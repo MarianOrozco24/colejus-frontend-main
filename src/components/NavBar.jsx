@@ -102,7 +102,7 @@ const NavBar = () => {
 
             <div className="flex space-x-10 text-white md:text-xs 2xl:text-sm nav-links font-bold">
                 <div className="relative text-inherit">
-                    <a
+                    <a  href='#'
                         className="hover:text-gray-300 cursor-pointer flex items-center space-x-1"
                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                     >
