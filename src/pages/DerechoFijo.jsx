@@ -62,11 +62,23 @@ const DerechoFijo = () => {
   };
 
   const handleSubmit = (e) => {
+    // Manejamos el valor de ingreso de los valores
     e.preventDefault();
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      derecho_fijo_5pc: prevFormData.tasa_justicia * 0.05,
-    }));
+    if (Number(formData.total_depositado) < 12000) {
+      setModalMessage("El valor minimo para ingresar es de $12.000");
+      setModalVisible(true);
+      return;
+    };
+
+    // Armá el payload con los números correctamente casteados
+    const payload = {
+      ...formData,
+      tasa_justicia: Number(formData.tasa_justicia),
+      total_depositado: Number(formData.total_depositado),
+      derecho_fijo_5pc: Number(formData.tasa_justicia) * 0.05,
+    };
+
+
 
     postDerechoFijo(formData)
       .then((data) => {
@@ -410,7 +422,7 @@ const DerechoFijo = () => {
                   />
                 </div>
                 <p className="text-xs text-gray-500 mt-1 font-semibold font-lato">
-                  Ingreso mínimo $5000
+                  Ingreso mínimo $12000
                 </p>
               </div>
             </div>
