@@ -195,11 +195,10 @@ const Profesionales = () => {
                 {/* Botón de Página Anterior */}
                 <button
                   className={`px-4 py-2 rounded-md border border-primary text-primary font-bold transition 
-                ${
-                  pagination.currentPage === 1
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-primary hover:text-white"
-                }`}
+                ${pagination.currentPage === 1
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:bg-primary hover:text-white"
+                    }`}
                   onClick={() => handlePageChange(pagination.currentPage - 1)}
                   disabled={pagination.currentPage === 1}
                 >
@@ -218,11 +217,10 @@ const Profesionales = () => {
                 {/* Botón de Página Siguiente */}
                 <button
                   className={`px-4 py-2 rounded-md border border-primary text-primary font-bold transition 
-                ${
-                  pagination.currentPage >= pagination.totalPages
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-primary hover:text-white"
-                }`}
+                ${pagination.currentPage >= pagination.totalPages
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:bg-primary hover:text-white"
+                    }`}
                   onClick={() => handlePageChange(pagination.currentPage + 1)}
                   disabled={pagination.currentPage >= pagination.totalPages}
                 >
