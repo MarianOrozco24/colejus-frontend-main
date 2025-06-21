@@ -27,7 +27,7 @@ const ContactCard = ({
 
       {/* Contact Button */}
       <div className="flex flex-col justify-between items-end h-36">
-        <span className="text-gray-400">Mat.{tuition || "No disponible"}</span>
+        <span className="text-gray-400">Mat. {tuition || "No disponible"}</span>
         <button
           className="px-4 py-2 border border-primary text-primary rounded-full hover:bg-primary hover:text-white transition duration-200"
           onClick={onClick}
