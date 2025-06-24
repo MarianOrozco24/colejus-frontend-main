@@ -7,6 +7,7 @@ const ContactCard = ({
   email,
   location,
   tuition,
+  procurador_professions,
   onClick,
 }) => {
   return (
@@ -18,6 +19,11 @@ const ContactCard = ({
         </h3>
         <p className="text-gray-400">{profession}</p>
         <p className="text-gray-400 mt-4">{email}</p>
+
+        <div className="flex items-center mt-6 text-gray-500">
+          <FaMapMarkerAlt className="mr-1" />
+          <span className="text-gray-400">{procurador_professions}</span>
+        </div>
 
         <div className="flex items-center mt-6 text-gray-500">
           <FaMapMarkerAlt className="mr-1" />
