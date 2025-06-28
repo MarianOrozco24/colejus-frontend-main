@@ -1,61 +1,32 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
+import { FaPlus, FaEdit, FaTrash, FaSearch } from "react-icons/fa";
 import { fetchAllEdicts } from "../../../api/edicts/fetchAllEdicts";
 import { deleteEdictById } from "../../../api/edicts/deleteEdictsById";
 import DeleteEdictModal from "./DeleteEdictModal";
 
 const BackOfficeEdicts = () => {
   const navigate = useNavigate();
-  const [edicts, setEdicts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
-  // Pagination State
+  // --- Estados ---
+  // 1) Todos los edictos para búsqueda local
+  const [allEdicts, setAllEdicts] = useState([]);
+  // 2) Edictos de la página actual (backend)
+  const [edicts, setEdicts] = useState([]);
+  // 3) Búsqueda
+  const [searchTerm, setSearchTerm] = useState("");
+  // 4) Paginación
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const itemsPerPage = 10;
-
-  // Delete modal state
+  // 5) Carga / error
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  // 6) Modal de borrado
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEdict, setSelectedEdict] = useState(null);
 
-  const fetchEdicts = async (page) => {
-    const token = localStorage.getItem("authToken");
-    setLoading(true);
-
-    try {
-      const response = await fetchAllEdicts(token, page, itemsPerPage, true);
-      if (response.status === 200) {
-        setEdicts(response.data.edicts);
-        setTotalPages(response.data.pages);
-      } else {
-        setError(response.data.message || "Error al cargar las edictos");
-      }
-    } catch (err) {
-      setError("Error de conexión");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchEdicts(currentPage);
-  }, [currentPage]);
-
-  const handleNewOpen = () => {
-    navigate("/backoffice/nuevo-edicto");
-  };
-
-  const handleEditOpen = (edictUuid) => {
-    navigate(`/backoffice/editar-edicto/${edictUuid}`);
-  };
-
-  const handleDeleteClick = (edictItem) => {
-    setSelectedEdict(edictItem);
-    setIsModalOpen(true);
-  };
+  // --- Helpers ---
   const parseToArgentinaDate = (dateString) => {
     if (!dateString) return "";
     const [year, month, day] = dateString.split("-");
@@ -66,119 +37,174 @@ const BackOfficeEdicts = () => {
     });
   };
 
+  // --- 1) Al montar: cargo TODOS los edictos para búsqueda ---
+  useEffect(() => {
+    const loadAll = async () => {
+      try {
+        const token = localStorage.getItem("authToken");
+        // Página 1 con 10k items para simular "todos"
+        const resp = await fetchAllEdicts(token, 1, 10000, true);
+        if (resp.status === 200) {
+          setAllEdicts(resp.data.edicts);
+        } else {
+          setError(resp.data.message || "Error cargando todos los edictos");
+        }
+      } catch (err) {
+        console.error(err);
+        setError("Error de conexión al cargar todos los edictos");
+      }
+    };
+    loadAll();
+  }, []);
+
+  // --- 2) Paginación backend: se dispara si NO hay búsqueda activa ---
+  useEffect(() => {
+    if (searchTerm.trim() !== "") return;
+    const loadPage = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const token = localStorage.getItem("authToken");
+        const resp = await fetchAllEdicts(token, currentPage, itemsPerPage, true);
+        if (resp.status === 200) {
+          setEdicts(resp.data.edicts);
+          setTotalPages(resp.data.pages);
+        } else {
+          setError(resp.data.message || "Error cargando edictos");
+        }
+      } catch (err) {
+        console.error(err);
+        setError("Error de conexión");
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadPage();
+  }, [currentPage, searchTerm]);
+
+  // --- 3) Filtrado y paginado local cuando hay búsqueda ---
+  const filtered = searchTerm
+    ? allEdicts.filter((e) =>
+      e.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      parseToArgentinaDate(e.date).includes(searchTerm)
+    )
+    : [];
+
+  const totalPagesLocal = Math.ceil(filtered.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const pageItemsLocal = filtered.slice(startIndex, startIndex + itemsPerPage);
+
+  // --- 4) Decidir lista a mostrar y páginas ---
+  const displayList = searchTerm.trim() ? pageItemsLocal : edicts;
+  const displayTotalPages = searchTerm.trim() ? totalPagesLocal : totalPages;
+
+  // --- Handlers CRUD ---
+  const handleNew = () => navigate("/backoffice/nuevo-edicto");
+  const handleEdit = (uuid) => navigate(`/backoffice/editar-edicto/${uuid}`);
+  const handleDeleteClick = (item) => {
+    setSelectedEdict(item);
+    setIsModalOpen(true);
+  };
   const handleDeleteConfirm = async () => {
-    const token = localStorage.getItem("authToken");
-    if (!token) {
-      console.error("No authentication token found");
-      return;
-    }
-
     try {
-      const response = await deleteEdictById(selectedEdict.uuid, token);
-
-      if (response.status === 200) {
-        setEdicts((prevEdict) =>
-          prevEdict.filter((item) => item.uuid !== selectedEdict.uuid)
-        );
-        setIsModalOpen(false);
+      const token = localStorage.getItem("authToken");
+      const resp = await deleteEdictById(selectedEdict.uuid, token);
+      if (resp.status === 200) {
+        // actualizar listas
+        setAllEdicts((a) => a.filter((e) => e.uuid !== selectedEdict.uuid));
+        if (!searchTerm.trim()) {
+          setEdicts((e) => e.filter((x) => x.uuid !== selectedEdict.uuid));
+          setTotalPages((tp) => Math.max(tp, 1));
+        }
       } else {
-        console.error(
-          "Failed to delete news:",
-          response.data.message || "Unknown error"
-        );
+        console.error(resp.data.message);
       }
     } catch (err) {
-      console.error("Error deleting news:", err);
+      console.error(err);
+    } finally {
+      setIsModalOpen(false);
     }
   };
 
-  if (loading) {
-    return <p className="text-center text-gray-500">Cargando edictos...</p>;
-  }
+  // --- Handlers de paginado ---
+  const prevPage = () =>
+    setCurrentPage((p) => Math.max(p - 1, 1));
+  const nextPage = () =>
+    setCurrentPage((p) => Math.min(p + 1, displayTotalPages));
 
-  if (error) {
-    return <p className="text-center text-red-500">{error}</p>;
-  }
+  // --- Render ---
+  if (loading) return <p className="text-center text-gray-500">Cargando edictos...</p>;
+  if (error) return <p className="text-center text-red-500">{error}</p>;
 
   return (
     <div className="p-6">
+      {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-primary">
           Sección <span className="text-secondary">edictos</span>
         </h1>
         <button
-          onClick={handleNewOpen}
+          onClick={handleNew}
           className="flex items-center space-x-2 px-4 py-2 bg-secondary text-white rounded-full shadow hover:bg-secondary-dark"
         >
-          <FaPlus />
-          <span>Nuevo edicto</span>
+          <FaPlus /><span>Nuevo edicto</span>
         </button>
       </div>
 
-      {edicts.length === 0 ? (
-        <p className="text-center text-gray-500">Sin edictos creados aún</p>
+      {/* Buscador */}
+      <div className="mb-4 flex items-center space-x-2">
+        <FaSearch className="text-gray-500" />
+        <input
+          type="text"
+          placeholder="Buscar en todos los edictos por título o fecha..."
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1);
+          }}
+          className="w-full p-2 border border-gray-300 rounded focus:outline-none"
+        />
+      </div>
+
+      {/* Tabla */}
+      {displayList.length === 0 ? (
+        <p className="text-center text-gray-500">No hay edictos para mostrar.</p>
       ) : (
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <table className="w-full text-left border-separate border-spacing-0">
             <thead>
               <tr>
-                <th className="p-4 text-sm font-medium text-gray-500 w-2/12">
-                  Fecha
-                </th>
-                <th className="p-4 text-sm font-medium text-gray-500 w-7/12">
-                  Título
-                </th>
-                <th className="p-4 text-sm font-medium text-gray-500 w-2/12">
-                  Estado
-                </th>
-
-                <th className="p-4 text-sm font-medium text-gray-500 text-center w-3/12">
-                  Acciones
-                </th>
+                <th className="p-4 text-sm font-medium text-gray-500 w-2/12">Fecha</th>
+                <th className="p-4 text-sm font-medium text-gray-500 w-7/12">Título</th>
+                <th className="p-4 text-sm font-medium text-gray-500 w-2/12">Estado</th>
+                <th className="p-4 text-sm font-medium text-gray-500 text-center w-3/12">Acciones</th>
               </tr>
             </thead>
             <tbody>
-              {edicts.map((item, index) => {
+              {displayList.map((item) => {
                 const isPublished = new Date(item.scheduled_date) <= new Date();
-
                 return (
-                  <tr key={index} className="border-b">
+                  <tr key={item.uuid} className="border-b">
                     <td className="p-4 text-sm text-gray-500">
                       {parseToArgentinaDate(item.date)}
                     </td>
-                    <td
-                      className="p-4 text-sm text-gray-800 overflow-hidden truncate whitespace-nowrap max-w-[250px]"
-                      title={item.title}
-                    >
+                    <td className="p-4 text-sm text-gray-800 truncate max-w-[250px]" title={item.title}>
                       {item.title}
                     </td>
-
-                    {/* NUEVA COLUMNA: Estado */}
                     <td className="p-4 text-sm">
-                      {isPublished ? (
-                        <span className="text-green-600 font-medium">
-                          Publicado
+                      {isPublished
+                        ? <span className="text-green-600 font-medium">Publicado</span>
+                        : <span className="text-yellow-600 font-medium">
+                          Programado para {parseToArgentinaDate(item.scheduled_date)}
                         </span>
-                      ) : (
-                        <span className="text-yellow-600 font-medium">
-                          Programado para{" "}
-                          {parseToArgentinaDate(item.scheduled_date)}
-                        </span>
-                      )}
+                      }
                     </td>
-
                     <td className="p-4 flex items-center justify-center space-x-4">
-                      <button className="text-gray-500 hover:text-secondary">
-                        <FaEdit
-                          size={20}
-                          onClick={() => handleEditOpen(item.uuid)}
-                        />
+                      <button onClick={() => handleEdit(item.uuid)} className="text-gray-500 hover:text-secondary">
+                        <FaEdit size={20} />
                       </button>
-                      <button className="text-gray-500 hover:text-red-500">
-                        <FaTrash
-                          size={20}
-                          onClick={() => handleDeleteClick(item)}
-                        />
+                      <button onClick={() => handleDeleteClick(item)} className="text-gray-500 hover:text-red-500">
+                        <FaTrash size={20} />
                       </button>
                     </td>
                   </tr>
@@ -189,69 +215,38 @@ const BackOfficeEdicts = () => {
         </div>
       )}
 
-      {/* Pagination */}
-      {edicts.length > 0 && (
+      {/* Paginación */}
+      {displayList.length > 0 && (
         <div className="flex justify-between items-center mt-4 text-sm">
+          <button
+            disabled={currentPage === 1}
+            onClick={prevPage}
+            className={`px-2 py-1 rounded ${currentPage === 1
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-gray-200 text-gray-500 hover:bg-secondary hover:text-white"
+              }`}
+          >
+            {"<"}
+          </button>
+
           <span className="text-gray-500">
-            Página <strong>{currentPage}</strong> de{" "}
-            <strong>{totalPages}</strong>
+            Página <strong>{currentPage}</strong> de <strong>{displayTotalPages}</strong>
           </span>
-          <div className="flex items-center space-x-2">
-            <button
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              className={`px-2 py-1 rounded ${
-                currentPage === 1
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : "bg-gray-200 text-gray-500 hover:bg-secondary hover:text-white"
+
+          <button
+            disabled={currentPage === displayTotalPages}
+            onClick={nextPage}
+            className={`px-2 py-1 rounded ${currentPage === displayTotalPages
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-gray-200 text-gray-500 hover:bg-secondary hover:text-white"
               }`}
-            >
-              {"<"}
-            </button>
-
-            {/* Botones dinámicos */}
-            {Array.from({ length: Math.min(totalPages, 5) }, (_, idx) => {
-              let startPage = Math.max(
-                Math.min(currentPage - 2, totalPages - 4),
-                1
-              );
-              const pageNumber = startPage + idx;
-
-              if (pageNumber > totalPages) return null;
-
-              return (
-                <button
-                  key={pageNumber}
-                  onClick={() => setCurrentPage(pageNumber)}
-                  className={`px-2 py-1 rounded ${
-                    currentPage === pageNumber
-                      ? "bg-secondary text-white"
-                      : "bg-gray-200 text-gray-500 hover:bg-secondary hover:text-white"
-                  }`}
-                >
-                  {pageNumber}
-                </button>
-              );
-            })}
-
-            <button
-              disabled={currentPage === totalPages}
-              onClick={() =>
-                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-              }
-              className={`px-2 py-1 rounded ${
-                currentPage === totalPages
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : "bg-gray-200 text-gray-500 hover:bg-secondary hover:text-white"
-              }`}
-            >
-              {">"}
-            </button>
-          </div>
+          >
+            {">"}
+          </button>
         </div>
       )}
 
-      {/* Delete Modal */}
+      {/* Modal de eliminación */}
       <DeleteEdictModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

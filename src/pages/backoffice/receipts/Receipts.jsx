@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FaEye, FaDownload } from "react-icons/fa";
+import { FaDownload, FaSearch } from "react-icons/fa";
 
 const Receipts = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -72,25 +72,27 @@ const Receipts = () => {
 
   return (
     <div className="p-6">
-      {/* BUSCADOR */}
-      <div className="mb-4">
+      <div className="flex justify-between items-center mb-2">
+        <h1 className="text-2xl font-bold text-primary">
+          Historial de <span className="text-secondary">Recibos</span>
+        </h1>
+      </div>
+
+      {/* BUSCADOR (ahora debajo del título) */}
+      <div className="mb-6 flex items-center space-x-2">
+        <FaSearch className="text-gray-500" />
         <input
           type="text"
           placeholder="Buscar por carátula o fecha..."
           value={searchTerm}
           onChange={e => {
             setSearchTerm(e.target.value);
-            setCurrentPage(1); // reset al primer página
+            setCurrentPage(1);
           }}
           className="w-full p-2 border border-gray-300 rounded focus:outline-none"
         />
       </div>
 
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-primary">
-          Historial de <span className="text-secondary">Recibos</span>
-        </h1>
-      </div>
       {loading ? (
         <p className="text-center text-gray-400">Cargando recibos...</p>
       ) : !recibos || recibos.length === 0 ? (
@@ -106,7 +108,7 @@ const Receipts = () => {
                   Fecha
                 </th>
                 <th className="p-4 text-sm font-medium text-gray-500 w-3/12">
-                  Caratula
+                  Carátula
                 </th>
                 <th className="p-4 text-sm font-medium text-gray-500 w-3/12">
                   Monto
@@ -154,9 +156,10 @@ const Receipts = () => {
             </tbody>
           </table>
         </div>
-      )}{" "}
-      {/* PAGINADO FANCY 👇 */}
-      {recibos.length > 0 && (
+      )}
+
+      {/* PAGINADO */}
+      {recibosFiltrados.length > 0 && (
         <div className="flex justify-between items-center mt-4 text-sm">
           <span className="text-gray-500">
             Página <strong>{currentPage}</strong> de{" "}
@@ -165,45 +168,36 @@ const Receipts = () => {
           <div className="flex items-center space-x-2">
             <button
               disabled={currentPage === 1}
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
               className="px-2 py-1 rounded bg-gray-200 text-gray-500 hover:bg-secondary hover:text-white disabled:bg-gray-300 disabled:text-gray-500"
             >
               {"<"}
             </button>
-
-            {(() => {
-              let pages = [];
-              let startPage = Math.max(1, currentPage - 2);
-              let endPage = Math.min(totalPages, currentPage + 2);
-
-              if (currentPage <= 3) {
-                endPage = Math.min(totalPages, 5);
-              } else if (currentPage > totalPages - 3) {
-                startPage = Math.max(1, totalPages - 4);
-              }
-
-              for (let i = startPage; i <= endPage; i++) {
-                pages.push(
-                  <button
-                    key={i}
-                    onClick={() => setCurrentPage(i)}
-                    className={`px-2 py-1 rounded ${currentPage === i
-                      ? "bg-secondary text-white"
-                      : "bg-gray-200 text-gray-500 hover:bg-secondary hover:text-white"
-                      }`}
-                  >
-                    {i}
-                  </button>
-                );
-              }
-
-              return pages;
-            })()}
-
+            {/* Botones numéricos */}
+            {Array.from({ length: Math.min(totalPages, 5) }, (_, idx) => {
+              let startPage = Math.max(
+                Math.min(currentPage - 2, totalPages - 4),
+                1
+              );
+              const pageNum = startPage + idx;
+              if (pageNum > totalPages) return null;
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => setCurrentPage(pageNum)}
+                  className={`px-2 py-1 rounded ${pageNum === currentPage
+                    ? "bg-secondary text-white"
+                    : "bg-gray-200 text-gray-500 hover:bg-secondary hover:text-white"
+                    }`}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
             <button
               disabled={currentPage === totalPages}
               onClick={() =>
-                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                setCurrentPage((p) => Math.min(p + 1, totalPages))
               }
               className="px-2 py-1 rounded bg-gray-200 text-gray-500 hover:bg-secondary hover:text-white disabled:bg-gray-300 disabled:text-gray-500"
             >

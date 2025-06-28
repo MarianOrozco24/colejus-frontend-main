@@ -6,10 +6,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import es from "date-fns/locale/es";
 import { FaCalendarAlt } from "react-icons/fa";
 import "../styles/derechofijo.css";
-import {
-  postLiquidaciones,
-  postLiquidacionesScrapp,
-} from "../api/postLiquidaciones";
+import { postLiquidacionesScrapp } from "../api/postLiquidaciones";
 
 registerLocale("es", es);
 
@@ -20,6 +17,7 @@ const Liquidaciones = () => {
     capital: "",
     fecha_origen: "",
     fecha_liquidacion: "",
+    tasa_label: "",
     imprimir: false,
   });
 
@@ -36,10 +34,20 @@ const Liquidaciones = () => {
 
   const handleLiquidacionChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setLiquidacionFormData((prevData) => ({
-      ...prevData,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    setLiquidacionFormData((prevData) => {
+      // Si cambió la tasa, actualizo también la etiqueta
+      if (name === "tasa") {
+        return {
+          ...prevData,
+          tasa: value,
+          tasa_label: value,
+        };
+      }
+      return {
+        ...prevData,
+        [name]: type === "checkbox" ? checked : value,
+      };
+    });
   };
 
   const handleReset = () => {
@@ -49,6 +57,7 @@ const Liquidaciones = () => {
       capital: "",
       fecha_origen: "",
       fecha_liquidacion: "",
+      tasa_label: "",
       imprimir: false,
     });
   };
@@ -56,10 +65,10 @@ const Liquidaciones = () => {
   const formatDate = (date) =>
     date
       ? date.toLocaleDateString("es-AR", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-        })
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      })
       : "";
 
   const handleSubmitLiquidacion = async (e) => {
@@ -69,7 +78,10 @@ const Liquidaciones = () => {
     setModalMessage("Calculando...");
 
     const payload = {
-      ...liquidacionFormData,
+      concepto: liquidacionFormData.concepto,
+      capital: liquidacionFormData.capital,
+      tasa: liquidacionFormData.tasa,
+      tasa_label: liquidacionFormData.tasa_label,
       fecha_origen: formatDate(liquidacionFormData.fecha_origen),
       fecha_liquidacion: formatDate(liquidacionFormData.fecha_liquidacion),
       descargar_pdf: true,
@@ -135,7 +147,7 @@ const Liquidaciones = () => {
                   name="concepto"
                   className="w-full border-b border-gray-300 p-3 focus:outline-none placeholder-gray-500 font-lato"
                   placeholder="Ej: DEUDA POR HONORARIOS"
-                  value={liquidacionFormData.concepto || ""}
+                  value={liquidacionFormData.concepto}
                   onChange={handleLiquidacionChange}
                   required
                 />
@@ -150,7 +162,7 @@ const Liquidaciones = () => {
                   name="tasa"
                   className="w-full border-b border-gray-300 p-3 focus:outline-none font-lato"
                   onChange={handleLiquidacionChange}
-                  value={liquidacionFormData.tasa || ""}
+                  value={liquidacionFormData.tasa}
                   required
                 >
                   <option value="">Seleccione una tasa</option>
