@@ -1,25 +1,29 @@
-export const fetchAllProfessionals = async (token, page = 1, perPage = 10) => {
+export const fetchAllProfessionals = async (token, page = 1, perPage = 10, search = "") => {
     try {
-        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/professionals?page=${page}&per_page=${perPage}`, {
+        const base = `${process.env.REACT_APP_BACKEND_URL}/professionals`;
+        const params = new URLSearchParams({
+            page: page,
+            per_page: perPage,
+        });
+        if (search && search.trim() !== "") {
+            params.append("search", search.trim());
+        }
+
+        const url = `${base}?${params.toString()}`;
+        console.log("📡 URL GENERADA:", url);
+
+        const response = await fetch(url, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`, // Include token for authentication
+                'Authorization': `Bearer ${token}`,
             },
         });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            return {
-                data: errorData,
-                status: response.status,
-            };
-        }
 
         const data = await response.json();
 
         return {
-            data: data, // Contains professionals and metadata
+            data,
             status: response.status,
         };
     } catch (error) {
