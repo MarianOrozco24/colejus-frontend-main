@@ -11,7 +11,9 @@ const BackOfficeProfessionals = () => {
   const [professionals, setProfessionals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -20,6 +22,15 @@ const BackOfficeProfessionals = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProfessional, setSelectedProfessional] = useState(null);
 
+  // Debounce para la búsqueda
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 400);
+    return () => clearTimeout(timeout);
+  }, [searchTerm]);
+
+  // Fetch de profesionales
   const loadPage = async (page, term = "") => {
     setLoading(true);
     setError(null);
@@ -41,8 +52,8 @@ const BackOfficeProfessionals = () => {
   };
 
   useEffect(() => {
-    loadPage(currentPage, searchTerm);
-  }, [currentPage, searchTerm]);
+    loadPage(currentPage, debouncedSearchTerm);
+  }, [currentPage, debouncedSearchTerm]);
 
   const handleNewOpen = () => navigate("/backoffice/nuevo-profesional");
   const handleEditOpen = (uuid) => navigate(`/backoffice/editar-profesional/${uuid}`);
@@ -50,12 +61,13 @@ const BackOfficeProfessionals = () => {
     setSelectedProfessional(item);
     setIsModalOpen(true);
   };
+
   const handleDeleteConfirm = async () => {
     try {
       const token = localStorage.getItem("authToken");
       const resp = await deleteProfessionalsById(selectedProfessional.uuid, token);
       if (resp.status === 200) {
-        loadPage(currentPage, searchTerm);
+        loadPage(currentPage, debouncedSearchTerm);
       } else {
         console.error(resp.data.message);
       }
@@ -74,6 +86,7 @@ const BackOfficeProfessionals = () => {
 
   return (
     <div className="p-6">
+      {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-primary">
           Sección <span className="text-secondary">profesionales</span>
@@ -86,6 +99,7 @@ const BackOfficeProfessionals = () => {
         </button>
       </div>
 
+      {/* Buscador */}
       <div className="mb-4 flex items-center space-x-2">
         <FaSearch className="text-gray-500" />
         <input
@@ -100,6 +114,7 @@ const BackOfficeProfessionals = () => {
         />
       </div>
 
+      {/* Tabla */}
       {professionals.length === 0 ? (
         <p className="text-center text-gray-500">Sin profesionales que mostrar</p>
       ) : (
@@ -136,6 +151,7 @@ const BackOfficeProfessionals = () => {
         </div>
       )}
 
+      {/* Paginación */}
       {professionals.length > 0 && (
         <div className="flex justify-between items-center mt-4 text-sm">
           <button
@@ -166,6 +182,7 @@ const BackOfficeProfessionals = () => {
         </div>
       )}
 
+      {/* Modal de eliminación */}
       <DeleteProfessionalModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

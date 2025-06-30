@@ -7,7 +7,6 @@ import Footer from "../components/Footer";
 import { getPublicProfessionals } from "../api/professionals/getPublicProfesionals";
 
 const Profesionales = () => {
-  // filtros
   const [selectedLocations, setSelectedLocations] = useState({
     alvear: false,
     malargue: false,
@@ -15,20 +14,27 @@ const Profesionales = () => {
   });
   const [selectedLetter, setSelectedLetter] = useState("Todos");
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
 
-  // listado + loading/error
   const [professionals, setProfessionals] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // paginación
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  // modal info
   const [selectedProfessional, setSelectedProfessional] = useState(null);
 
-  // fetch each vez que cambian filtros, búsqueda o página
+  // Debounce de búsqueda
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 400);
+
+    return () => clearTimeout(delay);
+  }, [searchTerm]);
+
+  // Fetch de profesionales (con debounce)
   useEffect(() => {
     const fetchProfessionals = async () => {
       setLoading(true);
@@ -38,7 +44,7 @@ const Profesionales = () => {
         const resp = await getPublicProfessionals({
           page: currentPage,
           perPage: 12,
-          search: searchTerm,
+          search: debouncedSearchTerm,
           letter: selectedLetter !== "Todos" ? selectedLetter : "",
           locations: Object.entries(selectedLocations)
             .filter(([, sel]) => sel)
@@ -60,9 +66,8 @@ const Profesionales = () => {
     };
 
     fetchProfessionals();
-  }, [currentPage, searchTerm, selectedLetter, selectedLocations]);
+  }, [currentPage, debouncedSearchTerm, selectedLetter, selectedLocations]);
 
-  // al enviar el form de búsqueda, resetear página a 1
   const handleSearch = e => {
     e.preventDefault();
     setCurrentPage(1);
@@ -78,9 +83,7 @@ const Profesionales = () => {
     <div className="bg-gray-100 min-h-screen">
       <header className="relative h-[75vh] bg-primary bg-cover bg-center flex flex-col justify-center items-center text-white text-center">
         <div className="absolute inset-0 opacity-60 z-0" style={{ backgroundColor: "#06092E" }} />
-
         <NavBar />
-
         <div className="absolute inset-0 flex flex-col justify-center items-center text-white z-10 px-4">
           <h1 className="2xl:text-7xl md:text-5xl font-normal mb-2" style={{ lineHeight: "1.5" }}>
             Conocé nuestro
@@ -88,7 +91,6 @@ const Profesionales = () => {
           <h1 className="2xl:text-7xl md:text-5xl font-normal mb-6" style={{ lineHeight: "1.5" }}>
             listado de profesionales
           </h1>
-
           <form onSubmit={handleSearch} className="flex items-center w-full max-w-md mt-4">
             <div className="flex items-center bg-white rounded-full px-4 py-2 shadow-md flex-grow font-lato">
               <FaSearch className="text-gray-500 mr-2" />
@@ -110,21 +112,19 @@ const Profesionales = () => {
         </div>
       </header>
 
-      <section className="bg-gray-100 2xl:mx-52 md:mx-16">
-        <div className="mt-8">
-          <FilterBar
-            selectedLetter={selectedLetter}
-            selectedLocations={selectedLocations}
-            setSelectedLetter={letter => {
-              setSelectedLetter(letter);
-              setCurrentPage(1);
-            }}
-            setSelectedLocations={locs => {
-              setSelectedLocations(locs);
-              setCurrentPage(1);
-            }}
-          />
-        </div>
+      <section className="bg-gray-100 2xl:mx-52 md:mx-16 mt-8">
+        <FilterBar
+          selectedLetter={selectedLetter}
+          selectedLocations={selectedLocations}
+          setSelectedLetter={letter => {
+            setSelectedLetter(letter);
+            setCurrentPage(1);
+          }}
+          setSelectedLocations={locs => {
+            setSelectedLocations(locs);
+            setCurrentPage(1);
+          }}
+        />
       </section>
 
       <section className="min-h-full bg-gray-100 2xl:mx-52 md:mx-16 mt-20">
@@ -174,9 +174,7 @@ const Profesionales = () => {
                 </button>
 
                 <span className="text-primary font-bold">
-                  Página{" "}
-                  <span className="px-2 border rounded-md">{currentPage}</span> de{" "}
-                  {totalPages}
+                  Página <span className="px-2 border rounded-md">{currentPage}</span> de {totalPages}
                 </span>
 
                 <button
@@ -200,9 +198,7 @@ const Profesionales = () => {
       {selectedProfessional && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-10">
           <div className="bg-white rounded-lg p-6 w-1/3 text-center">
-            <h2 className="text-xl font-bold text-primary">
-              {selectedProfessional.name}
-            </h2>
+            <h2 className="text-xl font-bold text-primary">{selectedProfessional.name}</h2>
             <p className="text-gray-600">{selectedProfessional.title}</p>
             <p className="text-gray-500">{selectedProfessional.location}</p>
             <p className="text-gray-700 mt-2">
