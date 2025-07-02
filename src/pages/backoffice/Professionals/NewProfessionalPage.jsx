@@ -175,7 +175,7 @@ const NewProfessionalPage = () => {
               name="procurador_professions"
               value={formData.procurador_professions}
               onChange={handleInputChange}
-              placeholder="Listado de profesiones"
+              placeholder=""
               className="w-full px-4 py-2 mt-1 border rounded-lg text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
               required
             />
