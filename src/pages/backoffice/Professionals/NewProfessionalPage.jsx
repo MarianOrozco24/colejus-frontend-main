@@ -14,9 +14,10 @@ const NewProfessionalPage = () => {
     title: "Abogado",
     tuition: "",
     email: "",
-    address: "", // Nuevo campo de domicilio legal
-    phone: "", // Nuevo campo de teléfono
+    address: "",
+    phone: "",
     location: "San Rafael, Mendoza",
+    procurador_professions: "", // <-- nuevo campo
   });
 
   const handleInputChange = (e) => {
@@ -39,7 +40,14 @@ const NewProfessionalPage = () => {
   };
 
   const handleTitleChange = (event) => {
-    setFormData({ ...formData, title: event.target.value });
+    setFormData((prev) => ({
+      ...prev,
+      title: event.target.value,
+      // Limpiar el campo si cambia a Abogado
+      procurador_professions: prev.title === "Procurador" && event.target.value !== "Procurador"
+        ? ""
+        : prev.procurador_professions,
+    }));
   };
 
   const locations = [
@@ -51,7 +59,10 @@ const NewProfessionalPage = () => {
   ];
 
   const handleLocationChange = (event) => {
-    setFormData({ ...formData, location: event.target.value });
+    setFormData((prev) => ({
+      ...prev,
+      location: event.target.value,
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -59,14 +70,20 @@ const NewProfessionalPage = () => {
 
     const token = localStorage.getItem("authToken");
 
+    // Construyo el payload
     const payload = {
-      title: formData.title,
       name: formData.name,
+      title: formData.title,
       tuition: formData.tuition,
-      email: "",
-      address: formData.address, // Incluyendo domicilio legal
-      phone: formData.phone, // Incluyendo teléfono
+      email: formData.email,
+      address: formData.address,
+      phone: formData.phone,
       location: formData.location,
+      // Backend exige siempre esta propiedad:
+      procurador_professions:
+        formData.title === "Procurador"
+          ? [formData.procurador_professions]
+          : [],
     };
 
     setIsSubmitting(true);
@@ -117,17 +134,18 @@ const NewProfessionalPage = () => {
             />
           </div>
 
-          <div className="">
+          <div>
             <label className="block text-sm font-medium text-gray-500">
               Título
             </label>
             <select
+              name="title"
               value={formData.title}
               onChange={handleTitleChange}
               className="w-full px-4 py-3 border rounded-lg text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="Abogado">Abogado</option>
-              <option value="Procurador">Procurador </option>
+              <option value="Procurador">Procurador</option>
             </select>
           </div>
 
@@ -146,6 +164,24 @@ const NewProfessionalPage = () => {
           </div>
         </div>
 
+        {/* Campo condicional para Procurador */}
+        {formData.title === "Procurador" && (
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-500">
+              Profesiones de Procurador
+            </label>
+            <input
+              type="text"
+              name="procurador_professions"
+              value={formData.procurador_professions}
+              onChange={handleInputChange}
+              placeholder="Listado de profesiones"
+              className="w-full px-4 py-2 mt-1 border rounded-lg text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
+              required
+            />
+          </div>
+        )}
+
         <div className="grid grid-cols-3 gap-4 mb-4">
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-500">
@@ -156,9 +192,9 @@ const NewProfessionalPage = () => {
               onChange={handleLocationChange}
               className="w-full px-4 py-3 border rounded-lg text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
             >
-              {locations.map((location) => (
-                <option key={location} value={location}>
-                  {location}
+              {locations.map((loc) => (
+                <option key={loc} value={loc}>
+                  {loc}
                 </option>
               ))}
             </select>
@@ -202,9 +238,8 @@ const NewProfessionalPage = () => {
           </button>
           <button
             type="submit"
-            className={`bg-primary text-white font-medium px-6 py-3 rounded-lg shadow hover:bg-primary-dark transition ${
-              isSubmitting ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            className={`bg-primary text-white font-medium px-6 py-3 rounded-lg shadow hover:bg-primary-dark transition ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+              }`}
             disabled={isSubmitting}
           >
             {isSubmitting ? "Publicando..." : "Publicar"}
@@ -228,7 +263,6 @@ const NewProfessionalPage = () => {
         </div>
       )}
 
-      {/* Error Modal */}
       {error && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg p-6 w-1/3 text-center">

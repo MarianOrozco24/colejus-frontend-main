@@ -7,6 +7,7 @@ const ContactCard = ({
   email,
   location,
   tuition,
+  procurador_professions,
   onClick,
 }) => {
   return (
