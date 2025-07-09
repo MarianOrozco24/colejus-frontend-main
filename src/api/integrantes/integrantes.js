@@ -15,25 +15,47 @@ export const useIntegrantes = (token) => {
     return headers;
   };
 
-  const fetchIntegrantes = async () => {
-    // console.log("📡 Llamando a fetchIntegrantes con token:", token);
+  // const fetchIntegrantes = async () => {
+  //   // console.log("📡 Llamando a fetchIntegrantes con token:", token);
 
-    try {
-      const response = await fetch(API_URL, {
-        method: "GET",
-        headers: getAuthHeaders(),
-      });
-      // console.log("📬 Respuesta completa:", response);
-      if (!response.ok) throw new Error("Error al obtener integrantes");
-      const data = await response.json();
-      // console.log("✅ Integrantes recibidos:", data);
-      setIntegrantes(data);
-    } catch (error) {
-      console.error("❌ Error al obtener integrantes:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  //   try {
+  //     const response = await fetch(API_URL, {
+  //       method: "GET",
+  //       headers: getAuthHeaders(),
+  //     });
+  //     // console.log("📬 Respuesta completa:", response);
+  //     if (!response.ok) throw new Error("Error al obtener integrantes");
+  //     const data = await response.json();
+  //     // console.log("✅ Integrantes recibidos:", data);
+  //     setIntegrantes(data);
+  //   } catch (error) {
+  //     console.error("❌ Error al obtener integrantes:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+const fetchIntegrantes = async () => {
+  try {
+    const headers = {
+      "Content-Type": "application/json",
+    };
+
+    const response = await fetch(API_URL, {
+      method: "GET",
+      headers,
+    });
+
+    if (!response.ok) throw new Error("Error al obtener integrantes");
+    const data = await response.json();
+    setIntegrantes(data);
+  } catch (error) {
+    console.error("❌ Error al obtener integrantes:", error);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const agregarIntegrante = async (nuevo) => {
     try {

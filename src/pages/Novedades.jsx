@@ -13,7 +13,7 @@ const NewsCard = ({ uuid, title, description, readTime, tags, subtitle }) => {
   };
 
   return (
-    <div className="bg-white rounded-md shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+  <div className="bg-white rounded-md shadow-sm overflow-hidden hover:shadow-md transition-shadow mb-8">
       <div className="p-4">
         <div className="mb-3">
           {tags.map((item, index) => (

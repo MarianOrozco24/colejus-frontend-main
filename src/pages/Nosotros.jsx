@@ -148,46 +148,59 @@ const Nosotros = () => {
       </section>
 
       <section className="bg-gray-100 py-8 px-20">
-        <div className="container mx-auto text-center">
-          {/* Section Title */}
-          <h3 className="text-3xl mb-24 text-primary">
-            Integrantes del Directorio del Colegio de Abogados
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-10 gap-x-48 mb-24">
-            {Object.entries(
-              agruparPorCargo(renderIntegrantesPorCategoria("Autoridades"))
-            ).map(([cargo, personas]) => (
-              <div
-                key={cargo}
-                className="flex flex-col items-center space-y-2 text-center"
+      <div className="container mx-auto text-center">
+
+        {/* DIRECTORIO */}
+        <h3 className="text-3xl mb-12 text-primary">
+          Integrantes del Directorio del Colegio de Abogados
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-24">
+          {Object.entries(
+            agruparPorCargo(renderIntegrantesPorCategoria("Autoridades"))
+          ).map(([cargo, personas]) => (
+            <div
+              key={cargo}
+              className="bg-white p-6 rounded-lg shadow text-center"
+            >
+              <h4
+                className={`text-lg font-semibold mb-2 ${
+                  cargo === "Presidente" ? "text-secondary text-xl" : "text-primary"
+                }`}
               >
-                <h4 className="text-base 2xl:text-lg font-semibold text-primary">
-                  {cargo}
-                </h4>
+                {cargo}
+              </h4>
+              <div className="flex flex-col gap-1">
                 {personas.map((p) => (
-                  <p key={p.uuid} className="text-xs 2xl:text-sm text-gray-700">
+                  <p key={p.uuid} className="text-sm text-gray-700">
                     {p.nombre}
                   </p>
                 ))}
               </div>
-            ))}
-          </div>
-
-          {/* Grid Container */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-10 gap-x-48 mb-24">
-            {renderIntegrantesPorCategoria("Integrantes").map((i) => (
-              <div key={i.uuid} className="...">
-                <h4 className="text-base 2xl:text-lg font-semibold text-primary">
-                  {i.nombre}
-                </h4>
-                <p className="text-xs 2xl:text-sm text-gray-700">
-                  {i.cargo} {i.telefono && `| Tel. ${i.telefono}`}
-                </p>
-              </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
-      </section>
+
+        {/* INSTITUTOS Y COMISIONES */}
+        <h3 className="text-3xl mb-12 text-primary">Institutos y Comisiones</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-24">
+          {renderIntegrantesPorCategoria("Integrantes").map((i) => (
+            <div
+              key={i.uuid}
+              className="bg-white p-6 rounded-lg shadow text-center flex flex-col items-center"
+            >
+              <h4 className="text-base font-semibold text-primary mb-1">
+                {i.nombre}
+              </h4>
+              <p className="text-sm text-gray-700 text-center">
+                {i.cargo}
+                {i.telefono && <span> | Tel. {i.telefono}</span>}
+              </p>
+            </div>
+          ))}
+        </div>
+
+      </div>
+    </section>
 
       <section className="bg-gray-100 py-8">
         <div className="container mx-auto w-full pb-5">
