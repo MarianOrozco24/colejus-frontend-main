@@ -14,6 +14,8 @@ const DerechoFijo = () => {
   const [paymentStatus, setPaymentStatus] = useState("pending");
   const [preferenceId, setPreferenceId] = useState(null);
   const [derechoFijoId, setDerechoFijoId] = useState(null);
+  const [valorDerechoFijo, setValorDerechoFijo] = useState(null);
+
 
   const [formData, setFormData] = useState({
     lugar: "",
@@ -64,21 +66,22 @@ const DerechoFijo = () => {
   const handleSubmit = (e) => {
     // Manejamos el valor de ingreso de los valores
     e.preventDefault();
-    if (Number(formData.total_depositado) < 12000) {
-      setModalMessage("El valor minimo para ingresar es de $12.000");
-      setModalVisible(true);
-      return;
-    };
+    if (valorDerechoFijo && Number(formData.total_depositado) < valorDerechoFijo) {
+  setModalMessage(`El valor mínimo para ingresar es de $${valorDerechoFijo}`);
+  setModalVisible(true);
+  return;
+}
+// ############### Se comenta porque segun NPM se llama y no se esta usando #############//
 
     // Armá el payload con los números correctamente casteados
-    const payload = {
-      ...formData,
-      tasa_justicia: Number(formData.tasa_justicia),
-      total_depositado: Number(formData.total_depositado),
-      derecho_fijo_5pc: Number(formData.tasa_justicia) * 0.05,
-    };
+    // const payload = {
+    //   ...formData,
+    //   tasa_justicia: Number(formData.tasa_justicia),
+    //   total_depositado: Number(formData.total_depositado),
+    //   derecho_fijo_5pc: Number(formData.tasa_justicia) * 0.05,
+    // };
 
-
+// EN CASO DE ERROR DESCOMENTAR //
 
     postDerechoFijo(formData)
       .then((data) => {
@@ -137,6 +140,28 @@ const DerechoFijo = () => {
       alert("Error al descargar el comprobante");
     }
   };
+
+  useEffect(() => {
+  const fetchValorDerechoFijo = async () => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/forms/get_price_derecho_fijo`);
+      const result = await response.json();
+      console.log("💡 Valor recibido:", result);
+
+      const valor = result.data?.[0]?.value;
+
+      if (response.ok && valor) {
+        setValorDerechoFijo(valor);
+      }
+    } catch (error) {
+      console.error("❌ Error trayendo derecho fijo:", error);
+    }
+  };
+
+  fetchValorDerechoFijo();
+}, []);
+
+
 
   useEffect(() => {
     let interval;
@@ -412,17 +437,16 @@ const DerechoFijo = () => {
                 <div className="flex items-center border-b border-gray-300">
                   <span className="text-gray-500 px-2">$</span>
                   <input
-                    //min={5000}
                     type="number"
                     name="total_depositado"
-                    placeholder="0"
+                    placeholder={valorDerechoFijo ? `$${valorDerechoFijo}` : "Ej: 12000"}
                     className="w-full p-3 focus:outline-none placeholder-gray-500 font-lato"
                     value={formData.total_depositado}
                     onChange={handleChange}
                   />
                 </div>
                 <p className="text-xs text-gray-500 mt-1 font-semibold font-lato">
-                  Ingreso mínimo $12000
+                  Ingreso mínimo ${valorDerechoFijo || "No se encontro un valor"}
                 </p>
               </div>
             </div>
