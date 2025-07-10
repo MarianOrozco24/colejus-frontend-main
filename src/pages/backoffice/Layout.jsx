@@ -176,6 +176,19 @@ const Layout = () => {
               </li>
               <li>
                 <Link
+                  to="/backoffice/actualizar-derecho-fijo"
+                  className={`flex items-center px-4 py-3 rounded-lg ${
+                    location.pathname === "/backoffice/integrantes"
+                      ? "bg-secondary text-white"
+                      : "hover:bg-secondary hover:text-white"
+                  }`}
+                >
+                  <FaUsers className="mr-2" />
+                  Actualizar Derecho Fijo
+                </Link>
+              </li>
+              <li>
+                <Link
                   to="/backoffice/integrantes"
                   className={`flex items-center px-4 py-3 rounded-lg ${
                     location.pathname === "/backoffice/integrantes"
