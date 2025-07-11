@@ -29,7 +29,7 @@ import BackOfficeRates from "./pages/backoffice/rates/BackOfficeRates";
 import NewRatePage from "./pages/backoffice/rates/NewRatePage";
 import VerNoticia from "./pages/VerNoticia";
 import Receipts from "./pages/backoffice/receipts/Receipts";
-import AdminDerechoFijo from "./pages/backoffice/admin_derecho_fijo/AdminDerechoFIjo"; // ajustá la ruta si es diferente
+import AdminDerechoFijo from "./pages/backoffice/DerechoFijo/AdminDerechoFIjo"; // ajustá la ruta si es diferente
 import Integrantes from "./pages/backoffice/integrantes/Integrantes";
 
 
@@ -74,7 +74,7 @@ function App() {
           <Route path="tasas" element={<BackOfficeRates />} />
           <Route path="nueva-tasa" element={<NewRatePage />} />
           <Route path="historial-recibos" element={<Receipts />} />
-          <Route path="actualizar-derecho-fijo" element={<AdminDerechoFijo />} />
+          <Route path="update-derecho-fijo" element={<AdminDerechoFijo />} />
           <Route path="integrantes" element={<Integrantes />} />
         </Route>
       </Routes>

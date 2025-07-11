@@ -176,9 +176,9 @@ const Layout = () => {
               </li>
               <li>
                 <Link
-                  to="/backoffice/actualizar-derecho-fijo"
+                  to="/backoffice/update-derecho-fijo"
                   className={`flex items-center px-4 py-3 rounded-lg ${
-                    location.pathname === "/backoffice/integrantes"
+                    location.pathname === "/backoffice/update-derecho-fijo"
                       ? "bg-secondary text-white"
                       : "hover:bg-secondary hover:text-white"
                   }`}
