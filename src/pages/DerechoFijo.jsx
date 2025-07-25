@@ -86,29 +86,41 @@ const DerechoFijo = () => {
     postDerechoFijo(formData)
       .then((data) => {
         if (data.qr_code_base64) {
-          setPreferenceId(data.preference_id);
-          setDerechoFijoId(data.uuid); // Store the ID when created
-          setModalMessage(
-            <div>
-              <h2 className="text-xl font-semibold mb-4 font-lato">
-                Pago creado exitosamente
-              </h2>
-              <p className="text-sm font-normal mb-4 font-lato">
-                Código QR para pagar con MercadoPago:
+        setPreferenceId(data.preference_id);
+        setDerechoFijoId(data.uuid);
+        setModalMessage(
+          <div className="text-center font-lato">
+            <h2 className="text-2xl font-semibold text-primary mb-4">¡Pago generado con éxito!</h2>
+
+            <p className="text-base text-gray-700 mb-2">Escaneá el siguiente código QR para pagar con Mercado Pago:</p>
+            
+            <img
+              src={`data:image/png;base64,${data.qr_code_base64}`}
+              alt="QR Code"
+              className="mx-auto mb-4 rounded shadow-md"
+              style={{ width: "220px", height: "220px" }}
+            />
+
+            <p className="text-base text-gray-700 mb-2">¿Preferís pagar con tarjeta?</p>
+            <button
+              onClick={() => window.open(data.payment_url, "_blank")}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-full transition duration-200 shadow"
+            >
+              Pagar con tarjeta
+            </button>
+
+            <div className="mt-6">
+              <p className="text-sm text-gray-500">
+                Estado actual del pago: <span className="font-semibold text-black">{paymentStatus}</span>
               </p>
-              <img
-                src={`data:image/png;base64,${data.qr_code_base64}`}
-                alt="QR Code"
-                className="mx-auto mb-4"
-                style={{ width: "250px", height: "250px" }}
-              />
-              <div id="payment-status" className="mt-4">
-                <p>Estado del pago: {paymentStatus}</p>
-              </div>
             </div>
-          );
-          setModalVisible(true);
-        } else {
+          </div>
+        );
+
+        setModalVisible(true);
+        } 
+        else 
+          {
           setModalMessage("Error en el creado del pago");
           setModalVisible(true);
         }
