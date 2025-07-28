@@ -110,12 +110,16 @@ const Receipts = () => {
                 <th className="p-4 text-sm font-medium text-gray-500 w-3/12">
                   Carátula
                 </th>
+                <th className="p-4 text-sm font-medium text-gray-500 w-2/12">
+                  Metodologia de pago
+                </th>
                 <th className="p-4 text-sm font-medium text-gray-500 w-3/12">
                   Monto
                 </th>
                 <th className="p-4 text-sm font-medium text-gray-500 w-2/12">
                   Estado
                 </th>
+                
                 <th className="p-4 text-sm font-medium text-gray-500 text-center w-2/12">
                   Acciones
                 </th>
@@ -131,6 +135,9 @@ const Receipts = () => {
                     {recibo.caratula}
                   </td>
                   <td className="p-4 text-sm text-gray-500">
+                    {recibo.payment_method}
+                  </td>
+                  <td className="p-4 text-sm text-gray-500">
                     ${recibo.total_depositado.toFixed(2)}
                   </td>
                   <td className="p-4 text-sm">
@@ -142,6 +149,7 @@ const Receipts = () => {
                     >
                       {recibo.status}
                     </span>
+                  
                   </td>
                   <td className="p-4 flex items-center justify-center space-x-4">
                     <button
