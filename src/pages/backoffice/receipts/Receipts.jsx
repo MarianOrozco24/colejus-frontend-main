@@ -110,6 +110,8 @@ const Receipts = () => {
                 <th className="p-4 text-sm font-medium text-gray-500 w-3/12">
                   Carátula
                 </th>
+
+
                 <th className="p-4 text-sm font-medium text-gray-500 w-2/12">
                   Metodologia de pago
                 </th>
@@ -134,6 +136,7 @@ const Receipts = () => {
                   <td className="p-4 text-sm text-gray-500">
                     {recibo.caratula}
                   </td>
+                  
                   <td className="p-4 text-sm text-gray-500">
                     {recibo.payment_method}
                   </td>
