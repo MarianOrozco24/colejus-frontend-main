@@ -49,78 +49,96 @@ const DerechoFijo = () => {
   };
 
   const handleReset = (e) => {
-    setFormData({
-      lugar: "",
-      fecha: "",
-      juicio_n: "",
-      caratula: "",
-      juzgado: "",
-      fecha_inicio: "",
-      tasa_justicia: "",
-      parte: "",
-      total_depositado: "",
-      derecho_fijo_5pc: "",
-    });
-  };
+  setFormData({
+    lugar: "",
+    fecha: "",
+    juicio_n: "",
+    caratula: "",
+    juzgado: "",
+    fecha_inicio: "",
+    tasa_justicia: "",
+    parte: "",
+    total_depositado: "",
+    derecho_fijo_5pc: "",
+  });
+
+  // 🔄 Borra el control de duplicado
+  sessionStorage.removeItem("ultimoDerechoFijoForm");
+};
+
 
   const handleSubmit = (e) => {
-    // Manejamos el valor de ingreso de los valores
     e.preventDefault();
+
+    // ✅ Validación de campos obligatorios
+    const requiredFields = [
+      "lugar",
+      "fecha_inicio",
+      "fecha",
+      "tasa_justicia",
+      "juicio_n",
+      "caratula",
+      "parte",
+      "juzgado",
+      "total_depositado",
+    ];
+
+    for (let field of requiredFields) {
+      const value = formData[field];
+      if (value === "" || value === null || value === undefined) {
+        setModalMessage("Por favor, completá todos los campos antes de continuar.");
+        setModalVisible(true);
+        return;
+      }
+    }
+
+    // ✅ Validación de monto mínimo
     if (valorDerechoFijo && Number(formData.total_depositado) < valorDerechoFijo) {
-  setModalMessage(`El valor mínimo para ingresar es de $${valorDerechoFijo}`);
-  setModalVisible(true);
-  return;
-}
-// ############### Se comenta porque segun NPM se llama y no se esta usando #############//
+      setModalMessage(`El valor mínimo para ingresar es de $${valorDerechoFijo}`);
+      setModalVisible(true);
+      return;
+    }
 
-    // Armá el payload con los números correctamente casteados
-    // const payload = {
-    //   ...formData,
-    //   tasa_justicia: Number(formData.tasa_justicia),
-    //   total_depositado: Number(formData.total_depositado),
-    //   derecho_fijo_5pc: Number(formData.tasa_justicia) * 0.05,
-    // };
-
-// EN CASO DE ERROR DESCOMENTAR //
-
+    // ✅ Envío al backend
     postDerechoFijo(formData)
       .then((data) => {
         if (data.qr_code_base64) {
-        setPreferenceId(data.preference_id);
-        setDerechoFijoId(data.uuid);
-        setModalMessage(
-          <div className="text-center font-lato">
-            <h2 className="text-2xl font-semibold text-primary mb-4">¡Pago generado con éxito!</h2>
+          setPreferenceId(data.preference_id);
+          setDerechoFijoId(data.uuid);
+          setModalMessage(
+            <div className="text-center font-lato">
+              <h2 className="text-2xl font-semibold text-primary mb-4">¡Pago generado con éxito!</h2>
 
-            <p className="text-base text-gray-700 mb-2">Escaneá el siguiente código QR para pagar con Mercado Pago:</p>
-            
-            <img
-              src={`data:image/png;base64,${data.qr_code_base64}`}
-              alt="QR Code"
-              className="mx-auto mb-4 rounded shadow-md"
-              style={{ width: "220px", height: "220px" }}
-            />
-
-            <p className="text-base text-gray-700 mb-2">¿Preferís pagar con tarjeta?</p>
-            <button
-              onClick={() => window.open(data.payment_url, "_blank")}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-full transition duration-200 shadow"
-            >
-              Pagar con tarjeta
-            </button>
-
-            <div className="mt-6">
-              <p className="text-sm text-gray-500">
-                Estado actual del pago: <span className="font-semibold text-black">{paymentStatus}</span>
+              <p className="text-base text-gray-700 mb-2">
+                Escaneá el siguiente código QR para pagar con Mercado Pago:
               </p>
-            </div>
-          </div>
-        );
 
-        setModalVisible(true);
-        } 
-        else 
-          {
+              <img
+                src={`data:image/png;base64,${data.qr_code_base64}`}
+                alt="QR Code"
+                className="mx-auto mb-4 rounded shadow-md"
+                style={{ width: "220px", height: "220px" }}
+              />
+
+              <p className="text-base text-gray-700 mb-2">¿Preferís pagar con tarjeta?</p>
+              <button
+                onClick={() => window.open(data.payment_url, "_blank")}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-full transition duration-200 shadow"
+              >
+                Pagar con tarjeta
+              </button>
+
+              <div className="mt-6">
+                <p className="text-sm text-gray-500">
+                  Estado actual del pago:{" "}
+                  <span className="font-semibold text-black">{paymentStatus}</span>
+                </p>
+              </div>
+            </div>
+          );
+
+          setModalVisible(true);
+        } else {
           setModalMessage("Error en el creado del pago");
           setModalVisible(true);
         }
@@ -147,11 +165,17 @@ const DerechoFijo = () => {
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
+
+      // ✅ Recargar luego de la descarga (con delay para no cortarla)
+      setTimeout(() => {
+        window.location.reload();
+      }, 800);
     } catch (error) {
       console.error("Error downloading PDF:", error);
       alert("Error al descargar el comprobante");
     }
   };
+
 
   useEffect(() => {
   const fetchValorDerechoFijo = async () => {
@@ -239,9 +263,9 @@ const DerechoFijo = () => {
   }, [preferenceId, derechoFijoId]);
 
   const handleCloseModal = () => {
-    setModalVisible(false);
-    setModalMessage("");
+    window.location.reload(); // 🔄 Esto fuerza la recarga
   };
+
 
   return (
     <div className="bg-gray-100 min-h-screen">
