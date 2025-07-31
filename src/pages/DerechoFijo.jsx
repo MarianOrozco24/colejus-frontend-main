@@ -15,6 +15,7 @@ const DerechoFijo = () => {
   const [preferenceId, setPreferenceId] = useState(null);
   const [derechoFijoId, setDerechoFijoId] = useState(null);
   const [valorDerechoFijo, setValorDerechoFijo] = useState(null);
+  
 
 
   const [formData, setFormData] = useState({
@@ -100,54 +101,120 @@ const DerechoFijo = () => {
     }
 
     // ✅ Envío al backend
-    postDerechoFijo(formData)
-      .then((data) => {
-        if (data.qr_code_base64) {
-          setPreferenceId(data.preference_id);
-          setDerechoFijoId(data.uuid);
-          setModalMessage(
-            <div className="text-center font-lato">
-              <h2 className="text-2xl font-semibold text-primary mb-4">¡Pago generado con éxito!</h2>
+    setModalMessage(
+      <div className="bg-white p-6 rounded-xl shadow-xl max-w-md mx-auto">
+        <h2 className="text-2xl font-bold text-primary mb-4 font-lato">¿Cómo querés pagar?</h2>
+        <p className="text-gray-700 mb-6 font-lato">
+          Seleccioná una de las opciones para continuar con el pago.
+        </p>
+        <div className="flex flex-col space-y-4">
+          <button
+            onClick={() => handlePago("qr")}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg text-lg font-semibold transition duration-200 shadow-sm"
+          >
+            🧾 Pagar con QR
+          </button>
+          <button
+            onClick={() => handlePago("tarjeta")}
+            className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg text-lg font-semibold transition duration-200 shadow-sm"
+          >
+            💳 Pagar con tarjeta
+          </button>
+        </div>
+        {/* <button
+          onClick={handleCloseModal}
+          className="mt-6 text-sm text-gray-500 hover:underline"
+        >
+          Cancelar
+        </button> */}
+      </div>
+    );
+      setModalVisible(true);
+  //     postDerechoFijo(FormData)
+  //     .then((data) => {
+  //       if (data.qr_code_base64) {
+  //         setPreferenceId(data.preference_id);
+  //         setDerechoFijoId(data.uuid);
+  //         setModalMessage(
+  //           <div className="text-center font-lato">
+  //             <h2 className="text-2xl font-semibold text-primary mb-4">¡Pago generado con éxito!</h2>
 
-              <p className="text-base text-gray-700 mb-2">
-                Escaneá el siguiente código QR para pagar con Mercado Pago:
-              </p>
+  //             <p className="text-base text-gray-700 mb-2">
+  //               Escaneá el siguiente código QR para pagar con Mercado Pago:
+  //             </p>
 
-              <img
-                src={`data:image/png;base64,${data.qr_code_base64}`}
-                alt="QR Code"
-                className="mx-auto mb-4 rounded shadow-md"
-                style={{ width: "220px", height: "220px" }}
-              />
+  //             <img
+  //               src={`data:image/png;base64,${data.qr_code_base64}`}
+  //               alt="QR Code"
+  //               className="mx-auto mb-4 rounded shadow-md"
+  //               style={{ width: "220px", height: "220px" }}
+  //             />
 
-              <p className="text-base text-gray-700 mb-2">¿Preferís pagar con tarjeta?</p>
-              <button
-                onClick={() => window.open(data.payment_url, "_blank")}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-full transition duration-200 shadow"
-              >
-                Pagar con tarjeta
-              </button>
+  //             <p className="text-base text-gray-700 mb-2">¿Preferís pagar con tarjeta?</p>
+  //             <button
+  //               onClick={() => window.open(data.payment_url, "_blank")}
+  //               className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-full transition duration-200 shadow"
+  //             >
+  //               Pagar con tarjeta
+  //             </button>
 
-              <div className="mt-6">
-                <p className="text-sm text-gray-500">
-                  Estado actual del pago:{" "}
-                  <span className="font-semibold text-black">{paymentStatus}</span>
-                </p>
-              </div>
-            </div>
-          );
+  //             <div className="mt-6">
+  //               <p className="text-sm text-gray-500">
+  //                 Estado actual del pago:{" "}
+  //                 <span className="font-semibold text-black">{paymentStatus}</span>
+  //               </p>
+  //             </div>
+  //           </div>
+  //         );
 
-          setModalVisible(true);
-        } else {
-          setModalMessage("Error en el creado del pago");
-          setModalVisible(true);
-        }
-      })
-      .catch((error) => {
-        setModalMessage(`Error: ${error.message || error}`);
-        setModalVisible(true);
-      });
+  //         setModalVisible(true);
+  //       } else {
+  //         setModalMessage("Error en el creado del pago");
+  //         setModalVisible(true);
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       setModalMessage(`Error: ${error.message || error}`);
+  //       setModalVisible(true);
+  //     });
   };
+
+  const handlePago = async (tipo) => {
+  setModalMessage("⏳ Generando pago...");
+  setModalVisible(true);
+  try {
+    const conTarjeta = tipo === "tarjeta";
+    const data = await postDerechoFijo(formData, conTarjeta);
+
+    setPreferenceId(data.preference_id);
+    setDerechoFijoId(data.uuid);
+
+    if (conTarjeta) {
+      const checkoutUrl = data.init_point //?.transaction_data?.ticket_url;
+      if (checkoutUrl) {
+        window.location.href = checkoutUrl;
+      } else {
+        setModalMessage("❌ No se pudo redireccionar al checkout.");
+      }
+    } else {
+      setModalMessage(
+        <div className="text-center font-lato">
+          <h2 className="text-2xl font-semibold text-primary mb-4">¡Pago generado con éxito!</h2>
+          <p className="text-base text-gray-700 mb-2">Escaneá el siguiente código QR:</p>
+          <img
+            src={`data:image/png;base64,${data.qr_code_base64}`}
+            alt="QR Code"
+            className="mx-auto mb-4 rounded shadow-md"
+            style={{ width: "220px", height: "220px" }}
+          />
+        </div>
+      );
+    }
+  } catch (error) {
+    setModalMessage(`❌ Error al generar el pago: ${error.message || error}`);
+  }
+};
+
 
   const downloadPDF = async (uuid) => {
     try {

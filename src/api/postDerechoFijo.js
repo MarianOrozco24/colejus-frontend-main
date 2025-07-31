@@ -1,7 +1,11 @@
-export const postDerechoFijo = async (form_data) => {
+export const postDerechoFijo = async (form_data, pagoConTarjeta = false) => {
+    const endpoint = pagoConTarjeta
+        ? "/forms/derecho_fijo_tarjeta"
+        : "/forms/derecho_fijo_qr";
+
     try {
         const response = await fetch(
-            `${process.env.REACT_APP_BACKEND_URL}/forms/derecho_fijo`,
+            `${process.env.REACT_APP_BACKEND_URL}${endpoint}`,
             {
                 method: "POST",
                 headers: {
