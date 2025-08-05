@@ -330,7 +330,8 @@ const DerechoFijo = () => {
   }, [preferenceId, derechoFijoId]);
 
   const handleCloseModal = () => {
-    window.location.reload(); // 🔄 Esto fuerza la recarga
+    // window.location.reload(); // 🔄 Esto fuerza la recarga
+    setModalVisible(false)
   };
 
 
