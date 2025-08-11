@@ -31,6 +31,8 @@ import VerNoticia from "./pages/VerNoticia";
 import Receipts from "./pages/backoffice/receipts/Receipts";
 import AdminDerechoFijo from "./pages/backoffice/DerechoFijo/AdminDerechoFIjo"; // ajustá la ruta si es diferente
 import Integrantes from "./pages/backoffice/integrantes/Integrantes";
+import PaymentSuccess from "./pages/PaymentSuccess";
+import PaymentFailure from "./pages/PaymentFailure";
 
 
 function App() {
@@ -48,6 +50,9 @@ function App() {
         <Route path="/nosotros" element={<Nosotros />} />
         <Route path="/novedades" element={<Novedades />} />
         <Route path="/noticias/:uuid" element={<VerNoticia />} />
+        <Route path="/payment/success" element={<PaymentSuccess />} />
+        <Route path="/payment/failure" element={<PaymentFailure />} />
+
 
         <Route path="/login" element={<Login />} />
         <Route path="/backoffice" element={<Layout />}>
@@ -76,6 +81,7 @@ function App() {
           <Route path="historial-recibos" element={<Receipts />} />
           <Route path="update-derecho-fijo" element={<AdminDerechoFijo />} />
           <Route path="integrantes" element={<Integrantes />} />
+
         </Route>
       </Routes>
     </Router>
