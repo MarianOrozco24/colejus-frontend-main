@@ -26,7 +26,7 @@ const PaymentSuccess = () => {
         }
 
         // Paso 2: Confirmar el recibo en backend
-        const uuid = estadoData.uuid || searchParams.get("external_reference");
+        const uuid = estadoData.external_reference || searchParams.get("external_reference");
         const paymentId = estadoData.payment_id;
 
         const confirmRes = await fetch(`${process.env.REACT_APP_BACKEND_URL}/forms/confirm_receipt`, {
