@@ -120,7 +120,14 @@ const DerechoFijo = () => {
           >
             💳 Pagar con tarjeta
           </button>
+        <button
+          onClick={() => postDerechoFijo(formData, "boleta")}
+          className="bg-gray-700 hover:bg-gray-800 text-white px-6 py-2 rounded-full"
+        >
+          Pagar con Boleta (PDF)
+        </button>
         </div>
+
         {/* <button
           onClick={handleCloseModal}
           className="mt-6 text-sm text-gray-500 hover:underline"
