@@ -1,58 +1,81 @@
-// api/postDerechoFijo.js
-export const postDerechoFijo = async (form_data, metodo = "qr") => {
-  // Mapeo de endpoint según método
-  const endpoint =
-    metodo === "tarjeta"
-      ? "/forms/derecho_fijo_tarjeta"
-      : metodo === "boleta"
-      ? "/forms/boleta_bolsa"
-      : "/forms/derecho_fijo_qr";
+// src/api/postDerechoFijo.js
 
-  const url = `${process.env.REACT_APP_BACKEND_URL}${endpoint}`;
+// ✅ Mantiene tu contrato actual:
+// pagoConTarjeta = false  -> /forms/derecho_fijo_qr  (QR Mercado Pago)
+// pagoConTarjeta = true   -> /forms/derecho_fijo_tarjeta  (Checkout tarjeta)
+export const postDerechoFijo = async (form_data, pagoConTarjeta = false) => {
+  const endpoint = pagoConTarjeta
+    ? "/forms/derecho_fijo_tarjeta"
+    : "/forms/derecho_fijo_qr";
 
   try {
-    const isBoleta = metodo === "boleta";
-
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(form_data),
-    });
+    const response = await fetch(
+      `${process.env.REACT_APP_BACKEND_URL}${endpoint}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form_data),
+      }
+    );
 
     if (!response.ok) {
-      throw new Error(`Failed operation: ${response.statusText}`);
+      let extra = "";
+      try {
+        const errJson = await response.json();
+        extra = errJson?.message || JSON.stringify(errJson);
+      } catch (_) {
+        const errTxt = await response.text();
+        extra = errTxt;
+      }
+      throw new Error(`Failed operation (${response.status}): ${extra}`);
     }
 
-    // 🔽 Si es boleta, el backend devuelve un PDF → lo descargamos
-    if (isBoleta) {
-      const blob = await response.blob();
-      // nombre de archivo amigable (puede venir del backend si querés)
-      const filename = `boleta_${form_data?.juicio_n || "pago"}.pdf`;
-
-      const urlBlob = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = urlBlob;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(urlBlob);
-
-      return { ok: true, downloaded: true };
-    }
-
-    // Tarjeta/QR → JSON como ya usabas
-    const data = await response.json();
-    return data;
+    return await response.json();
   } catch (error) {
     if (error instanceof TypeError && error.message === "Failed to fetch") {
       console.error("Network error: Backend server is unreachable");
       throw new Error("Network error: Backend server is unreachable");
-    } else {
-      console.error("Error:", error);
-      throw error;
     }
+    console.error("Error:", error);
+    throw error;
+  }
+};
+
+// ✅ Nueva función para QR de la Bolsa (BCM):
+// Llama a un endpoint nuevo que debe exponer tu backend: /forms/derecho_fijo_qr_bcm
+export const postDerechoFijoBCM = async (form_data) => {
+  const endpoint = "/forms/derecho_fijo_qr_bcm";
+
+  try {
+    const response = await fetch(
+      `${process.env.REACT_APP_BACKEND_URL}${endpoint}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form_data),
+      }
+    );
+
+    if (!response.ok) {
+      let extra = "";
+      try {
+        const errJson = await response.json();
+        extra = errJson?.message || JSON.stringify(errJson);
+      } catch (_) {
+        const errTxt = await response.text();
+        extra = errTxt;
+      }
+      throw new Error(`Failed operation (${response.status}): ${extra}`);
+    }
+
+    return await response.json();
+    
+  } catch (error) {
+    if (error instanceof TypeError && error.message === "Failed to fetch") {
+      console.error("Network error: Backend server is unreachable");
+      throw new Error("Network error: Backend server is unreachable");
+    }
+    console.error("Error:", error);
+    throw error;
   }
 };
