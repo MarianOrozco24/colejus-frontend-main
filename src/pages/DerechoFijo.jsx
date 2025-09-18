@@ -117,12 +117,12 @@ const DerechoFijo = () => {
           </button>
           {/* Descomentar una vez que se encuentre testeado le endpoint de confirmacion de pago */}
           
-          <button
+          {/* <button
             onClick={() => handlePago("bcm_qr")}
             className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg text-lg font-semibold transition duration-200 shadow-sm"
           >
             🟩 QR Bolsa de Comercio
-          </button>
+          </button> */}
         </div>
       </div>
     );
