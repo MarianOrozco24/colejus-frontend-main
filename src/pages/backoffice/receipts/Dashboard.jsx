@@ -1,0 +1,517 @@
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+} from "recharts";
+
+
+
+
+/**
+ * BackofficeIngresos.jsx (versión sin dependencias externas)
+ *
+ * Esta versión elimina shadcn/ui y lucide-react para evitar errores de resolución.
+ * Usa componentes locales (Card, Button, Input, KPI) con Tailwind puro.
+ */
+
+// --- UI mínimos locales --
+function Card({ className = "", children }) {
+  return (
+    <div className={`rounded-2xl border shadow-sm 
+      bg-gradient-to-br from-white to-indigo-50/40 
+      dark:from-neutral-1200 dark:to-neutral-200 ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+function CardContent({ className = "", children }) {
+  return <div className={`p-4 ${className}`}>{children}</div>;
+}
+function Button({ className = "", variant = "solid", ...props }) {
+  const base =
+    variant === "outline"
+      ? "border border-gray-100 dark:border-neutral-700 bg-transparent hover:bg-gray-50 dark:hover:bg-neutral-800"
+      : "bg-indigo-600 text-white hover:bg-indigo-700";
+  return <button className={`px-3 py-2 rounded-xl text-sm transition ${base} ${className}`} {...props} />;
+}
+function Input(props) {
+  return (
+    <input
+      {...props}
+      className={`w-full rounded-xl border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-neutral-100 dark:border-neutral-700 ${props.className || ""}`}
+    />
+  );
+}
+function Icon({ name, className = "w-4 h-4" }) {
+  // íconos mínimos en SVG inline
+  const icons = {
+    refresh: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
+        <path d="M20 12a8 8 0 10-3 6.3" />
+        <path d="M20 4v6h-6" />
+      </svg>
+    ),
+    download: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+        <path d="M7 10l5 5 5-5" />
+        <path d="M12 15V3" />
+      </svg>
+    ),
+    filter: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
+        <path d="M3 4h18l-7 8v6l-4 2v-8L3 4z" />
+      </svg>
+    ),
+  };
+  return icons[name] || null;
+}
+function KPI({ title, value }) {
+  return (
+    <Card>
+      <CardContent>
+        <p className="text-xs text-gray-500">{title}</p>
+        <p className="mt-1 text-xl font-semibold">{value}</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+// --- Utils ---
+const fmtMoney = (n) =>
+  new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS" }).format(Number(n || 0));
+const fmtDate = (s) => (s ? new Date(s.replace(" ", "T")) : null);
+const groupBy = (arr, keyFn) =>
+  arr.reduce((acc, x) => {
+    const k = keyFn(x);
+    acc[k] ||= [];
+    acc[k].push(x);
+    return acc;
+  }, {});
+
+// --- Helpers robustos ---
+const COMMISSION_FACTOR = {
+  "QR BCM": 0.782,
+  "Mercado Pago(QR)": 0.782,
+  "Mercado Pago (QR)": 0.782,
+  "Mercado Pago(TD)": 0.782,
+  "Mercado Pago(TC)": 0.782,
+};
+
+const toNumber = (x) => {
+  if (x == null) return 0;
+  if (typeof x === "number") return Number.isFinite(x) ? x : 0;
+  let s = String(x).trim();
+  if (!s) return 0;
+  // Si parece formato latino (tiene ',' como decimal), normalizamos:
+  const comma = s.includes(",");
+  const dot = s.includes(".");
+  if (comma && (!dot || s.lastIndexOf(",") > s.lastIndexOf("."))) {
+    s = s.replace(/\./g, "").replace(/,/g, "."); // "1.234,56" -> "1234.56"
+  } else {
+    s = s.replace(/,/g, ""); // "1,234.56" -> "1234.56"
+  }
+  const n = parseFloat(s);
+  return Number.isFinite(n) ? n : 0;
+};
+
+const parseDate = (s) => {
+  if (!s) return null;
+  const t = String(s).trim();
+  // ISO-like: "YYYY-MM-DD HH:MM[:SS]"
+  if (/^\d{4}-\d{2}-\d{2}(?: [0-2]\d:[0-5]\d(?::[0-5]\d)?)?$/.test(t)) {
+    const d = new Date(t.replace(" ", "T"));
+    return isNaN(d) ? null : d;
+  }
+  // LatAm: "DD/MM/YYYY[ HH:MM[:SS]]" o con guiones
+  const m = t.match(
+    /^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?$/
+  );
+  if (m) {
+    const [, d, mo, y, hh = "0", mm = "0", ss = "0"] = m;
+    const out = new Date(+y, +mo - 1, +d, +hh, +mm, +ss);
+    return isNaN(out) ? null : out;
+  }
+  const d = new Date(t);
+  return isNaN(d) ? null : d;
+};
+
+const normMethod = (m) => {
+  const x = (m || "").replace(/\s+/g, " ").trim().toLowerCase();
+  if (x.includes("bcm")) return "QR BCM";
+  if (x.includes("td") || x.includes("débito") || x.includes("debito")) return "Mercado Pago(TD)";
+  if (x.includes("tc") || x.includes("crédito") || x.includes("credito")) return "Mercado Pago(TC)";
+  if (x.includes("qr")) return "Mercado Pago(QR)";
+  return m || "Desconocido";
+};
+
+
+export default function BackofficeIngresos() {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
+  const [daysWindow, setDaysWindow] = useState(90);
+
+  // --- fetchReceipts robusto ---
+const fetchReceipts = async () => {
+  try {
+    setLoading(true);
+    setError("");
+
+    const token = localStorage.getItem("authToken");
+    const url = `${process.env.REACT_APP_BACKEND_URL}/forms/receipts`;
+
+    const res = await fetch(url, {
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(token ? { "x-access-token": token } : {}),
+      },
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status} – No se pudo obtener ingresos`);
+
+    const rows = await res.json();
+
+    // DEBUG rápido (podés dejarlo un rato):
+    console.log("rows sample:", rows?.slice?.(0, 3));
+    console.log("status únicos:", [...new Set(rows.map(r => r.status))]);
+    console.log("métodos únicos:", [...new Set(rows.map(r => r.payment_method))]);
+
+    const normalized = rows
+      // Si el backend no manda status, NO filtramos; si lo manda, aceptamos los que "parecen pagados"
+      .filter((r) => !r.status || /pag/i.test(String(r.status)))
+      .map((r) => {
+        const payment_method = normMethod(r.payment_method || inferPaymentMethod(r));
+        const bruto = toNumber(r.total_depositado);
+        const factor = COMMISSION_FACTOR[payment_method] ?? 1;
+        const neto = +(bruto * factor).toFixed(2);
+
+        const fecha_pago_date = parseDate(r.fecha_pago);
+
+        return {
+          ...r,
+          total_depositado: bruto,
+          payment_method,
+          total_depositado_neto: neto,
+
+          // desagregados por método si los necesitás
+          total_bcm_qr_neto: payment_method === "QR BCM" ? neto : 0,
+          total_mp_qr_neto: payment_method === "Mercado Pago(QR)" || payment_method === "Mercado Pago (QR)" ? neto : 0,
+          total_mp_td_neto: payment_method === "Mercado Pago(TD)" ? neto : 0,
+          total_mp_tc_neto: payment_method === "Mercado Pago(TC)" ? neto : 0,
+
+          fecha_pago_date,
+        };
+      })
+      // Si la fecha viene rara y no la podemos parsear, no tiramos todo: dejá pasar y mostralo al final si querés
+      .filter((r) => r.fecha_pago_date instanceof Date && !isNaN(r.fecha_pago_date));
+
+    setData(normalized);
+  } catch (e) {
+    console.error(e);
+    setError(e.message || "Error cargando ingresos");
+  } finally {
+    setLoading(false);
+  }
+};
+
+  useEffect(() => {
+    fetchReceipts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // KPIs
+  const totalIngresos = useMemo(() => data.reduce((acc, r) => acc + (r.total_depositado || 0), 0), [data]);
+  const totalIngresos_menos_iva = useMemo(() => data.reduce((acc, r) => acc + (r.total_depositado_menos_iva || 0), 0), [data]);
+  const totalIngresosQrBcm = useMemo(() => data.reduce((acc, r) => acc + (r.total_depositado_qr_bcm_menos_comision || 0), 0), [data]);
+  const totalIngresosMpTc = useMemo(() => data.reduce((acc, r) => acc + (r.total_depositado_mp_tc_menos_comision || 0), 0), [data]);
+  const totalIngresosMpTd = useMemo(() => data.reduce((acc, r) => acc + (r.total_depositado_mp_td_menos_comision || 0), 0), [data]);
+  const ahora = new Date();
+  const hace30 = new Date(ahora.getTime() - 30 * 24 * 60 * 60 * 1000);
+  const ultimos30 = useMemo(
+    () => data.filter((r) => r.fecha_pago_date >= hace30).reduce((a, r) => a + r.total_depositado, 0),
+    [data]
+  );
+  const ticketPromedio = useMemo(() => (data.length ? totalIngresos / data.length : 0), [totalIngresos, data.length]);
+
+  // Series
+  const desdeVentana = useMemo(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - daysWindow);
+    return d;
+  }, [daysWindow]);
+
+  const serieDiaria = useMemo(() => {
+    const filtrado = data.filter((r) => r.fecha_pago_date >= desdeVentana);
+    const porDia = groupBy(filtrado, (r) => r.fecha_pago_date.toISOString().slice(0, 10));
+    return Object.entries(porDia)
+      .map(([day, rows]) => ({
+        day,
+        ingresos: rows.reduce((a, r) => a + r.total_depositado, 0),
+        cantidad: rows.length,
+      }))
+      .sort((a, b) => a.day.localeCompare(b.day));
+  }, [data, desdeVentana]);
+
+  const serieMensual = useMemo(() => {
+    const porMes = groupBy(data, (r) => r.fecha_pago_date.toISOString().slice(0, 7));
+    return Object.entries(porMes)
+      .map(([month, rows]) => ({ month, ingresos: rows.reduce((a, r) => a + r.total_depositado, 0) }))
+      .sort((a, b) => a.month.localeCompare(b.month));
+  }, [data]);
+
+  const porMetodo = useMemo(() => {
+    const por = groupBy(data, (r) => r.payment_method || "Desconocido");
+    return Object.entries(por)
+      .map(([name, rows]) => ({ name, value: rows.reduce((a, r) => a + r.total_depositado, 0) }))
+      .sort((a, b) => b.value - a.value);
+  }, [data]);
+
+  // Filtro tabla
+  const filteredRows = useMemo(() => {
+    const q = (search || "").toLowerCase();
+    if (!q) return data;
+    return data.filter((r) =>
+      [r.receipt_number, r.caratula, r.juicio_n, r.payment_id, r.payment_method]
+        .filter(Boolean)
+        .some((f) => String(f).toLowerCase().includes(q))
+    );
+  }, [data, search]);
+
+  const exportCSV = () => {
+    const headers = [
+      "fecha_pago",
+      "receipt_number",
+      "payment_id",
+      "monto",
+      "caratula",
+      "juicio_n",
+      "tasa_justicia",
+      "payment_method",
+      "status",
+    ];
+    const rows = filteredRows.map((r) =>
+      [
+        r.fecha_pago,
+        r.receipt_number,
+        r.payment_id,
+        r.total_depositado,
+        safe(r.caratula),
+        safe(r.juicio_n),
+        r.tasa_justicia,
+        r.payment_method,
+        r.status,
+      ].join(",")
+    );
+    const blob = new Blob([[headers.join(","), ...rows].join("")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `ingresos_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <div className="p-6 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">Dashboard de Ingresos</h1>
+        <div className="flex items-center gap-2">
+          <Button onClick={fetchReceipts}>
+            <span className="inline-flex items-center gap-2"><Icon name="refresh" /> Actualizar</span>
+          </Button>
+          <Button onClick={exportCSV}>
+            <span className="inline-flex items-center gap-2"><Icon name="download" /> Exportar CSV</span>
+          </Button>
+        </div>
+      </div>
+
+      {/* Alertas */}
+      {error && (
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm">
+          <p className="font-medium text-red-700">Error</p>
+          <p className="text-red-600">{error}</p>
+          <p className="mt-1 text-red-500">Verificá el token (JWT) y REACT_APP_BACKEND_URL.</p>
+        </div>
+      )}
+
+      {/* KPIs */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <KPI title="Ingresos totales" value={fmtMoney(totalIngresos)} />
+        <KPI title="Ingresos totales menos IVA" value={fmtMoney(totalIngresos_menos_iva)} />
+        <KPI title="Ingresos totales QR BCM" value={fmtMoney(totalIngresosQrBcm)} />
+        <KPI title="Ingresos totales MP TC" value={fmtMoney(totalIngresosMpTc)} />
+        <KPI title="Ingresos totales MP TD" value={fmtMoney(totalIngresosMpTd)} />
+        <KPI title="Últimos 30 días" value={fmtMoney(ultimos30)} />
+        <KPI title="Ticket promedio" value={fmtMoney(ticketPromedio)} />
+        <KPI title="Pagos (count)" value={data.length} />
+      </div>
+
+      {/* Controles */}
+      <div className="flex items-center gap-3">
+        <div className="relative w-full md:w-80">
+          <Input
+            placeholder="Buscar por carátula, recibo, expediente…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <Icon name="filter" />
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-600">Ventana:</span>
+          <select
+            className="border rounded-md px-2 py-1 dark:bg-neutral-900 dark:border-neutral-700"
+            value={daysWindow}
+            onChange={(e) => setDaysWindow(Number(e.target.value))}
+          >
+            <option value={30}>30 días</option>
+            <option value={60}>60 días</option>
+            <option value={90}>90 días</option>
+            <option value={180}>180 días</option>
+            <option value={365}>1 año</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Gráficos */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <Card className="xl:col-span-2">
+          <CardContent>
+            <h3 className="text-lg font-medium mb-2">Ingresos diarios</h3>
+            <div className="h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={serieDiaria} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="day" tick={{ fontSize: 12 }} />
+                  <YAxis tick={{ fontSize: 12 }} />
+                  <Tooltip formatter={(v) => fmtMoney(v)} />
+                  <Line type="monotone" dataKey="ingresos" strokeWidth={2} dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent>
+            <h3 className="text-lg font-medium mb-2">Ingresos por método</h3>
+            <div className="h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie data={porMetodo} dataKey="value" nameKey="name" outerRadius={90}>
+                    {porMetodo.map((_, i) => (
+                      <Cell key={i} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(v) => fmtMoney(v)} />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardContent>
+          <h3 className="text-lg font-medium mb-2">Ingresos por mes</h3>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={serieMensual}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                <YAxis tick={{ fontSize: 12 }} />
+                <Tooltip formatter={(v) => fmtMoney(v)} />
+                <Bar dataKey="ingresos" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Tabla */}
+      <Card>
+        <CardContent className="p-0 overflow-auto">
+          <table className="min-w-full text-sm">
+            <thead className="bg-gray-50 text-xs uppercase tracking-wider text-gray-500">
+              <tr>
+                <th className="px-4 py-3 text-left">Fecha pago</th>
+                <th className="px-4 py-3 text-left">Recibo</th>
+                <th className="px-4 py-3 text-left">Expediente</th>
+                <th className="px-4 py-3 text-left">Carátula</th>
+                <th className="px-4 py-3 text-right">Monto</th>
+                <th className="px-4 py-3 text-left">Método</th>
+                <th className="px-4 py-3 text-left">Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td className="px-4 py-6" colSpan={7}>Cargando…</td>
+                </tr>
+              ) : filteredRows.length === 0 ? (
+                <tr>
+                  <td className="px-4 py-6" colSpan={7}>Sin resultados</td>
+                </tr>
+              ) : (
+                filteredRows.map((r) => (
+                  <tr key={r.uuid} className="border-b last:border-0">
+                    <td className="px-4 py-3">{fmtNiceDate(r.fecha_pago_date)}</td>
+                    <td className="px-4 py-3 font-medium">{r.receipt_number}</td>
+                    <td className="px-4 py-3">{r.juicio_n}</td>
+                    <td className="px-4 py-3 truncate max-w-[360px]" title={r.caratula}>
+                      {r.caratula}
+                    </td>
+                    <td className="px-4 py-3 text-right">{fmtMoney(r.total_depositado)}</td>
+                    <td className="px-4 py-3">{r.payment_method}</td>
+                    <td className="px-4 py-3">{r.status}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function fmtNiceDate(d) {
+  try {
+    return new Intl.DateTimeFormat("es-AR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(d);
+  } catch {
+    return "-";
+  }
+}
+function safe(v) {
+  return String(v ?? "").replaceAll(",", " ").replaceAll("", " ");
+}
+function inferPaymentMethod(r) {
+  const id = (r?.payment_id || "").toLowerCase();
+  if (id.includes("pos") || id.includes("card")) return "Mercado Pago(TC/TD)";
+  return "Mercado Pago(QR)";
+}

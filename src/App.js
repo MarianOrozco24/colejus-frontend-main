@@ -33,7 +33,7 @@ import AdminDerechoFijo from "./pages/backoffice/DerechoFijo/AdminDerechoFIjo"; 
 import Integrantes from "./pages/backoffice/integrantes/Integrantes";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentFailure from "./pages/PaymentFailure";
-
+import BackofficeIngresos from "./pages/backoffice/receipts/Dashboard";
 
 function App() {
   return (
@@ -81,6 +81,8 @@ function App() {
           <Route path="historial-recibos" element={<Receipts />} />
           <Route path="update-derecho-fijo" element={<AdminDerechoFijo />} />
           <Route path="integrantes" element={<Integrantes />} />
+          <Route path="dashboard-ingresos" element={<BackofficeIngresos />} />
+
 
         </Route>
       </Routes>
