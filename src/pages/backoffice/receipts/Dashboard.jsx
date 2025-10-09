@@ -37,7 +37,7 @@ function Card({ className = "", children }) {
 }
 
 function CardContent({ className = "", children }) {
-  return <div className={`p-4 ${className}`}>{children}</div>;
+  return <div className={`p-5 ${className}`}>{children}</div>;
 }
 function Button({ className = "", variant = "solid", ...props }) {
   const base =
@@ -150,13 +150,22 @@ const parseDate = (s) => {
 
 const normMethod = (m) => {
   const x = (m || "").replace(/\s+/g, " ").trim().toLowerCase();
-  if (x.includes("bcm")) return "QR BCM";
-  if (x.includes("td") || x.includes("débito") || x.includes("debito")) return "Mercado Pago(TD)";
+  if (x.includes("qr bcm")) return "QR BCM";
+  if (x.includes("mercado pago (td)") || x.includes("débito") || x.includes("debito")) return "Mercado Pago(TD)";
   if (x.includes("tc") || x.includes("crédito") || x.includes("credito")) return "Mercado Pago(TC)";
   if (x.includes("qr")) return "Mercado Pago(QR)";
   return m || "Desconocido";
 };
 
+// arriba del componente
+const COLOR_BY_METHOD = {
+  "Mercado Pago(QR)": "#5b5c91ff", // indigo
+  "Mercado Pago(TC)": "#aa884cff", // amber
+  "Mercado Pago(TD)": "#5ea890ff", // emerald
+  "QR BCM":           "#549daaaf", // cyan
+  "Boleta BCM":       "#7f629b9c", // violet
+};
+const PALETTE = ["#5b5c91ff","#aa884cff","#5ea890ff","#549daaaf","#7f629b9c","#d47575a6","#5fbe829c","#67a4c0a9"];
 
 export default function BackofficeIngresos() {
   const [data, setData] = useState([]);
@@ -236,9 +245,10 @@ const fetchReceipts = async () => {
   // KPIs
   const totalIngresos = useMemo(() => data.reduce((acc, r) => acc + (r.total_depositado || 0), 0), [data]);
   const totalIngresos_menos_iva = useMemo(() => data.reduce((acc, r) => acc + (r.total_depositado_menos_iva || 0), 0), [data]);
-  const totalIngresosQrBcm = useMemo(() => data.reduce((acc, r) => acc + (r.total_depositado_qr_bcm_menos_comision || 0), 0), [data]);
-  const totalIngresosMpTc = useMemo(() => data.reduce((acc, r) => acc + (r.total_depositado_mp_tc_menos_comision || 0), 0), [data]);
-  const totalIngresosMpTd = useMemo(() => data.reduce((acc, r) => acc + (r.total_depositado_mp_td_menos_comision || 0), 0), [data]);
+  const totalIngresosQrBcm = useMemo(() => data.reduce((acc, r) => acc + (r.total_bcm_qr_neto || 0), 0), [data]);
+  const totalIngresosMpQr = useMemo(() => data.reduce((acc, r) => acc + (r.total_mp_qr_neto || 0), 0), [data]);
+  const totalIngresosMpTc = useMemo(() => data.reduce((acc, r) => acc + (r.total_mp_tc_neto || 0), 0), [data]);
+  const totalIngresosMpTd = useMemo(() => data.reduce((acc, r) => acc + (r.total_mp_td_neto || 0), 0), [data]);
   const ahora = new Date();
   const hace30 = new Date(ahora.getTime() - 30 * 24 * 60 * 60 * 1000);
   const ultimos30 = useMemo(
@@ -354,7 +364,7 @@ const fetchReceipts = async () => {
       {/* KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <KPI title="Ingresos totales" value={fmtMoney(totalIngresos)} />
-        <KPI title="Ingresos totales menos IVA" value={fmtMoney(totalIngresos_menos_iva)} />
+        <KPI title="Recaudado Mercado Pago Qr" value={fmtMoney(totalIngresosMpQr)} />
         <KPI title="Ingresos totales QR BCM" value={fmtMoney(totalIngresosQrBcm)} />
         <KPI title="Ingresos totales MP TC" value={fmtMoney(totalIngresosMpTc)} />
         <KPI title="Ingresos totales MP TD" value={fmtMoney(totalIngresosMpTd)} />
@@ -376,9 +386,9 @@ const fetchReceipts = async () => {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-600">Ventana:</span>
+          <span className="text-sm text-gray-400">Ventana:</span>
           <select
-            className="border rounded-md px-2 py-1 dark:bg-neutral-900 dark:border-neutral-700"
+            className="border rounded-md px-2 py-1 dark:bg-neutral-1200 dark:border-neutral-700"
             value={daysWindow}
             onChange={(e) => setDaysWindow(Number(e.target.value))}
           >
@@ -409,40 +419,51 @@ const fetchReceipts = async () => {
             </div>
           </CardContent>
         </Card>
-
+        {/* Ingresos por metodo */}
         <Card>
           <CardContent>
             <h3 className="text-lg font-medium mb-2">Ingresos por método</h3>
             <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={porMetodo} dataKey="value" nameKey="name" outerRadius={90}>
-                    {porMetodo.map((_, i) => (
-                      <Cell key={i} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(v) => fmtMoney(v)} />
-                  <Legend />
-                </PieChart>
+              <PieChart>
+                <Pie data={porMetodo} dataKey="value" nameKey="name" outerRadius={90}>
+                  {porMetodo.map((slice, i) => (
+                    <Cell
+                      key={slice.name}
+                      fill={COLOR_BY_METHOD[slice.name] || PALETTE[i % PALETTE.length]}
+                      stroke="#fff"
+                      strokeWidth={1}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(v) => fmtMoney(v)} />
+                <Legend />
+              </PieChart>
               </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
       </div>
-
+      {/* Ingresos por mes */}
       <Card>
         <CardContent>
           <h3 className="text-lg font-medium mb-2">Ingresos por mes</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={serieMensual}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip formatter={(v) => fmtMoney(v)} />
-                <Bar dataKey="ingresos" />
-              </BarChart>
-            </ResponsiveContainer>
+            <BarChart data={serieMensual}>
+              <defs>
+                <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#6366F1" stopOpacity={1} />
+                  <stop offset="100%" stopColor="#6366F1" stopOpacity={0.7} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+              <YAxis tick={{ fontSize: 12 }} />
+              <Tooltip formatter={(v) => fmtMoney(v)} />
+              <Bar dataKey="ingresos" fill="url(#barGrad)" />
+            </BarChart>
+          </ResponsiveContainer>
           </div>
         </CardContent>
       </Card>
