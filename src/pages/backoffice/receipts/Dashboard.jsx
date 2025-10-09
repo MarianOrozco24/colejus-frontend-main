@@ -366,18 +366,18 @@ const ticketPromedio = useMemo(
         r.receipt_number,
         r.payment_id,
         r.total_depositado,
-        safe(r.caratula),
+        r.caratula,
         safe(r.juicio_n),
         r.tasa_justicia,
         r.payment_method,
         r.status,
-      ].join(",")
+      ].join(";")
     );
-    const blob = new Blob([[headers.join(","), ...rows].join("")], { type: "text/csv;charset=utf-8;" });
+    const blob = new Blob([[headers.join(";"), ...rows].join("\n")], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `ingresos_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `ingresos al ${new Date().toISOString().slice(0, 10)}.csv`;
     document.body.appendChild(a);
     a.click();
     a.remove();
