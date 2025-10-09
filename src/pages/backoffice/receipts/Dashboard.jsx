@@ -17,14 +17,6 @@ import {
 
 
 
-
-/**
- * BackofficeIngresos.jsx (versión sin dependencias externas)
- *
- * Esta versión elimina shadcn/ui y lucide-react para evitar errores de resolución.
- * Usa componentes locales (Card, Button, Input, KPI) con Tailwind puro.
- */
-
 // --- UI mínimos locales --
 function Card({ className = "", children }) {
   return (
@@ -103,11 +95,11 @@ const groupBy = (arr, keyFn) =>
 
 // --- Helpers robustos ---
 const COMMISSION_FACTOR = {
-  "QR BCM": 0.782,
-  "Mercado Pago(QR)": 0.782,
-  "Mercado Pago (QR)": 0.782,
-  "Mercado Pago(TD)": 0.782,
-  "Mercado Pago(TC)": 0.782,
+  "QR BCM": 0.992,
+  "Mercado Pago(QR)": 0.959,
+  "Mercado Pago (QR)": 0.959,
+  "Mercado Pago(TD)": 0.959,
+  "Mercado Pago(TC)": 0.959,
 };
 
 const toNumber = (x) => {
