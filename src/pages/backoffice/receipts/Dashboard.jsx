@@ -17,14 +17,6 @@ import {
 
 
 
-
-/**
- * BackofficeIngresos.jsx (versión sin dependencias externas)
- *
- * Esta versión elimina shadcn/ui y lucide-react para evitar errores de resolución.
- * Usa componentes locales (Card, Button, Input, KPI) con Tailwind puro.
- */
-
 // --- UI mínimos locales --
 function Card({ className = "", children }) {
   return (
@@ -37,7 +29,7 @@ function Card({ className = "", children }) {
 }
 
 function CardContent({ className = "", children }) {
-  return <div className={`p-4 ${className}`}>{children}</div>;
+  return <div className={`p-5 ${className}`}>{children}</div>;
 }
 function Button({ className = "", variant = "solid", ...props }) {
   const base =
@@ -103,11 +95,11 @@ const groupBy = (arr, keyFn) =>
 
 // --- Helpers robustos ---
 const COMMISSION_FACTOR = {
-  "QR BCM": 0.782,
-  "Mercado Pago(QR)": 0.782,
-  "Mercado Pago (QR)": 0.782,
-  "Mercado Pago(TD)": 0.782,
-  "Mercado Pago(TC)": 0.782,
+  "QR BCM": 0.992,
+  "Mercado Pago(QR)": 0.959,
+  "Mercado Pago (QR)": 0.959,
+  "Mercado Pago(TD)": 0.959,
+  "Mercado Pago(TC)": 0.959,
 };
 
 const toNumber = (x) => {
@@ -150,13 +142,22 @@ const parseDate = (s) => {
 
 const normMethod = (m) => {
   const x = (m || "").replace(/\s+/g, " ").trim().toLowerCase();
-  if (x.includes("bcm")) return "QR BCM";
-  if (x.includes("td") || x.includes("débito") || x.includes("debito")) return "Mercado Pago(TD)";
+  if (x.includes("qr bcm")) return "QR BCM";
+  if (x.includes("mercado pago (td)") || x.includes("débito") || x.includes("debito")) return "Mercado Pago(TD)";
   if (x.includes("tc") || x.includes("crédito") || x.includes("credito")) return "Mercado Pago(TC)";
   if (x.includes("qr")) return "Mercado Pago(QR)";
   return m || "Desconocido";
 };
 
+// arriba del componente
+const COLOR_BY_METHOD = {
+  "Mercado Pago(QR)": "#5b5c91ff", // indigo
+  "Mercado Pago(TC)": "#aa884cff", // amber
+  "Mercado Pago(TD)": "#5ea890ff", // emerald
+  "QR BCM":           "#549daaaf", // cyan
+  "Boleta BCM":       "#7f629b9c", // violet
+};
+const PALETTE = ["#5b5c91ff","#aa884cff","#5ea890ff","#549daaaf","#7f629b9c","#d47575a6","#5fbe829c","#67a4c0a9"];
 
 export default function BackofficeIngresos() {
   const [data, setData] = useState([]);
@@ -233,26 +234,78 @@ const fetchReceipts = async () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // KPIs
-  const totalIngresos = useMemo(() => data.reduce((acc, r) => acc + (r.total_depositado || 0), 0), [data]);
-  const totalIngresos_menos_iva = useMemo(() => data.reduce((acc, r) => acc + (r.total_depositado_menos_iva || 0), 0), [data]);
-  const totalIngresosQrBcm = useMemo(() => data.reduce((acc, r) => acc + (r.total_depositado_qr_bcm_menos_comision || 0), 0), [data]);
-  const totalIngresosMpTc = useMemo(() => data.reduce((acc, r) => acc + (r.total_depositado_mp_tc_menos_comision || 0), 0), [data]);
-  const totalIngresosMpTd = useMemo(() => data.reduce((acc, r) => acc + (r.total_depositado_mp_td_menos_comision || 0), 0), [data]);
-  const ahora = new Date();
-  const hace30 = new Date(ahora.getTime() - 30 * 24 * 60 * 60 * 1000);
-  const ultimos30 = useMemo(
-    () => data.filter((r) => r.fecha_pago_date >= hace30).reduce((a, r) => a + r.total_depositado, 0),
-    [data]
-  );
-  const ticketPromedio = useMemo(() => (data.length ? totalIngresos / data.length : 0), [totalIngresos, data.length]);
 
-  // Series
-  const desdeVentana = useMemo(() => {
-    const d = new Date();
-    d.setDate(d.getDate() - daysWindow);
-    return d;
-  }, [daysWindow]);
+  // --- Ventana de tiempo ---
+const desdeVentana = useMemo(() => {
+  const d = new Date();
+  d.setDate(d.getDate() - daysWindow);
+  return d;
+}, [daysWindow]);
+
+// Base filtrada por ventana (USAR EN TODO)
+const dataWindow = useMemo(() => {
+  const fromTs = desdeVentana.getTime();
+  const nowTs = Date.now();
+  return data.filter((r) => {
+    const t = r.fecha_pago_date?.getTime?.() ?? 0;
+    return t >= fromTs && t <= nowTs;
+  });
+}, [data, desdeVentana]);
+
+// --- KPIs sobre la ventana ---
+const totalIngresos = useMemo(
+  () => dataWindow.reduce((acc, r) => acc + (r.total_depositado || 0), 0),
+  [dataWindow]
+);
+
+const totalIngresos_menos_iva = useMemo(
+  () => dataWindow.reduce((acc, r) => acc + (r.total_depositado_menos_iva || 0), 0),
+  [dataWindow]
+);
+
+const totalIngresosQrBcm = useMemo(
+  () => dataWindow.reduce((acc, r) => acc + (r.total_bcm_qr_neto || 0), 0),
+  [dataWindow]
+);
+
+const totalIngresosMpQr = useMemo(
+  () => dataWindow.reduce((acc, r) => acc + (r.total_mp_qr_neto || 0), 0),
+  [dataWindow]
+);
+
+const totalIngresosMpTc = useMemo(
+  () => dataWindow.reduce((acc, r) => acc + (r.total_mp_tc_neto || 0), 0),
+  [dataWindow]
+);
+
+const totalIngresosMpTd = useMemo(
+  () => dataWindow.reduce((acc, r) => acc + (r.total_mp_td_neto || 0), 0),
+  [dataWindow]
+);
+
+const ticketPromedio = useMemo(
+  () => (dataWindow.length ? totalIngresos / dataWindow.length : 0),
+  [totalIngresos, dataWindow.length]
+);
+
+   
+  // Filtro tabla
+  const filteredRows = useMemo(() => {
+    const q = (search || "").toLowerCase();
+    if (!q) return data;
+    return data.filter((r) =>
+      [r.receipt_number, r.caratula, r.juicio_n, r.payment_id, r.payment_method]
+        .filter(Boolean)
+        .some((f) => String(f).toLowerCase().includes(q))
+    );
+  }, [dataWindow,  search]);
+
+  // // Series
+  // const desdeVentana = useMemo(() => {
+  //   const d = new Date();
+  //   d.setDate(d.getDate() - daysWindow);
+  //   return d;
+  // }, [daysWindow]);
 
   const serieDiaria = useMemo(() => {
     const filtrado = data.filter((r) => r.fecha_pago_date >= desdeVentana);
@@ -265,31 +318,27 @@ const fetchReceipts = async () => {
       }))
       .sort((a, b) => a.day.localeCompare(b.day));
   }, [data, desdeVentana]);
-
+  
   const serieMensual = useMemo(() => {
     const porMes = groupBy(data, (r) => r.fecha_pago_date.toISOString().slice(0, 7));
     return Object.entries(porMes)
-      .map(([month, rows]) => ({ month, ingresos: rows.reduce((a, r) => a + r.total_depositado, 0) }))
-      .sort((a, b) => a.month.localeCompare(b.month));
+    .map(([month, rows]) => ({ month, ingresos: rows.reduce((a, r) => a + r.total_depositado, 0) }))
+    .sort((a, b) => a.month.localeCompare(b.month));
   }, [data]);
-
+  
+  // Pie por método (filtrado por ventana)
   const porMetodo = useMemo(() => {
-    const por = groupBy(data, (r) => r.payment_method || "Desconocido");
-    return Object.entries(por)
-      .map(([name, rows]) => ({ name, value: rows.reduce((a, r) => a + r.total_depositado, 0) }))
+    const acc = new Map();
+    for (const r of dataWindow) {
+      const m = r.payment_method || "Desconocido";
+      const v = r.total_depositado ?? 0;        // o r.total_depositado_neto si querés el neto
+      acc.set(m, (acc.get(m) || 0) + v);
+    }
+    return Array.from(acc, ([name, value]) => ({ name, value }))
+      .filter(s => s.value > 0)                 // evita porciones en 0
       .sort((a, b) => b.value - a.value);
-  }, [data]);
+  }, [dataWindow]);
 
-  // Filtro tabla
-  const filteredRows = useMemo(() => {
-    const q = (search || "").toLowerCase();
-    if (!q) return data;
-    return data.filter((r) =>
-      [r.receipt_number, r.caratula, r.juicio_n, r.payment_id, r.payment_method]
-        .filter(Boolean)
-        .some((f) => String(f).toLowerCase().includes(q))
-    );
-  }, [data, search]);
 
   const exportCSV = () => {
     const headers = [
@@ -309,18 +358,18 @@ const fetchReceipts = async () => {
         r.receipt_number,
         r.payment_id,
         r.total_depositado,
-        safe(r.caratula),
+        r.caratula,
         safe(r.juicio_n),
         r.tasa_justicia,
         r.payment_method,
         r.status,
-      ].join(",")
+      ].join(";")
     );
-    const blob = new Blob([[headers.join(","), ...rows].join("")], { type: "text/csv;charset=utf-8;" });
+    const blob = new Blob([[headers.join(";"), ...rows].join("\n")], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `ingresos_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `ingresos al ${new Date().toISOString().slice(0, 10)}.csv`;
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -354,31 +403,21 @@ const fetchReceipts = async () => {
       {/* KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <KPI title="Ingresos totales" value={fmtMoney(totalIngresos)} />
-        <KPI title="Ingresos totales menos IVA" value={fmtMoney(totalIngresos_menos_iva)} />
+        <KPI title="Recaudado Mercado Pago Qr" value={fmtMoney(totalIngresosMpQr)} />
         <KPI title="Ingresos totales QR BCM" value={fmtMoney(totalIngresosQrBcm)} />
         <KPI title="Ingresos totales MP TC" value={fmtMoney(totalIngresosMpTc)} />
         <KPI title="Ingresos totales MP TD" value={fmtMoney(totalIngresosMpTd)} />
-        <KPI title="Últimos 30 días" value={fmtMoney(ultimos30)} />
+        {/* <KPI title="Últimos 30 días" value={fmtMoney(ultimos30)} /> */}
         <KPI title="Ticket promedio" value={fmtMoney(ticketPromedio)} />
         <KPI title="Pagos (count)" value={data.length} />
       </div>
 
       {/* Controles */}
       <div className="flex items-center gap-3">
-        <div className="relative w-full md:w-80">
-          <Input
-            placeholder="Buscar por carátula, recibo, expediente…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
-            <Icon name="filter" />
-          </div>
-        </div>
         <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-600">Ventana:</span>
+          <span className="text-sm text-gray-400">Ventana:</span>
           <select
-            className="border rounded-md px-2 py-1 dark:bg-neutral-900 dark:border-neutral-700"
+            className="border rounded-md px-2 py-1 dark:bg-neutral-1200 dark:border-neutral-700"
             value={daysWindow}
             onChange={(e) => setDaysWindow(Number(e.target.value))}
           >
@@ -387,6 +426,7 @@ const fetchReceipts = async () => {
             <option value={90}>90 días</option>
             <option value={180}>180 días</option>
             <option value={365}>1 año</option>
+            <option value={730}>2 años</option>
           </select>
         </div>
       </div>
@@ -409,87 +449,120 @@ const fetchReceipts = async () => {
             </div>
           </CardContent>
         </Card>
-
+        {/* Ingresos por metodo */}
         <Card>
           <CardContent>
             <h3 className="text-lg font-medium mb-2">Ingresos por método</h3>
             <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={porMetodo} dataKey="value" nameKey="name" outerRadius={90}>
-                    {porMetodo.map((_, i) => (
-                      <Cell key={i} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(v) => fmtMoney(v)} />
-                  <Legend />
-                </PieChart>
+              <PieChart>
+                <Pie data={porMetodo} dataKey="value" nameKey="name" outerRadius={90}>
+                  {porMetodo.map((slice, i) => (
+                    <Cell
+                      key={slice.name}
+                      fill={COLOR_BY_METHOD[slice.name] || PALETTE[i % PALETTE.length]}
+                      stroke="#fff"
+                      strokeWidth={1}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(v) => fmtMoney(v)} />
+                <Legend />
+              </PieChart>
               </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
       </div>
-
+      {/* Ingresos por mes */}
       <Card>
         <CardContent>
           <h3 className="text-lg font-medium mb-2">Ingresos por mes</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={serieMensual}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip formatter={(v) => fmtMoney(v)} />
-                <Bar dataKey="ingresos" />
-              </BarChart>
-            </ResponsiveContainer>
+            <BarChart data={serieMensual}>
+              <defs>
+                <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#6366F1" stopOpacity={1} />
+                  <stop offset="100%" stopColor="#6366F1" stopOpacity={0.7} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+              <YAxis tick={{ fontSize: 12 }} />
+              <Tooltip formatter={(v) => fmtMoney(v)} />
+              <Bar dataKey="ingresos" fill="url(#barGrad)" />
+            </BarChart>
+          </ResponsiveContainer>
           </div>
         </CardContent>
       </Card>
 
+      <div className="flex items-center gap-3">
+        <div className="relative w-full md:w-80">
+          <Input
+            placeholder="Buscar por carátula, recibo, expediente…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <Icon name="filter" />
+          </div>
+        </div>
+      </div>
       {/* Tabla */}
+          
       <Card>
-        <CardContent className="p-0 overflow-auto">
-          <table className="min-w-full text-sm">
-            <thead className="bg-gray-50 text-xs uppercase tracking-wider text-gray-500">
-              <tr>
-                <th className="px-4 py-3 text-left">Fecha pago</th>
-                <th className="px-4 py-3 text-left">Recibo</th>
-                <th className="px-4 py-3 text-left">Expediente</th>
-                <th className="px-4 py-3 text-left">Carátula</th>
-                <th className="px-4 py-3 text-right">Monto</th>
-                <th className="px-4 py-3 text-left">Método</th>
-                <th className="px-4 py-3 text-left">Estado</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
+        <CardContent className="p-0">
+          <div className="max-h-96 overflow-auto">
+            <table className="min-w-full text-sm table-fixed"> {/* table-fixed = no se estira */}
+              <thead className="bg-gray-50 text-xs uppercase tracking-wider text-gray-500 sticky top-0 z-10">
                 <tr>
-                  <td className="px-4 py-6" colSpan={7}>Cargando…</td>
+                  <th className="px-3 py-2 text-left w-36 whitespace-nowrap">Fecha pago</th>
+                  <th className="px-3 py-2 text-left w-36 whitespace-nowrap">Recibo</th>
+                  <th className="px-3 py-2 text-left w-32 whitespace-nowrap">Expediente</th>
+                  {/* Carátula: única “ancha” y con wrap controlado */}
+                  <th className="px-3 py-2 text-left w-[22rem] md:w-[28rem]">Carátula</th>
+                  <th className="px-3 py-2 text-right w-28 whitespace-nowrap">Monto</th>
+                  <th className="px-3 py-2 text-left w-36 whitespace-nowrap">Método</th>
+                  <th className="px-3 py-2 text-left w-28 whitespace-nowrap hidden lg:table-cell">Estado</th>
                 </tr>
-              ) : filteredRows.length === 0 ? (
-                <tr>
-                  <td className="px-4 py-6" colSpan={7}>Sin resultados</td>
-                </tr>
-              ) : (
-                filteredRows.map((r) => (
-                  <tr key={r.uuid} className="border-b last:border-0">
-                    <td className="px-4 py-3">{fmtNiceDate(r.fecha_pago_date)}</td>
-                    <td className="px-4 py-3 font-medium">{r.receipt_number}</td>
-                    <td className="px-4 py-3">{r.juicio_n}</td>
-                    <td className="px-4 py-3 truncate max-w-[360px]" title={r.caratula}>
-                      {r.caratula}
-                    </td>
-                    <td className="px-4 py-3 text-right">{fmtMoney(r.total_depositado)}</td>
-                    <td className="px-4 py-3">{r.payment_method}</td>
-                    <td className="px-4 py-3">{r.status}</td>
+              </thead>
+              <tbody className="divide-y">
+                {loading ? (
+                  <tr>
+                    <td className="px-3 py-4" colSpan={7}>Cargando…</td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : filteredRows.length === 0 ? (
+                  <tr>
+                    <td className="px-3 py-4" colSpan={7}>Sin resultados</td>
+                  </tr>
+                ) : (
+                  filteredRows.map((r) => (
+                    <tr key={r.uuid} className="hover:bg-gray-50/70">
+                      <td className="px-3 py-2 whitespace-nowrap">{fmtNiceDate(r.fecha_pago_date)}</td>
+                      <td className="px-3 py-2 whitespace-nowrap font-medium">{r.receipt_number}</td>
+                      <td className="px-3 py-2 whitespace-nowrap">{r.juicio_n}</td>
+                      {/* Para “afinar”: en desktop truncamos, en mobile dejamos wrap corto */}
+                      <td className="px-3 py-2 align-top">
+                        <div className="md:truncate md:max-w-[28rem] md:whitespace-nowrap
+                                        whitespace-normal break-words max-w-[22rem]">
+                          {r.caratula}
+                        </div>
+                      </td>
+                      <td className="px-3 py-2 text-right whitespace-nowrap">{fmtMoney(r.total_depositado)}</td>
+                      <td className="px-3 py-2 whitespace-nowrap">{r.payment_method}</td>
+                      <td className="px-3 py-2 whitespace-nowrap hidden lg:table-cell">{r.status}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </CardContent>
       </Card>
+
+
     </div>
   );
 }
