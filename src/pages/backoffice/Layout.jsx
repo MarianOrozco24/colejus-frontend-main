@@ -175,7 +175,7 @@ const Layout = () => {
                 </Link>
               </li>
               <li>
-                <Link
+                {/* <Link
                   to="/backoffice/dashboard-ingresos"
                   className={`flex items-center px-4 py-3 rounded-lg ${
                     location.pathname === "/backoffice/dashboard-ingresos"
@@ -185,7 +185,7 @@ const Layout = () => {
                 >
                   <FaReceipt className="mr-2" />
                   Dashboard Ingresos
-                </Link>
+                </Link> */}
               </li>
               <li>
                 <Link
