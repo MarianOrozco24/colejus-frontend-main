@@ -17,6 +17,7 @@ const DerechoFijo = () => {
   const [valorDerechoFijo, setValorDerechoFijo] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
+  const [bcmPaymentId, setBcmPaymentId] = useState(null); // NUEVO: payment_id devuelto por QR BCM
 
   const [formData, setFormData] = useState({
     lugar: "",
@@ -29,6 +30,7 @@ const DerechoFijo = () => {
     parte: "",
     total_depositado: "",
     derecho_fijo_5pc: "",
+    email: "", // 👈 NUEVO
   });
 
   const handleDateChange = (date, fieldName) => {
@@ -37,7 +39,9 @@ const DerechoFijo = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    // para email, recortamos espacios
+    const v = name === "email" ? value.trim() : value;
+    setFormData((prev) => ({ ...prev, [name]: v }));
   };
 
   const handleReset = () => {
@@ -52,6 +56,7 @@ const DerechoFijo = () => {
       parte: "",
       total_depositado: "",
       derecho_fijo_5pc: "",
+      email: "", // 👈 NUEVO
     });
     sessionStorage.removeItem("ultimoDerechoFijoForm");
   };
@@ -67,7 +72,7 @@ const DerechoFijo = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // ✅ Validación de campos obligatorios
+    // ✅ Validación de campos obligatorios (agregamos email)
     const requiredFields = [
       "lugar",
       "fecha_inicio",
@@ -78,6 +83,7 @@ const DerechoFijo = () => {
       "parte",
       "juzgado",
       "total_depositado",
+      "email",
     ];
     for (let field of requiredFields) {
       const v = formData[field];
@@ -86,6 +92,14 @@ const DerechoFijo = () => {
         setModalVisible(true);
         return;
       }
+    }
+
+    // Validación rápida de email
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email);
+    if (!emailOk) {
+      setModalMessage("Revisá el correo electrónico: el formato no es válido.");
+      setModalVisible(true);
+      return;
     }
 
     // ✅ Validación de monto mínimo
@@ -115,8 +129,6 @@ const DerechoFijo = () => {
           >
             💳 Pagar con tarjeta
           </button>
-          {/* Descomentar una vez que se encuentre testeado le endpoint de confirmacion de pago */}
-          
           {/* <button
             onClick={() => handlePago("bcm_qr")}
             className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg text-lg font-semibold transition duration-200 shadow-sm"
@@ -135,7 +147,6 @@ const DerechoFijo = () => {
       setModalVisible(true);
 
       if (tipo === "tarjeta") {
-        // Tu flujo actual de tarjeta (MP Checkout)
         const data = await postDerechoFijo(formData, true);
         setPreferenceId(data?.preference_id || null);
         setDerechoFijoId(data?.uuid || null);
@@ -150,7 +161,6 @@ const DerechoFijo = () => {
       }
 
       if (tipo === "mp_qr") {
-        // Tu flujo actual de QR Mercado Pago
         const data = await postDerechoFijo(formData, false);
         setPreferenceId(data?.preference_id || null);
         setDerechoFijoId(data?.uuid || null);
@@ -175,12 +185,11 @@ const DerechoFijo = () => {
       }
 
       if (tipo === "bcm_qr") {
-        // Nuevo flujo de QR Bolsa (BCM)
         const data = await postDerechoFijoBCM(formData);
-        setPreferenceId(data?.preference_id || null); // por si algún día lo envían
+        setPreferenceId(data?.preference_id || null);
         setDerechoFijoId(data?.uuid || null);
+        setBcmPaymentId(data?.payment_id || null); // NUEVO
 
-        // BCM típicamente devuelve qr_image_base64
         const src = normalizeQrSrc(data?.qr_image_base64 || data?.qr_code_base64);
         if (!src) {
           setModalMessage("❌ No se recibió la imagen del QR de la Bolsa.");
@@ -281,6 +290,39 @@ const DerechoFijo = () => {
     }
     return () => interval && clearInterval(interval);
   }, [preferenceId, derechoFijoId]);
+
+  // 🔁 Polling para BCM por payment_id
+  useEffect(() => {
+    if (!bcmPaymentId) return;
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(
+          `${process.env.REACT_APP_BACKEND_URL}/forms/receipt-status?payment_id=${encodeURIComponent(bcmPaymentId)}`
+        );
+        if (!res.ok) return;
+        const j = await res.json();
+        const paid = String(j?.status || "").toLowerCase().startsWith("paga");
+        if (paid) {
+          setPaymentStatus("approved");
+          clearInterval(interval);
+          setModalMessage(
+            <div className="text-center font-lato">
+              <h2 className="text-xl font-semibold mb-4">Pago aprobado</h2>
+              <button
+                onClick={() => downloadPDF(derechoFijoId)}
+                className="bg-secondary text-white px-4 py-2 rounded-lg"
+              >
+                Descargar Comprobante
+              </button>
+            </div>
+          );
+        }
+      } catch (e) {
+        // opcional: log
+      }
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [bcmPaymentId, derechoFijoId]);
 
   const handleCloseModal = () => setModalVisible(false);
 
@@ -412,6 +454,24 @@ const DerechoFijo = () => {
                   onChange={handleChange}
                 />
               </div>
+
+              {/* 👇 NUEVO CAMPO: CORREO ELECTRÓNICO */}
+              <div>
+                <label className="block font-semibold text-gray-700 font-bakersville">Correo electrónico</label>
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="ejemplo@correo.com"
+                  autoComplete="email"
+                  className="w-full border-b border-gray-300 p-3 focus:outline-none placeholder-gray-500 font-lato"
+                  value={formData.email}
+                  onChange={handleChange}
+                />
+                <p className="text-xs text-gray-500 mt-1 font-lato">
+                  Recibirás el comprobante de pago en este correo.
+                </p>
+              </div>
+              {/* 👆 FIN NUEVO CAMPO */}
 
               <div>
                 <label className="block font-semibold text-gray-700 font-bakersville">Parte</label>

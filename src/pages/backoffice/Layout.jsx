@@ -175,6 +175,19 @@ const Layout = () => {
                 </Link>
               </li>
               <li>
+                {/* <Link
+                  to="/backoffice/dashboard-ingresos"
+                  className={`flex items-center px-4 py-3 rounded-lg ${
+                    location.pathname === "/backoffice/dashboard-ingresos"
+                      ? "bg-secondary text-white"
+                      : "hover:bg-secondary hover:text-white"
+                  }`}
+                >
+                  <FaReceipt className="mr-2" />
+                  Dashboard Ingresos
+                </Link> */}
+              </li>
+              <li>
                 <Link
                   to="/backoffice/update-derecho-fijo"
                   className={`flex items-center px-4 py-3 rounded-lg ${
