@@ -234,20 +234,25 @@ const DerechoFijo = () => {
       alert("Error al descargar el comprobante");
     }
   };
+useEffect(() => {
+  const fetchValorDerechoFijo = async () => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/forms/get_price_derecho_fijo`);
+      const result = await response.json();
 
-  useEffect(() => {
-    const fetchValorDerechoFijo = async () => {
-      try {
-        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/forms/get_price_derecho_fijo`);
-        const result = await response.json();
-        const valor = result.data?.[0]?.value;
-        if (response.ok && valor) setValorDerechoFijo(valor);
-      } catch (error) {
-        console.error("❌ Error trayendo derecho fijo:", error);
+      // el backend ahora devuelve { "data": 12000.0 }
+      const valor = result.data;
+
+      if (response.ok && valor) {
+        setValorDerechoFijo(valor);
       }
-    };
-    fetchValorDerechoFijo();
-  }, []);
+    } catch (error) {
+      console.error("❌ Error trayendo derecho fijo:", error);
+    }
+  };
+
+  fetchValorDerechoFijo();
+}, []);
 
   // Polling (solo para MP con preferenceId)
   useEffect(() => {
