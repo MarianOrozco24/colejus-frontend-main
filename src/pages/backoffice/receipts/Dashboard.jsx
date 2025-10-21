@@ -96,10 +96,10 @@ const groupBy = (arr, keyFn) =>
 // --- Helpers robustos ---
 const COMMISSION_FACTOR = {
   "QR BCM": 0.992,
-  "Mercado Pago(QR)": 0.959,
-  "Mercado Pago (QR)": 0.959,
-  "Mercado Pago(TD)": 0.959,
-  "Mercado Pago(TC)": 0.959,
+  "Mercado Pago(QR)": 0.992,
+  "Mercado Pago (QR)": 0.992,
+  "Mercado Pago(TD)": 0.9865,
+  "Mercado Pago(TC)": 0.9371,
 };
 
 const toNumber = (x) => {
@@ -143,7 +143,7 @@ const parseDate = (s) => {
 const normMethod = (m) => {
   const x = (m || "").replace(/\s+/g, " ").trim().toLowerCase();
   if (x.includes("qr bcm")) return "QR BCM";
-  if (x.includes("mercado pago (td)") || x.includes("débito") || x.includes("debito")) return "Mercado Pago(TD)";
+  if (x.includes("mercado pago (td)") || x.includes("débito") || x.includes("debito") || x.includes("td")) return "Mercado Pago(TD)";
   if (x.includes("tc") || x.includes("crédito") || x.includes("credito")) return "Mercado Pago(TC)";
   if (x.includes("qr")) return "Mercado Pago(QR)";
   return m || "Desconocido";
@@ -151,10 +151,10 @@ const normMethod = (m) => {
 
 // arriba del componente
 const COLOR_BY_METHOD = {
-  "Mercado Pago(QR)": "#5b5c91ff", // indigo
-  "Mercado Pago(TC)": "#aa884cff", // amber
-  "Mercado Pago(TD)": "#5ea890ff", // emerald
-  "QR BCM":           "#549daaaf", // cyan
+  "Mercado Pago(QR)": "#2563EB",
+  "Mercado Pago(TC)": "#F59E0B",
+  "Mercado Pago(TD)": "#10B981",
+  "QR BCM":           "#06B6D4",
   "Boleta BCM":       "#7f629b9c", // violet
 };
 const PALETTE = ["#5b5c91ff","#aa884cff","#5ea890ff","#549daaaf","#7f629b9c","#d47575a6","#5fbe829c","#67a4c0a9"];
@@ -213,6 +213,7 @@ const fetchReceipts = async () => {
           total_mp_qr_neto: payment_method === "Mercado Pago(QR)" || payment_method === "Mercado Pago (QR)" ? neto : 0,
           total_mp_td_neto: payment_method === "Mercado Pago(TD)" ? neto : 0,
           total_mp_tc_neto: payment_method === "Mercado Pago(TC)" ? neto : 0,
+          total_desconocido_neto: payment_method === "Desconocido" ? neto : 0,
 
           fecha_pago_date,
         };
@@ -280,6 +281,10 @@ const totalIngresosMpTc = useMemo(
 
 const totalIngresosMpTd = useMemo(
   () => dataWindow.reduce((acc, r) => acc + (r.total_mp_td_neto || 0), 0),
+  [dataWindow]
+);
+const totalIngresosDesconocidos = useMemo(
+  () => dataWindow.reduce((acc, r) => acc + (r.totoal_desconocido_neto || 0), 0),
   [dataWindow]
 );
 
@@ -404,12 +409,13 @@ const ticketPromedio = useMemo(
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <KPI title="Ingresos totales" value={fmtMoney(totalIngresos)} />
         <KPI title="Recaudado Mercado Pago Qr" value={fmtMoney(totalIngresosMpQr)} />
-        <KPI title="Ingresos totales QR BCM" value={fmtMoney(totalIngresosQrBcm)} />
-        <KPI title="Ingresos totales MP TC" value={fmtMoney(totalIngresosMpTc)} />
-        <KPI title="Ingresos totales MP TD" value={fmtMoney(totalIngresosMpTd)} />
+        <KPI title="Recaudado Qr BCM" value={fmtMoney(totalIngresosQrBcm)} />
+        <KPI title="Recaudado Mercado Pago TC" value={fmtMoney(totalIngresosMpTc)} />
+        <KPI title="Recaudado Mercado Pago TD" value={fmtMoney(totalIngresosMpTd)} />
+        {/* <KPI title="Ingresos totales Desconocidos" value={fmtMoney(totalIngresosDesconocidos)} /> */}
         {/* <KPI title="Últimos 30 días" value={fmtMoney(ultimos30)} /> */}
-        <KPI title="Ticket promedio" value={fmtMoney(ticketPromedio)} />
-        <KPI title="Pagos (count)" value={data.length} />
+        <KPI title="DF promedio" value={fmtMoney(ticketPromedio)} />
+        <KPI title="Cantidad de pagos" value={data.length} />
       </div>
 
       {/* Controles */}
@@ -483,8 +489,8 @@ const ticketPromedio = useMemo(
             <BarChart data={serieMensual}>
               <defs>
                 <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#6366F1" stopOpacity={1} />
-                  <stop offset="100%" stopColor="#6366F1" stopOpacity={0.7} />
+                  <stop offset="0%" stopColor="#2563EB" stopOpacity={1} />
+                  <stop offset="100%" stopColor="#2563EB" stopOpacity={0.7} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" />
