@@ -473,7 +473,7 @@ useEffect(() => {
                   onChange={handleChange}
                 />
                 <p className="text-xs text-gray-500 mt-1 font-lato">
-                  Recibirás el comprobante de pago en este correo.
+                  El comprobante de pago se enviará a este correo
                 </p>
               </div>
               {/* 👆 FIN NUEVO CAMPO */}

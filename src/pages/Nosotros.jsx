@@ -315,7 +315,7 @@ const Nosotros = () => {
               { icon: derecho_laboral, title: "Instituto de Derecho Laboral", name: "Dr. Javier Torres" },
               { icon: derecho_comercial, title: "Instituto de Derecho Comercial", name: "Dra. Alida Guillén" },
               { icon: derecho_ambiental, title: "Instituto de Derecho Ambiental", name: "Dr. Adriano Indiveri" },
-              { icon: derecho_penal, title: "Instituto de Derecho Penal, Procesal Penal y Criminología", name: "Dr. Gonzalo Pagliano" },
+              { icon: derecho_penal, title: "Instituto de Derecho Penal, Procesal Penal y Criminología", name: "Dra. Mariela Herrera" },
               { icon: derecho_consumo, title: "Instituto de Derecho de Consumo", name: "Dra. Cecilia Martínez" },
               { icon: comision_genero, title: "Comisión de Perspectiva de Género e Igualdad", name: "Dra. Celeste Marchetti" },
               { icon: "📜", title: "Instituto de Derecho Constitucional", name: "Dr. Enzo Orosito" },
