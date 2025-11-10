@@ -79,8 +79,7 @@ export const postDerechoFijoBCM = async (form_data) => {
     throw error;
   }
 };
-<<<<<<< Updated upstream
-=======
+
 // api/forms.js
 export const postDerechoFijoPresencial = async (form_data) => {
   const endpoint = "/forms/bcm/bar-code";
@@ -162,4 +161,3 @@ export const postDerechoFijoPresencial = async (form_data) => {
   }
 };
 
->>>>>>> Stashed changes
