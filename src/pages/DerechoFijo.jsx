@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import NavBar from "../components/NavBar";
 import Footer from "../components/Footer";
-import { postDerechoFijo, postDerechoFijoBCM } from "../api/postDerechoFijo";
+import { postDerechoFijo, postDerechoFijoBCM, postDerechoFijoPresencial } from "../api/postDerechoFijo";
 import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import es from "date-fns/locale/es";
@@ -135,6 +135,13 @@ const DerechoFijo = () => {
           >
             🟩 QR Bolsa de Comercio
           </button>
+          <button
+            onClick={() => handlePago("presencial")}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg text-lg font-semibold transition duration-200 shadow-sm"
+          >
+            🟩 Boleta Fisica Bolsa de Comercio
+          </button>
+
         </div>
       </div>
     );
@@ -208,8 +215,17 @@ const DerechoFijo = () => {
         );
         return;
       }
+
+    if (tipo === "presencial") {
+        const data = await postDerechoFijoPresencial(formData);
+        setPreferenceId(data?.preference_id || null);
+        setDerechoFijoId(data?.uuid || null);
+        
+        setModalMessage("✅ Boleta descargada con éxito")
+      } 
     } catch (error) {
-      setModalMessage(`❌ Error al generar el pago: ${error.message || error}`);
+      console.error("Error al generar el pago:", error);
+      setModalMessage("❌ Error al generar el pago.");
     }
   };
 
