@@ -135,15 +135,13 @@ const DerechoFijo = () => {
           >
             🟩 QR Bolsa de Comercio
           </button>
-<<<<<<< Updated upstream
-=======
           <button
             onClick={() => handlePago("presencial")}
             className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg text-lg font-semibold transition duration-200 shadow-sm"
           >
-            📄 Pago presencial BCM
+            🟩 Boleta Fisica Bolsa de Comercio
           </button>
->>>>>>> Stashed changes
+
         </div>
       </div>
     );
