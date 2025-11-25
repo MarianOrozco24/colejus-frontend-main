@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import NavBar from "../components/NavBar";
+import ResponsiveNav from "../components/ResponsiveNav";
 import Footer from "../components/Footer";
 import CourtCarousel from "../components/CourtCarousel";
 import derecho_ambiental from "../assets/derecho-ambiental.png";
@@ -89,7 +89,7 @@ const Nosotros = () => {
 
         {/* Navbar visible y encima de todo */}
         <div className="w-full z-20">
-          <NavBar />
+          <ResponsiveNav />
         </div>
 
         {/* Contenido central */}

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import NavBar from "../components/NavBar";
+import ResponsiveNav from "../components/ResponsiveNav";
 import Footer from "../components/Footer";
 import { postDerechoFijo, postDerechoFijoBCM, postDerechoFijoPresencial } from "../api/postDerechoFijo";
 import DatePicker, { registerLocale } from "react-datepicker";
@@ -136,12 +136,11 @@ const DerechoFijo = () => {
             🟩 QR Bolsa de Comercio
           </button>
           <button
-            onClick={() => handlePago("presencial")}
+            onClick={() => handlePago("bcm_presencial")}
             className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg text-lg font-semibold transition duration-200 shadow-sm"
           >
-            🟩 Boleta Fisica Bolsa de Comercio
+            📄 Boleta Bolsa de Comercio
           </button>
-
         </div>
       </div>
     );
@@ -149,85 +148,128 @@ const DerechoFijo = () => {
   };
 
   const handlePago = async (tipo) => {
-    try {
-      setModalMessage("⏳ Generando pago...");
-      setModalVisible(true);
+  try {
+    setModalMessage("⏳ Generando pago...");
+    setModalVisible(true);
 
-      if (tipo === "tarjeta") {
-        const data = await postDerechoFijo(formData, true);
-        setPreferenceId(data?.preference_id || null);
-        setDerechoFijoId(data?.uuid || null);
+    // 🔹 Pago con tarjeta (Mercado Pago Checkout)
+    if (tipo === "tarjeta") {
+      const data = await postDerechoFijo(formData, true);
+      setPreferenceId(data?.preference_id || null);
+      setDerechoFijoId(data?.uuid || null);
 
-        const checkoutUrl = data?.init_point || data?.payment_url;
-        if (checkoutUrl) {
-          window.location.href = checkoutUrl;
-        } else {
-          setModalMessage("❌ No se pudo redireccionar al checkout.");
-        }
-        return;
+      const checkoutUrl = data?.init_point || data?.payment_url;
+      if (checkoutUrl) {
+        window.location.href = checkoutUrl;
+      } else {
+        setModalMessage("❌ No se pudo redireccionar al checkout.");
       }
-
-      if (tipo === "mp_qr") {
-        const data = await postDerechoFijo(formData, false);
-        setPreferenceId(data?.preference_id || null);
-        setDerechoFijoId(data?.uuid || null);
-
-        const src = normalizeQrSrc(data?.qr_code_base64);
-        if (!src) {
-          setModalMessage("❌ No se recibió la imagen del QR de Mercado Pago.");
-          return;
-        }
-
-        setModalMessage(
-          <div className="text-center font-lato">
-            <h2 className="text-2xl font-semibold text-primary mb-4">¡QR generado!</h2>
-            <p className="text-base text-gray-700 mb-3">Escaneá el código para pagar con Mercado Pago.</p>
-            <img src={src} alt="QR MP" className="mx-auto mb-4 rounded shadow-md" style={{ width: 240, height: 240 }} />
-            <div className="mt-4 text-sm text-gray-500">
-              Estado del pago: <span className="font-semibold text-black">{paymentStatus}</span>
-            </div>
-          </div>
-        );
-        return;
-      }
-
-      if (tipo === "bcm_qr") {
-        const data = await postDerechoFijoBCM(formData);
-        setPreferenceId(data?.preference_id || null);
-        setDerechoFijoId(data?.uuid || null);
-        setBcmPaymentId(data?.payment_id || null); // NUEVO
-
-        const src = normalizeQrSrc(data?.qr_image_base64 || data?.qr_code_base64);
-        if (!src) {
-          setModalMessage("❌ No se recibió la imagen del QR de la Bolsa.");
-          return;
-        }
-
-        setModalMessage(
-          <div className="text-center font-lato">
-            <h2 className="text-2xl font-semibold text-primary mb-4">¡QR generado!</h2>
-            <p className="text-base text-gray-700 mb-3">Escaneá el código para pagar con la Bolsa de Comercio.</p>
-            <img src={src} alt="QR Bolsa de Comercio" className="mx-auto mb-4 rounded shadow-md" style={{ width: 240, height: 240 }} />
-            <div className="mt-4 text-sm text-gray-500">
-              Estado del pago: <span className="font-semibold text-black">{paymentStatus}</span>
-            </div>
-          </div>
-        );
-        return;
-      }
-
-    if (tipo === "presencial") {
-        const data = await postDerechoFijoPresencial(formData);
-        setPreferenceId(data?.preference_id || null);
-        setDerechoFijoId(data?.uuid || null);
-        
-        setModalMessage("✅ Boleta descargada con éxito")
-      } 
-    } catch (error) {
-      console.error("Error al generar el pago:", error);
-      setModalMessage("❌ Error al generar el pago.");
+      return;
     }
-  };
+
+    // 🔹 Pago con MP QR
+    if (tipo === "mp_qr") {
+      const data = await postDerechoFijo(formData, false);
+      setPreferenceId(data?.preference_id || null);
+      setDerechoFijoId(data?.uuid || null);
+
+      const src = normalizeQrSrc(data?.qr_code_base64);
+      if (!src) {
+        setModalMessage("❌ No se recibió la imagen del QR de Mercado Pago.");
+        return;
+      }
+
+      setModalMessage(
+        <div className="text-center font-lato">
+          <h2 className="text-2xl font-semibold text-primary mb-4">¡QR generado!</h2>
+          <p className="text-base text-gray-700 mb-3">
+            Escaneá el código para pagar con Mercado Pago.
+          </p>
+          <img
+            src={src}
+            alt="QR MP"
+            className="mx-auto mb-4 rounded shadow-md"
+            style={{ width: 240, height: 240 }}
+          />
+          <div className="mt-4 text-sm text-gray-500">
+            Estado del pago:{" "}
+            <span className="font-semibold text-black">{paymentStatus}</span>
+          </div>
+        </div>
+      );
+      return;
+    }
+
+    // 🔹 Pago con QR Bolsa de Comercio
+    if (tipo === "bcm_qr") {
+      const data = await postDerechoFijoBCM(formData);
+      setPreferenceId(data?.preference_id || null);
+      setDerechoFijoId(data?.uuid || null);
+      setBcmPaymentId(data?.payment_id || null);
+
+      const src = normalizeQrSrc(data?.qr_image_base64 || data?.qr_code_base64);
+      if (!src) {
+        setModalMessage("❌ No se recibió la imagen del QR de la Bolsa.");
+        return;
+      }
+
+      setModalMessage(
+        <div className="text-center font-lato">
+          <h2 className="text-2xl font-semibold text-primary mb-4">¡QR generado!</h2>
+          <p className="text-base text-gray-700 mb-3">
+            Escaneá el código para pagar con la Bolsa de Comercio.
+          </p>
+          <img
+            src={src}
+            alt="QR Bolsa de Comercio"
+            className="mx-auto mb-4 rounded shadow-md"
+            style={{ width: 240, height: 240 }}
+          />
+          <div className="mt-4 text-sm text-gray-500">
+            Estado del pago:{" "}
+            <span className="font-semibold text-black">{paymentStatus}</span>
+          </div>
+        </div>
+      );
+      return;
+    }
+
+    // 🔹 Pago PRESENCIAL Bolsa de Comercio
+    if (tipo === "bcm_presencial") {
+      setModalMessage("⏳ Generando boleta para pago presencial...");
+
+      // Esta función ya dispara la descarga del PDF
+      const result = await postDerechoFijoPresencial(formData);
+
+      if (result?.ok) {
+        setModalMessage(
+          <div className="text-center font-lato">
+            <h2 className="text-2xl font-semibold text-primary mb-4">
+              ¡Boleta generada!
+            </h2>
+            <p className="text-base text-gray-700 mb-3">
+              Se descargó la boleta <span className="font-semibold">{result.filename}</span>.
+            </p>
+            <p className="text-base text-gray-700 mb-3">
+              Presentala en la Bolsa de Comercio para realizar el pago presencial.
+            </p>
+            <div className="mt-4 text-sm text-gray-500">
+              Recordá revisar tu carpeta de descargas.
+            </div>
+          </div>
+        );
+      } else {
+        setModalMessage("❌ No se pudo generar la boleta para pago presencial.");
+      }
+
+      return;
+    }
+
+  } catch (error) {
+    setModalMessage(`❌ Error al generar el pago: ${error.message || error}`);
+  }
+};
+
 
   const downloadPDF = async (uuid) => {
     try {
@@ -349,10 +391,10 @@ useEffect(() => {
 
   return (
     <div className="bg-gray-100 min-h-screen">
-      <header className="relative 2xl:h-[70vh] md:h-[80vh] bg-primary bg-cover bg-center flex flex-col justify-center items-center text-white text-center">
+      <header className="relative min-h-[60vh] 2xl:h-[70vh] md:h-[80vh] bg-primary bg-cover bg-center flex flex-col justify-center items-center text-white text-center">
         <div className="absolute inset-0 opacity-60 z-0" style={{ backgroundColor: "#06092E" }}></div>
-        <NavBar />
-        <div className="absolute inset-0 flex flex-col justify-center items-center text-white z-10 px-4">
+        <ResponsiveNav />
+        <div className="absolute inset-0 flex flex-col justify-center items-center text-white z-10 px-4 pt-40 md:pt-0">
           <h5 className="2xl:text-2xl md:text-xl font-normal mb-2" style={{ lineHeight: "1.5" }}>
             Derecho fijo
           </h5>
@@ -363,8 +405,8 @@ useEffect(() => {
       </header>
 
       {/* Formulario */}
-      <section className="relative z-20 -mt-36 flex justify-center pb-20">
-        <div className="bg-white py-20 px-32 rounded-lg shadow-lg 2xl:w-full 2xl:max-w-screen-2xl md:w-4/5">
+      <section className="relative z-20 md:-mt-36 -mt-16 flex justify-center pb-20 px-4 sm:px-6">
+        <div className="bg-white py-10 md:py-16 px-6 sm:px-10 lg:px-20 xl:px-32 rounded-lg shadow-lg w-full md:w-4/5 max-w-5xl">
           <form onSubmit={handleSubmit} onReset={handleReset}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
@@ -549,11 +591,11 @@ useEffect(() => {
               </div>
             </div>
 
-            <div className="flex justify-end space-x-4 font-lato">
-              <button type="reset" className="px-4 py-2 border-gray-200 border-2 text-gray-700 rounded-lg">
+            <div className="flex flex-col sm:flex-row sm:justify-end gap-4 font-lato">
+              <button type="reset" className="px-4 py-2 border-gray-200 border-2 text-gray-700 rounded-lg w-full sm:w-auto">
                 Reiniciar
               </button>
-              <button type="submit" className="px-4 py-2 bg-secondary text-white rounded-lg">
+              <button type="submit" className="px-4 py-2 bg-secondary text-white rounded-lg w-full sm:w-auto">
                 Imprimir
               </button>
             </div>

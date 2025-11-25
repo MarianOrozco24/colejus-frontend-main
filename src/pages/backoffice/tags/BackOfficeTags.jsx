@@ -103,17 +103,17 @@ const BackOfficeTags = () => {
 
     return (
         <div className="p-6">
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between mb-6">
                 <h1 className="text-2xl font-bold text-primary">
                     Creación de <span className="text-secondary">categorías</span>
                 </h1>
-                <div className="flex items-center space-x-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4 w-full lg:w-auto">
                     <input
                         type="text"
                         value={newTagName}
                         onChange={(e) => setNewTagName(e.target.value)}
                         placeholder="Nombre de categoría"
-                        className="w-64 px-4 py-2 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-secondary"
+                        className="w-full sm:w-64 px-4 py-2 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-secondary"
                     />
                     <input
                         type="color"
@@ -122,7 +122,7 @@ const BackOfficeTags = () => {
                     />
                     <button
                         onClick={handleCreateTag}
-                        className="flex items-center px-4 py-2 bg-secondary text-white rounded-full shadow hover:bg-secondary-dark"
+                        className="flex items-center justify-center px-4 py-2 bg-secondary text-white rounded-full shadow hover:bg-secondary-dark"
                     >
                         <FaPlus className="mr-2" />
                         <span>Nueva categoría</span>
@@ -133,7 +133,7 @@ const BackOfficeTags = () => {
             {tags.length === 0 ? (
                 <p className="text-center text-gray-500">Sin categorías creadas aún</p>
             ) : (
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {tags.map((tag) => (
                         <div
                             key={tag.uuid}

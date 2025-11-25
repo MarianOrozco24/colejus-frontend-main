@@ -1,30 +1,55 @@
-export const postLiquidacionesScrapp = async (formData) => {
-  const response = await fetch(
-    `${process.env.REACT_APP_BACKEND_URL}/forms/calcular_liquidacion`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    }
-  );
+// export const postLiquidacionesScrapp = async (formData) => {
+//   const response = await fetch(
+//     `${process.env.REACT_APP_BACKEND_URL}/forms/calcular_liquidacion`,
+//     {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//       body: JSON.stringify(formData),
+//     }
+//   );
 
-  if (!response.ok) {
-    const errorText = await response.text();  // Capturar el mensaje de error
-    console.error("Error en el servidor", response.status, errorText); // Imprimir el mensaje de error
-    throw new Error("Error generando el PDF")};
+//   if (!response.ok) {
+//     const errorText = await response.text();  // Capturar el mensaje de error
+//     console.error("Error en el servidor", response.status, errorText); // Imprimir el mensaje de error
+//     throw new Error("Error generando el PDF")};
 
-  const blob = await response.blob();
-  const url = window.URL.createObjectURL(blob);
+//   const blob = await response.blob();
+//   const url = window.URL.createObjectURL(blob);
 
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "liquidacion.pdf";
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
+//   const a = document.createElement("a");
+//   a.href = url;
+//   a.download = "liquidacion.pdf";
+//   document.body.appendChild(a);
+//   a.click();
+//   a.remove();
+// };
+
+
+
+// ✅ Nueva función para calcular liquidación: (informacion solamente en el frontend)
+export const calcularLiquidacion = async (formData) => {
+  const url = `${process.env.REACT_APP_BACKEND_URL}/forms/calcular_liquidacion`;
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(formData),
+  });
+
+  const data = await res.json();
+
+  if (!res.ok || !data.ok) {
+    throw new Error(data.error || "Error al calcular la liquidación");
+  }
+
+  return data;
 };
+
+
 
 // export const postLiquidaciones = async (form_data) => {
 //   try {

@@ -384,9 +384,9 @@ const ticketPromedio = useMemo(
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <h1 className="text-2xl font-semibold">Dashboard de Ingresos</h1>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           <Button onClick={fetchReceipts}>
             <span className="inline-flex items-center gap-2"><Icon name="refresh" /> Actualizar</span>
           </Button>
@@ -419,7 +419,7 @@ const ticketPromedio = useMemo(
       </div>
 
       {/* Controles */}
-      <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-400">Ventana:</span>
           <select
@@ -520,8 +520,8 @@ const ticketPromedio = useMemo(
           
       <Card>
         <CardContent className="p-0">
-          <div className="max-h-96 overflow-auto">
-            <table className="min-w-full text-sm table-fixed"> {/* table-fixed = no se estira */}
+          <div className="hidden md:block max-h-96 overflow-auto">
+            <table className="min-w-full text-sm table-fixed">
               <thead className="bg-gray-50 text-xs uppercase tracking-wider text-gray-500 sticky top-0 z-10">
                 <tr>
                   <th className="px-3 py-2 text-left w-36 whitespace-nowrap">Fecha pago</th>
@@ -564,6 +564,25 @@ const ticketPromedio = useMemo(
                 )}
               </tbody>
             </table>
+          </div>
+          <div className="md:hidden divide-y max-h-[28rem] overflow-auto">
+            {loading ? (
+              <div className="p-4 text-sm">Cargando…</div>
+            ) : filteredRows.length === 0 ? (
+              <div className="p-4 text-sm">Sin resultados</div>
+            ) : (
+              filteredRows.map((r) => (
+                <div key={r.uuid} className="p-4 space-y-2">
+                  <div className="text-xs text-gray-500">{fmtNiceDate(r.fecha_pago_date)}</div>
+                  <div className="text-sm font-semibold text-primary">{r.caratula}</div>
+                  <div className="text-xs text-gray-600">Recibo: {r.receipt_number}</div>
+                  <div className="text-xs text-gray-600">Expediente: {r.juicio_n || "-"}</div>
+                  <div className="text-base font-bold">{fmtMoney(r.total_depositado)}</div>
+                  <div className="text-sm text-gray-600">{r.payment_method}</div>
+                  {r.status && <div className="text-xs text-gray-400">Estado: {r.status}</div>}
+                </div>
+              ))
+            )}
           </div>
         </CardContent>
       </Card>

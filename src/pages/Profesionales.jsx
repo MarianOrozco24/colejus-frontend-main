@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import NavBar from "../components/NavBar";
+import ResponsiveNav from "../components/ResponsiveNav";
 import { FaSearch } from "react-icons/fa";
 import FilterBar from "../components/ProfesionalesFilterBar";
 import ContactCard from "../components/ContactCard";
@@ -83,8 +83,8 @@ const Profesionales = () => {
     <div className="bg-gray-100 min-h-screen">
       <header className="relative h-[75vh] bg-primary bg-cover bg-center flex flex-col justify-center items-center text-white text-center">
         <div className="absolute inset-0 opacity-60 z-0" style={{ backgroundColor: "#06092E" }} />
-        <NavBar />
-        <div className="absolute inset-0 flex flex-col justify-center items-center text-white z-10 px-4">
+        <ResponsiveNav />
+        <div className="absolute inset-0 flex flex-col justify-center items-center text-white z-10 px-4 pt-40 md:pt-0">
           <h1 className="2xl:text-7xl md:text-5xl font-normal mb-2" style={{ lineHeight: "1.5" }}>
             Conocé nuestro
           </h1>
@@ -112,7 +112,7 @@ const Profesionales = () => {
         </div>
       </header>
 
-      <section className="bg-gray-100 2xl:mx-52 md:mx-16 mt-8">
+      <section className="bg-gray-100 px-4 md:px-0 2xl:mx-52 md:mx-16 mt-8">
         <FilterBar
           selectedLetter={selectedLetter}
           selectedLocations={selectedLocations}
@@ -127,7 +127,7 @@ const Profesionales = () => {
         />
       </section>
 
-      <section className="min-h-full bg-gray-100 2xl:mx-52 md:mx-16 mt-20">
+      <section className="min-h-full bg-gray-100 px-4 md:px-0 2xl:mx-52 md:mx-16 mt-20">
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
             {error}
@@ -197,7 +197,7 @@ const Profesionales = () => {
 
       {selectedProfessional && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-10">
-          <div className="bg-white rounded-lg p-6 w-1/3 text-center">
+          <div className="bg-white rounded-lg p-6 w-11/12 sm:w-2/3 md:w-1/2 lg:w-1/3 text-center">
             <h2 className="text-xl font-bold text-primary">{selectedProfessional.name}</h2>
             <p className="text-gray-600">{selectedProfessional.title}</p>
             <p className="text-gray-500">{selectedProfessional.location}</p>
