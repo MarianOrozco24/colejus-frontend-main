@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { fetchNewsById } from "../api/news/fetchNewsById";
-import NavBar from "../components/NavBar";
+import ResponsiveNav from "../components/ResponsiveNav";
 import Footer from "../components/Footer";
 
 const VerNoticia = () => {
@@ -45,10 +45,10 @@ const VerNoticia = () => {
 
   return (
     <div className="bg-white min-h-screen">
-      <header className="relative h-[65vh] bg-primary bg-cover bg-center flex flex-col justify-center items-center text-white text-center">
+      <header className="relative min-h-[60vh] md:h-[65vh] bg-primary bg-cover bg-center flex flex-col justify-center items-center text-white text-center">
         <div className="absolute inset-0 opacity-60 z-0 bg-[#06092E]"></div>
-        <NavBar />
-        <div className="absolute inset-0 flex flex-col justify-center items-center z-10 px-4 text-white">
+        <ResponsiveNav />
+        <div className="absolute inset-0 flex flex-col justify-center items-center z-10 px-4 pt-40 md:pt-0 text-white">
           <h1 className="text-4xl font-bold mb-4">{newsItem.title}</h1>
           {newsItem.subtitle && (
             <h2 className="text-xl">{newsItem.subtitle}</h2>

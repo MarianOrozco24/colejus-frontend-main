@@ -1,7 +1,6 @@
 import React from 'react';
 import ToolCard from './ToolCard';
-import NavBar from './NavBar';
-import NavBarMobile from './NavBarMobile';
+import ResponsiveNav from './ResponsiveNav';
 
 const Header = () => {
     const toolsRow1 = [
@@ -23,15 +22,7 @@ const Header = () => {
             {/* Background overlay */}
             <div className="absolute inset-0 bg-black opacity-70 md:opacity-60 z-0"></div>
 
-            {/* Desktop Navbar */}
-            <div className="hidden md:block">
-                <NavBar /> {/* Desktop Navbar */}
-            </div>
-
-            {/* Mobile Navbar */}
-            <div className="md:hidden">
-                <NavBarMobile /> {/* Mobile Navbar */}
-            </div>
+            <ResponsiveNav />
 
             {/* Centered Content with higher z-index */}
             <div className="inset-0 flex flex-col justify-center items-center text-white text-center z-20 pt-52 px-8 md:pt-0 md:absolute">

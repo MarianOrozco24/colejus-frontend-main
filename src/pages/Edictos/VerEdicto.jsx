@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { fetchPublicEdictById } from "../../api/edicts/fetchPublicEdictById";
-import NavBar from "../../components/NavBar";
+import ResponsiveNav from "../../components/ResponsiveNav";
 import Footer from "../../components/Footer";
 
 const VerEdicto = () => {
@@ -65,14 +65,14 @@ const VerEdicto = () => {
 
   return (
     <div className="bg-white min-h-screen">
-      <header className="relative h-[65vh] bg-primary bg-cover bg-center flex flex-col justify-center items-center text-white text-center">
+      <header className="relative min-h-[60vh] md:h-[65vh] bg-primary bg-cover bg-center flex flex-col justify-center items-center text-white text-center">
         <div
           className="absolute inset-0 opacity-60 z-0"
           style={{ backgroundColor: "#06092E" }}
         ></div>
-        <NavBar />
+        <ResponsiveNav />
 
-        <div className="absolute inset-0 flex flex-col justify-center items-center text-white z-10 px-4">
+        <div className="absolute inset-0 flex flex-col justify-center items-center text-white z-10 px-4 pt-40 md:pt-0">
           <h1
             className="text-4xl font-normal mb-4 truncate overflow-hidden whitespace-nowrap text-ellipsis max-w-[90%]"
             title={edict?.title}

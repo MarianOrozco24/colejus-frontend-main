@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import NavBar from "../components/NavBar";
+import ResponsiveNav from "../components/ResponsiveNav";
 import { FaRegClock, FaSearch } from "react-icons/fa";
 import Footer from "../components/Footer";
 import { fetchAllNews } from "../api/news/fetchAllNews";
@@ -116,9 +116,9 @@ const Novedades = () => {
           style={{ backgroundColor: "#06092E" }}
         ></div>
 
-        <NavBar />
+        <ResponsiveNav />
 
-        <div className="absolute inset-0 flex flex-col justify-center items-center text-white z-10 px-4">
+        <div className="absolute inset-0 flex flex-col justify-center items-center text-white z-10 px-4 pt-40 md:pt-0">
           <h1
             className="2xl:text-7xl md:text-5xl font-normal mb-2"
             style={{ lineHeight: "1.5" }}
@@ -128,7 +128,7 @@ const Novedades = () => {
         </div>
       </header>
 
-      <section className="min-h-full bg-gray-100 2xl:mx-52 md:mx-16 mt-20">
+      <section className="min-h-full bg-gray-100 px-4 md:px-0 2xl:mx-52 md:mx-16 mt-20">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {news.length === 0 ? (
             <p>Aún no hay noticias.</p>

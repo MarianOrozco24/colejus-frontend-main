@@ -139,7 +139,7 @@ const BackOfficeEdicts = () => {
   return (
     <div className="p-6">
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
         <h1 className="text-2xl font-bold text-primary">
           Sección <span className="text-secondary">edictos</span>
         </h1>
@@ -152,26 +152,29 @@ const BackOfficeEdicts = () => {
       </div>
 
       {/* Buscador */}
-      <div className="mb-4 flex items-center space-x-2">
-        <FaSearch className="text-gray-500" />
-        <input
-          type="text"
-          placeholder="Buscar en todos los edictos por título o fecha..."
-          value={searchTerm}
-          onChange={(e) => {
-            setSearchTerm(e.target.value);
-            setCurrentPage(1);
-          }}
-          className="w-full p-2 border border-gray-300 rounded focus:outline-none"
-        />
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="flex items-center gap-2 flex-1">
+          <FaSearch className="text-gray-500" />
+          <input
+            type="text"
+            placeholder="Buscar en todos los edictos por título o fecha..."
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="w-full p-2 border border-gray-300 rounded focus:outline-none"
+          />
+        </div>
       </div>
 
       {/* Tabla */}
       {displayList.length === 0 ? (
         <p className="text-center text-gray-500">No hay edictos para mostrar.</p>
       ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="w-full text-left border-separate border-spacing-0">
+        <div className="bg-white rounded-lg shadow">
+          <div className="overflow-x-auto hidden md:block">
+          <table className="min-w-[720px] w-full text-left border-separate border-spacing-0">
             <thead>
               <tr>
                 <th className="p-4 text-sm font-medium text-gray-500 w-2/12">Fecha</th>
@@ -212,6 +215,35 @@ const BackOfficeEdicts = () => {
               })}
             </tbody>
           </table>
+          </div>
+          <div className="md:hidden divide-y">
+            {displayList.map((item) => {
+              const isPublished = new Date(item.scheduled_date) <= new Date();
+              return (
+                <div key={item.uuid} className="p-4 space-y-2">
+                  <div className="text-xs text-gray-500">{parseToArgentinaDate(item.date)}</div>
+                  <div className="text-base font-medium text-gray-800">{item.title}</div>
+                  <div className="text-sm">
+                    {isPublished ? (
+                      <span className="text-green-600 font-medium">Publicado</span>
+                    ) : (
+                      <span className="text-yellow-600 font-medium">
+                        Programado para {parseToArgentinaDate(item.scheduled_date)}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-end gap-3 text-gray-500">
+                    <button onClick={() => handleEdit(item.uuid)} className="hover:text-secondary">
+                      <FaEdit />
+                    </button>
+                    <button onClick={() => handleDeleteClick(item)} className="hover:text-red-500">
+                      <FaTrash />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 

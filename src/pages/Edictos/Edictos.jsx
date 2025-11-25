@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import NavBar from "../../components/NavBar";
+import ResponsiveNav from "../../components/ResponsiveNav";
 import Footer from "../../components/Footer";
 import { FaSearch, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import "../../styles/derechofijo.css";
@@ -161,15 +161,15 @@ const Edictos = () => {
 
   return (
     <div className="bg-gray-100 min-h-screen">
-      <header className="relative h-[75vh] bg-primary bg-cover bg-center flex flex-col justify-center items-center text-white text-center">
+      <header className="relative min-h-[60vh] md:h-[75vh] bg-primary bg-cover bg-center flex flex-col justify-center items-center text-white text-center">
         <div
           className="absolute inset-0 opacity-60 z-0"
           style={{ backgroundColor: "#06092E" }}
         ></div>
 
-        <NavBar />
+        <ResponsiveNav />
 
-        <div className="absolute inset-0 flex flex-col justify-center items-center text-white z-10 px-4">
+        <div className="absolute inset-0 flex flex-col justify-center items-center text-white z-10 px-4 pt-40 md:pt-0">
           <h1 className="2xl:text-7xl md:text-5xl font-normal mb-6">Edictos</h1>
 
           <div className="flex items-center w-full max-w-md mt-4">
@@ -193,8 +193,8 @@ const Edictos = () => {
         </div>
       </header>
 
-      <section className="bg-gray-100 py-8 2xl:mx-52 md:mx-16 rounded-lg shadow-sm">
-        <div className="flex justify-end items-center mt-4 px-4">
+      <section className="bg-gray-100 py-8 px-4 md:px-0 2xl:mx-52 md:mx-16 rounded-lg shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:justify-end items-stretch sm:items-center gap-3 mt-4">
           <EdictosFilterBar
             initialDate={initialDate}
             setInitialDate={setInitialDate}
@@ -202,14 +202,14 @@ const Edictos = () => {
             setFinalDate={setFinalDate}
           />
           <button
-            className="ml-4 bg-primary text-white px-4 py-2 rounded hover:bg-indigo-700 transition"
+            className="sm:ml-4 bg-primary text-white px-4 py-2 rounded hover:bg-indigo-700 transition"
             onClick={() => fetchEdicts(1)}
           >
             Filtrar
           </button>
 
           <button
-            className="ml-2 bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition"
+            className="sm:ml-2 bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition"
             onClick={handleClearFilters}
           >
             Limpiar
@@ -217,7 +217,7 @@ const Edictos = () => {
         </div>
       </section>
 
-      <section className="bg-gray-100 pb-10 2xl:mx-52 md:mx-16 rounded-lg shadow-sm">
+      <section className="bg-gray-100 pb-10 px-4 md:px-0 2xl:mx-52 md:mx-16 rounded-lg shadow-sm">
         {loading ? (
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>

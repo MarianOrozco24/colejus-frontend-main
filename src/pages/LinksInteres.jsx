@@ -1,6 +1,5 @@
 import React from 'react';
-import NavBar from '../components/NavBar';
-import NavBarMobile from '../components/NavBarMobile';
+import ResponsiveNav from '../components/ResponsiveNav';
 import Footer from '../components/Footer';
 import MobileFooter from '../components/MobileFooter';
 
@@ -11,8 +10,8 @@ const LinksInteres = () => {
             <div className="hidden md:block">
                 <header className="relative h-[80vh] 2xl:h-[70vh] bg-primary bg-cover bg-center flex flex-col justify-center items-center text-white text-center">
                     <div className="absolute inset-0 opacity-60 z-0" style={{ backgroundColor: '#06092E' }}></div>
-                    <NavBar />
-                    <div className="absolute inset-0 flex flex-col justify-center items-center text-white z-10 px-4">
+                    <ResponsiveNav />
+                    <div className="absolute inset-0 flex flex-col justify-center items-center text-white z-10 px-4 pt-40 md:pt-0">
                         <h1 className="text-5xl 2xl:text-7xl font-normal mb-6" style={{ lineHeight: '1.5' }}>
                             Links de Interés
                         </h1>
@@ -34,7 +33,7 @@ const LinksInteres = () => {
 
             {/* Mobile View */}
             <div className="block md:hidden bg-primary min-h-screen text-white">
-                <NavBarMobile />
+                <ResponsiveNav />
 
                 {/* Mobile Header */}
                 <div className="px-6 pt-24 pb-8">
