@@ -177,7 +177,9 @@ const NewProfessionalPage = () => {
               onChange={handleInputChange}
               placeholder=""
               className="w-full px-4 py-2 mt-1 border rounded-lg text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
-              required
+              
+              // en caso de que se requiera que la profesión sea obligatoria descomentar linea de abajo
+              // required
             />
           </div>
         )}
@@ -282,3 +284,7 @@ const NewProfessionalPage = () => {
 };
 
 export default NewProfessionalPage;
+
+
+
+// Comentario para que me tome el  commit / borrar
