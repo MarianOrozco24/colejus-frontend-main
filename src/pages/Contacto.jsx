@@ -1,17 +1,17 @@
 import React from 'react'
-import NavBar from '../components/NavBar'
+import ResponsiveNav from '../components/ResponsiveNav'
 import { FaFacebook, FaInstagram, FaRegCheckCircle, FaWhatsapp } from 'react-icons/fa';
 import { Action, Fab } from 'react-tiny-fab';
 
 const Contacto = () => {
     return (
         <div className="bg-gray-100 min-h-screen">
-            <header className="relative 2xl:h-[75vh] md:h-[85vh] bg-primary bg-cover bg-center flex flex-col justify-center items-center text-white text-center" style={{ backgroundImage: `url('/contact-page-image.jpeg')` }}>
+            <header className="relative min-h-[60vh] 2xl:h-[75vh] md:h-[85vh] bg-primary bg-cover bg-center flex flex-col justify-center items-center text-white text-center" style={{ backgroundImage: `url('/contact-page-image.jpeg')` }}>
                 <div className="absolute inset-0 opacity-65 z-0 bg-black"></div>
 
-                <NavBar />
+                <ResponsiveNav />
 
-                <div className="absolute inset-0 flex flex-col justify-center items-center text-white z-10 px-4">
+                <div className="absolute inset-0 flex flex-col justify-center items-center text-white z-10 px-4 pt-44 md:pt-0">
                     <h1 className="2xl:text-7xl md:text-5xl font-normal mb-3" style={{ lineHeight: '1.5' }}>
                         Estamos para ayudarte
                     </h1>
@@ -23,11 +23,11 @@ const Contacto = () => {
                     </p>
 
                     {/* Container for WhatsApp buttons, vertically aligned */}
-                    <div className="flex items-center justify-center mt-6">
-                        <div className="flex flex-row items-center space-x-4">
+                    <div className="flex items-center justify-center mt-6 w-full">
+                        <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
                             <a
                                 href="#whatsapp-san-rafael"
-                                className="w-80 bg-green-500 text-white px-6 py-3 rounded-full inline-flex justify-center items-center"
+                                className="w-full sm:w-80 bg-green-500 text-white px-6 py-3 rounded-full inline-flex justify-center items-center"
                             >
                                 WhatsApp San Rafael
                                 <FaWhatsapp size={24} className="ml-4" />
@@ -35,7 +35,7 @@ const Contacto = () => {
 
                             <a
                                 href="#whatsapp-alvear"
-                                className="w-80 bg-green-500 text-white px-6 py-3 rounded-full inline-flex justify-center items-center"
+                                className="w-full sm:w-80 bg-green-500 text-white px-6 py-3 rounded-full inline-flex justify-center items-center"
                             >
                                 WhatsApp Alvear
                                 <FaWhatsapp size={24} className="ml-4" />

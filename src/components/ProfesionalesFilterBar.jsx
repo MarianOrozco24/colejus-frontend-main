@@ -14,9 +14,10 @@ const FilterBar = ({ selectedLetter, setSelectedLetter, selectedLocations, setSe
     };
 
     return (
-        <div className="flex items-center justify-between space-x-4 font-lato h-16">
+        <div className="w-full font-lato space-y-4 lg:space-y-0 lg:flex lg:items-center lg:justify-between lg:space-x-4">
             {/* Alphabet Selector */}
-            <div className="flex items-center 2xl:space-x-3 md:space-x-2 font-bakersville h-full 2xl:text-2xl md:text-sm">
+            <div className="overflow-x-auto">
+                <div className="flex items-center space-x-2 lg:space-x-1 font-bakersville text-sm sm:text-base lg:text-lg h-full pb-2">
                 {letters.map((letter) => (
                     <button
                         key={letter}
@@ -29,12 +30,13 @@ const FilterBar = ({ selectedLetter, setSelectedLetter, selectedLocations, setSe
                         {letter}
                     </button>
                 ))}
+                </div>
             </div>
 
             {/* Button Group Container */}
-            <div className="flex items-center rounded-full overflow-hidden shadow-lg 2xl:h-11 md:h-9 2xl:text-base md:text-xs">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center rounded-2xl overflow-hidden shadow-lg text-xs sm:text-sm lg:text-base">
                 {/* "Filtrar por ubicación" Button */}
-                <div className="bg-white text-primary py-2 px-4 flex items-center space-x-2 rounded-l-full h-full">
+                <div className="bg-white text-primary py-3 px-4 flex items-center justify-center space-x-2 sm:rounded-l-full">
                     <FaMapMarkerAlt />
                     <span>Filtrar por ubicación</span>
                 </div>
@@ -47,8 +49,8 @@ const FilterBar = ({ selectedLetter, setSelectedLetter, selectedLocations, setSe
                 ].map((location, index) => (
                     <label
                         key={index}
-                        className={`bg-primary text-white py-2 px-4 font-medium flex items-center space-x-2 transition cursor-pointer h-full ${index === 0 ? 'rounded-r-none' : ''
-                            } ${index === 2 ? 'rounded-r-full' : ''}`}
+                        className={`bg-primary text-white py-3 px-4 font-medium flex items-center justify-between sm:justify-center space-x-2 transition cursor-pointer ${index === 0 ? 'sm:rounded-r-none' : ''
+                            } ${index === 2 ? 'sm:rounded-r-full' : ''}`}
                     >
                         <input
                             type="checkbox"

@@ -72,25 +72,27 @@ const Receipts = () => {
 
   return (
     <div className="p-6">
-      <div className="flex justify-between items-center mb-2">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-4">
         <h1 className="text-2xl font-bold text-primary">
           Historial de <span className="text-secondary">Recibos</span>
         </h1>
       </div>
 
-      {/* BUSCADOR (ahora debajo del título) */}
-      <div className="mb-6 flex items-center space-x-2">
-        <FaSearch className="text-gray-500" />
-        <input
-          type="text"
-          placeholder="Buscar por carátula o fecha..."
-          value={searchTerm}
-          onChange={e => {
-            setSearchTerm(e.target.value);
-            setCurrentPage(1);
-          }}
-          className="w-full p-2 border border-gray-300 rounded focus:outline-none"
-        />
+      {/* BUSCADOR */}
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="flex items-center gap-2 flex-1">
+          <FaSearch className="text-gray-500" />
+          <input
+            type="text"
+            placeholder="Buscar por carátula o fecha..."
+            value={searchTerm}
+            onChange={e => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="w-full p-2 border border-gray-300 rounded focus:outline-none"
+          />
+        </div>
       </div>
 
       {loading ? (
@@ -100,8 +102,9 @@ const Receipts = () => {
           No hay recibos disponibles aún
         </p>
       ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="w-full text-left border-separate border-spacing-0">
+        <div className="bg-white rounded-lg shadow">
+          <div className="overflow-x-auto hidden md:block">
+          <table className="min-w-[720px] w-full text-left border-separate border-spacing-0">
             <thead>
               <tr>
                 <th className="p-4 text-sm font-medium text-gray-500 w-3/12">
@@ -166,6 +169,35 @@ const Receipts = () => {
               ))}
             </tbody>
           </table>
+          </div>
+          <div className="md:hidden divide-y">
+            {recibosPaginados.map((recibo) => (
+              <div key={recibo.uuid} className="p-4 space-y-2">
+                <div className="text-xs text-gray-500">{recibo.fecha_pago}</div>
+                <div className="text-sm font-semibold text-primary">{recibo.caratula}</div>
+                <div className="text-sm text-gray-600">{recibo.payment_method}</div>
+                <div className="text-base font-bold text-gray-800">${recibo.total_depositado.toFixed(2)}</div>
+                <div>
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-semibold ${recibo.status === "Pagado"
+                      ? "bg-green-100 text-green-800"
+                      : "bg-yellow-100 text-yellow-800"
+                      }`}
+                  >
+                    {recibo.status}
+                  </span>
+                </div>
+                <div className="flex justify-end">
+                  <button
+                    className="text-gray-500 hover:text-primary"
+                    onClick={() => downloadPDF(recibo.uuid)}
+                  >
+                    <FaDownload size={18} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

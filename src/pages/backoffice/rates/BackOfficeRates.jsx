@@ -69,7 +69,7 @@ const BackOfficeRates = () => {
 
     return (
         <div className="p-6">
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
                 <h1 className="text-2xl font-bold text-primary">
                     Sección <span className="text-secondary">tasas</span>
                 </h1>
@@ -85,8 +85,9 @@ const BackOfficeRates = () => {
             {(!rates || rates.length === 0) ? (
                 <p className="text-center text-gray-500">Sin tasas creadas aún</p>
             ) : (
-                <div className="bg-white rounded-lg shadow overflow-hidden">
-                    <table className="w-full text-left border-separate border-spacing-0">
+                <div className="bg-white rounded-lg shadow">
+                    <div className="overflow-x-auto hidden md:block">
+                    <table className="min-w-[640px] w-full text-left border-separate border-spacing-0">
                         <thead>
                             <tr>
                                 <th className="p-4 text-sm font-medium text-gray-500 w-2/12">Tasa</th>
@@ -131,6 +132,38 @@ const BackOfficeRates = () => {
                             ))}
                         </tbody>
                     </table>
+                    </div>
+                    <div className="md:hidden divide-y">
+                        {rates.map((item, index) => (
+                            <div key={index} className="p-4 space-y-2">
+                                <div className="text-sm font-semibold text-primary">
+                                    {parseFloat(item.rate).toFixed(4)}
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                    Inicio: {formatDate(item.start_date)}
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                    Fin: {formatDate(item.end_date)}
+                                </div>
+                                <div>
+                                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${!item.end_date
+                                        ? 'bg-green-100 text-green-800'
+                                        : 'bg-gray-100 text-gray-800'
+                                        }`}>
+                                        {!item.end_date ? 'Activa' : 'Histórica'}
+                                    </span>
+                                </div>
+                                <div className="flex items-center justify-end gap-3 text-gray-500">
+                                    <button onClick={() => handleEditOpen(item.uuid)} className="hover:text-secondary">
+                                        <FaEdit />
+                                    </button>
+                                    <button onClick={() => handleDeleteClick(item)} disabled={!item.end_date} className="hover:text-red-500 disabled:opacity-50">
+                                        <FaTrash />
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             )}
         </div>
