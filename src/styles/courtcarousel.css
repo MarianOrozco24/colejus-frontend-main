@@ -1,0 +1,12 @@
+/* Make the arrows white */
+.swiper-button-prev,
+.swiper-button-next {
+  color: white !important; /* Ensures the arrows are white */
+  font-size: 2rem; /* Optional: Adjust size */
+}
+
+/* Optional: Hover effect for better UX */
+.swiper-button-prev:hover,
+.swiper-button-next:hover {
+  color: #007bff; /* Change to blue or another color on hover */
+}

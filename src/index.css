@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
+
+.nav-links {
+    font-family: 'Libre Baskerville', serif;
+  }
+
+  @media (max-width: 768px) {
+    .header {
+      height: 70vh;
+    }
+    .navbar {
+      padding: 1rem;
+    }
+    .card {
+      padding: 1.5rem;
+    }
+  }  
+
+  html {
+    font-family: 'Libre Baskerville', serif;
+  }
+
+  #root, .min-h-screen {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  
