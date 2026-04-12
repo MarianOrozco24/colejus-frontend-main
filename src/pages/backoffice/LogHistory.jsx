@@ -13,7 +13,7 @@ const LogHistory = () => {
     const fetchLogFiles = async () => {
         try {
             setLoading(true);
-            const response = await fetch('http://localhost:5000/api/dev/logs/history');
+            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/logs/history`);
             const data = await response.json();
             setLogFiles(data);
             setLoading(false);
@@ -27,7 +27,7 @@ const LogHistory = () => {
         try {
             setLoadingContent(true);
             setSelectedFile(filename);
-            const response = await fetch(`http://localhost:5000/api/dev/logs/view/${filename}`);
+            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/logs/view/${filename}`);
             const text = await response.text();
             setLogContent(text);
             setLoadingContent(false);

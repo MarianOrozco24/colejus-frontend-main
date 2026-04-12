@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaTerminal, FaMicrochip, FaMemory, FaExclamationTriangle, FaShieldAlt, FaHistory, FaUsers } from 'react-icons/fa';
+import { FaTerminal, FaMicrochip, FaMemory, FaExclamationTriangle, FaShieldAlt, FaHistory, FaUsers, FaUserTag } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
 const DevPanel = () => {
@@ -12,7 +12,7 @@ const DevPanel = () => {
     useEffect(() => {
         const fetchRecentLogs = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/dev/logs/recent');
+                const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/logs/recent`);
                 const data = await response.json();
                 setLogs(data);
             } catch (error) {
@@ -24,7 +24,7 @@ const DevPanel = () => {
 
         let eventSource;
         if (isStreaming) {
-            eventSource = new EventSource('http://localhost:5000/api/dev/logs');
+            eventSource = new EventSource(`${process.env.REACT_APP_BACKEND_URL}/dev/logs`);
             eventSource.onmessage = (event) => {
                 setLogs((prevLogs) => {
                     // Evitar duplicados si el mensaje SSE ya estaba en la carga inicial (aunque poco probable en este intervalo)
@@ -46,7 +46,7 @@ const DevPanel = () => {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/dev/stats');
+                const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/stats`);
                 const data = await response.json();
                 setStats(data);
             } catch (error) {
@@ -81,6 +81,12 @@ const DevPanel = () => {
                         className="flex items-center justify-center px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-opacity-90 transition-all font-semibold shadow-md"
                     >
                         <FaUsers className="mr-2" /> Gestionar Usuarios
+                    </button>
+                    <button
+                        onClick={() => navigate('/backoffice/profile-manager')}
+                        className="flex items-center justify-center px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-opacity-90 transition-all font-semibold shadow-md"
+                    >
+                        <FaUserTag className="mr-2" /> Gestionar Roles
                     </button>
                     <button
                         onClick={() => navigate('/backoffice/log-history')}

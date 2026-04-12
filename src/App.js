@@ -38,6 +38,7 @@ import DevPanel from "./pages/backoffice/DevPanel";
 import IPManager from "./pages/backoffice/IPManager";
 import LogHistory from "./pages/backoffice/LogHistory";
 import UserManager from "./pages/backoffice/UserManager";
+import ProfileManager from "./pages/backoffice/ProfileManager";
 
 function App() {
   return (
@@ -90,6 +91,7 @@ function App() {
           <Route path="ip-manager" element={<IPManager />} />
           <Route path="log-history" element={<LogHistory />} />
           <Route path="user-manager" element={<UserManager />} />
+          <Route path="profile-manager" element={<ProfileManager />} />
 
 
         </Route>

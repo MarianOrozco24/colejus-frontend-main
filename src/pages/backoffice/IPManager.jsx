@@ -10,7 +10,7 @@ const IPManager = () => {
 
     const fetchIps = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/dev/ips');
+            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/ips`);
             const data = await response.json();
             setIps(data);
             setLoading(false);
@@ -29,7 +29,7 @@ const IPManager = () => {
     const handleBlockAction = async (ip, isBlocked) => {
         try {
             const endpoint = isBlocked ? 'unblock' : 'block';
-            await fetch(`http://localhost:5000/api/dev/ips/${endpoint}`, {
+            await fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/ips/${endpoint}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ip })
