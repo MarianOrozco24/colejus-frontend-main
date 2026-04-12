@@ -12,12 +12,20 @@ import {
   FaUsers,
   FaBars,
   FaTimes,
+  FaTerminal,
 } from "react-icons/fa";
 
 const Layout = () => {
   const [token, setToken] = useState(localStorage.getItem("authToken"));
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const username = localStorage.getItem("username");
+  
+  const [profiles] = useState(() => {
+    const p = localStorage.getItem("profiles");
+    return p ? JSON.parse(p) : [];
+  });
+
+  const isDev = profiles.some(p => p.profile_name?.toLowerCase() === 'dev');
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -72,61 +80,60 @@ const Layout = () => {
     { to: "/backoffice/dashboard-ingresos", label: "Dashboard Ingresos", icon: FaReceipt },
     { to: "/backoffice/update-derecho-fijo", label: "Actualizar Derecho Fijo", icon: FaUsers },
     { to: "/backoffice/integrantes", label: "Nosotros", icon: FaUsers },
+    ...(isDev ? [{ to: "/backoffice/dev-panel", label: "Dev Panel", icon: FaTerminal }] : []),
   ];
 
   const SidebarContent = () => (
     <>
-          {/* Logo */}
-          <div className="my-6 text-center">
-            <img
-              src="/isologo-white.svg"
-              alt="Logo"
-              className="w-14 h-14 mx-auto object-cover"
-            />
-            <p className="mt-4 text-lg">¡Hola {username}!</p>
-          </div>
-          <nav className="w-full px-4">
-            <ul className="space-y-1">
-              {navLinks.map(({ to, label, icon: Icon }) => (
-                <li key={to}>
-                  <Link
-                    to={to}
-                    onClick={() => setIsSidebarOpen(false)}
-                    className={`flex items-center px-4 py-3 rounded-lg ${
-                      location.pathname === to
-                        ? "bg-secondary text-white"
-                        : "hover:bg-secondary hover:text-white"
-                    }`}
-                  >
-                    <Icon className="mr-2" />
-                    {label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
+      {/* Logo */}
+      <div className="my-6 text-center">
+        <img
+          src="/isologo-white.svg"
+          alt="Logo"
+          className="w-14 h-14 mx-auto object-cover"
+        />
+        <p className="mt-4 text-lg">¡Hola {username}!</p>
+      </div>
+      <nav className="w-full px-4">
+        <ul className="space-y-1">
+          {navLinks.map(({ to, label, icon: Icon }) => (
+            <li key={to}>
+              <Link
+                to={to}
+                onClick={() => setIsSidebarOpen(false)}
+                className={`flex items-center px-4 py-3 rounded-lg ${location.pathname === to
+                    ? "bg-secondary text-white"
+                    : "hover:bg-secondary hover:text-white"
+                  }`}
+              >
+                <Icon className="mr-2" />
+                {label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
 
-          <hr className="border-gray-200 w-2/3 mt-auto" />
+      <hr className="border-gray-200 w-2/3 mt-auto" />
 
-          <div className="my-6 w-full text-center px-4">
-            <button
-              className="flex items-center justify-center w-full px-4 py-3 text-white rounded-lg hover:bg-red-700"
-              onClick={handleLogout}
-            >
-              <FaSignOutAlt className="mr-2" />
-              Cerrar sesión
-            </button>
-          </div>
-        </>
+      <div className="my-6 w-full text-center px-4">
+        <button
+          className="flex items-center justify-center w-full px-4 py-3 text-white rounded-lg hover:bg-red-700"
+          onClick={handleLogout}
+        >
+          <FaSignOutAlt className="mr-2" />
+          Cerrar sesión
+        </button>
+      </div>
+    </>
   );
 
   return (
     <div className="flex min-h-screen bg-gray-100 font-lato">
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-64 transform bg-primary text-white transition-transform duration-200 ease-in-out overflow-y-auto md:relative md:translate-x-0 ${
-          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed inset-y-0 left-0 z-40 w-64 transform bg-primary text-white transition-transform duration-200 ease-in-out overflow-y-auto md:relative md:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         <SidebarContent />
       </aside>

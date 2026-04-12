@@ -34,6 +34,10 @@ import Integrantes from "./pages/backoffice/integrantes/Integrantes";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentFailure from "./pages/PaymentFailure";
 import BackofficeIngresos from "./pages/backoffice/receipts/Dashboard";
+import DevPanel from "./pages/backoffice/DevPanel";
+import IPManager from "./pages/backoffice/IPManager";
+import LogHistory from "./pages/backoffice/LogHistory";
+import UserManager from "./pages/backoffice/UserManager";
 
 function App() {
   return (
@@ -82,6 +86,10 @@ function App() {
           <Route path="update-derecho-fijo" element={<AdminDerechoFijo />} />
           <Route path="integrantes" element={<Integrantes />} />
           <Route path="dashboard-ingresos" element={<BackofficeIngresos />} />
+          <Route path="dev-panel" element={<DevPanel />} />
+          <Route path="ip-manager" element={<IPManager />} />
+          <Route path="log-history" element={<LogHistory />} />
+          <Route path="user-manager" element={<UserManager />} />
 
 
         </Route>
