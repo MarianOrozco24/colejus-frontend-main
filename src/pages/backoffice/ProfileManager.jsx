@@ -19,8 +19,8 @@ const ProfileManager = () => {
         try {
             setLoading(true);
             const [profilesRes, accessesRes] = await Promise.all([
-                fetch('http://localhost:5000/api/dev/profiles'),
-                fetch('http://localhost:5000/api/dev/accesses')
+                fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/profiles`),
+                fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/accesses`)
             ]);
             const profilesData = await profilesRes.json();
             const accessesData = await accessesRes.json();
@@ -39,7 +39,7 @@ const ProfileManager = () => {
 
     const toggleBlock = async (uuid) => {
         try {
-            const response = await fetch('http://localhost:5000/api/dev/profiles/block', {
+            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/profiles/block`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ uuid })
@@ -54,8 +54,8 @@ const ProfileManager = () => {
         e.preventDefault();
         try {
             const url = isEditing 
-                ? 'http://localhost:5000/api/dev/profiles/edit' 
-                : 'http://localhost:5000/api/dev/profiles/create';
+                ? `${process.env.REACT_APP_BACKEND_URL}/dev/profiles/edit` 
+                : `${process.env.REACT_APP_BACKEND_URL}/dev/profiles/create`;
                 
             const response = await fetch(url, {
                 method: 'POST',

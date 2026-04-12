@@ -16,8 +16,8 @@ const UserManager = () => {
         try {
             setLoading(true);
             const [usersRes, profilesRes] = await Promise.all([
-                fetch('http://localhost:5000/api/dev/users'),
-                fetch('http://localhost:5000/api/dev/profiles')
+                fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/users`),
+                fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/profiles`)
             ]);
             const usersData = await usersRes.json();
             const profilesData = await profilesRes.json();
@@ -36,7 +36,7 @@ const UserManager = () => {
 
     const toggleBlock = async (uuid) => {
         try {
-            const response = await fetch('http://localhost:5000/api/dev/users/block', {
+            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/users/block`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ uuid })
@@ -50,7 +50,7 @@ const UserManager = () => {
     const handleSubmitUser = async (e) => {
         e.preventDefault();
         try {
-            const url = isEditing ? 'http://localhost:5000/api/dev/users/edit' : 'http://localhost:5000/api/dev/users/create';
+            const url = isEditing ? `${process.env.REACT_APP_BACKEND_URL}/dev/users/edit` : `${process.env.REACT_APP_BACKEND_URL}/dev/users/create`;
             const response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

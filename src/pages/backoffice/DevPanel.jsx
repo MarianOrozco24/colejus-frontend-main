@@ -12,7 +12,7 @@ const DevPanel = () => {
     useEffect(() => {
         const fetchRecentLogs = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/dev/logs/recent');
+                const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/logs/recent`);
                 const data = await response.json();
                 setLogs(data);
             } catch (error) {
@@ -24,7 +24,7 @@ const DevPanel = () => {
 
         let eventSource;
         if (isStreaming) {
-            eventSource = new EventSource('http://localhost:5000/api/dev/logs');
+            eventSource = new EventSource(`${process.env.REACT_APP_BACKEND_URL}/dev/logs`);
             eventSource.onmessage = (event) => {
                 setLogs((prevLogs) => {
                     // Evitar duplicados si el mensaje SSE ya estaba en la carga inicial (aunque poco probable en este intervalo)
@@ -46,7 +46,7 @@ const DevPanel = () => {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/dev/stats');
+                const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/stats`);
                 const data = await response.json();
                 setStats(data);
             } catch (error) {
