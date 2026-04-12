@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaShieldAlt, FaBan, FaCheckCircle, FaSearch, FaArrowLeft, FaClock, FaCalendarAlt } from 'react-icons/fa';
+import { FaShieldAlt, FaBan, FaCheckCircle, FaSearch, FaArrowLeft, FaClock, FaCalendarAlt, FaMapMarkerAlt, FaGlobe } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
 const IPManager = () => {
@@ -46,19 +46,19 @@ const IPManager = () => {
 
     return (
         <div className="p-4 md:p-6 bg-gray-50 min-h-screen">
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-8 gap-4">
                 <div className="flex items-center">
                     <button
                         onClick={() => navigate('/backoffice/dev-panel')}
-                        className="mr-4 p-2 rounded-full hover:bg-gray-200 text-gray-600 transition-colors"
+                        className="mr-3 md:mr-4 p-2 rounded-full hover:bg-gray-200 text-gray-600 transition-colors flex-shrink-0"
                     >
                         <FaArrowLeft />
                     </button>
-                    <h1 className="text-2xl md:text-3xl font-bold text-primary flex items-center">
-                        <FaShieldAlt className="mr-3" /> Gestor de IPs
+                    <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-primary flex items-center">
+                        <FaShieldAlt className="mr-2 md:mr-3 flex-shrink-0" /> Gestor de IPs
                     </h1>
                 </div>
-                <div className="relative w-64">
+                <div className="relative w-full md:w-64 lg:w-72">
                     <input
                         type="text"
                         placeholder="Buscar IP..."
@@ -82,6 +82,16 @@ const IPManager = () => {
                                 </th>
                                 <th className="px-6 py-4">
                                     <span className="flex items-center">
+                                        <FaMapMarkerAlt className="mr-1" /> Ubicación
+                                    </span>
+                                </th>
+                                <th className="px-6 py-4">
+                                    <span className="flex items-center">
+                                        <FaGlobe className="mr-1" /> Proveedor AS
+                                    </span>
+                                </th>
+                                <th className="px-6 py-4">
+                                    <span className="flex items-center">
                                         <FaCalendarAlt className="mr-1" /> Reqs/Mes
                                     </span>
                                 </th>
@@ -92,11 +102,11 @@ const IPManager = () => {
                         <tbody className="divide-y divide-gray-200">
                             {loading ? (
                                 <tr>
-                                    <td colSpan="6" className="px-6 py-10 text-center text-gray-500 italic">Cargando datos...</td>
+                                    <td colSpan="8" className="px-6 py-10 text-center text-gray-500 italic">Cargando datos...</td>
                                 </tr>
                             ) : filteredIps.length === 0 ? (
                                 <tr>
-                                    <td colSpan="6" className="px-6 py-10 text-center text-gray-500 italic">No se encontraron registros.</td>
+                                    <td colSpan="8" className="px-6 py-10 text-center text-gray-500 italic">No se encontraron registros.</td>
                                 </tr>
                             ) : (
                                 filteredIps.map((item) => (
@@ -112,6 +122,44 @@ const IPManager = () => {
                                                 }`}>
                                                 {item.requests_minute}
                                             </span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex flex-col">
+                                                <div className="flex items-center mb-1">
+                                                    {item.pais && item.pais !== 'Desconocido' ? (
+                                                        <img 
+                                                            src={`https://flagcdn.com/w20/${item.pais.toLowerCase()}.png`} 
+                                                            alt={item.pais} 
+                                                            className="mr-2 shadow-sm rounded-sm"
+                                                            title={item.pais}
+                                                        />
+                                                    ) : (
+                                                        <FaGlobe className="mr-2 text-gray-400" />
+                                                    )}
+                                                    <span className="text-sm font-semibold text-gray-800">
+                                                        {item.pais && item.pais !== 'Desconocido' ? item.pais : 'País Desconocido'}
+                                                    </span>
+                                                </div>
+                                                <span className="text-xs text-gray-500 ml-7">
+                                                    {item.continente && item.continente !== 'Desconocido' ? `${item.continente} - ` : ''}
+                                                    {item.ciudad && item.ciudad !== 'Desconocido' ? item.ciudad : 'Ciudad Desconocida'}
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex flex-col">
+                                                <span className="text-sm text-gray-800 font-medium">
+                                                    {item.proveedor && item.proveedor !== 'Desconocido' ? item.proveedor : 'Desconocido'}
+                                                </span>
+                                                <a 
+                                                    href={item.dominio_proveedor && item.dominio_proveedor !== 'Desconocido' ? `https://${item.dominio_proveedor}` : '#'}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-xs text-blue-500 hover:underline mt-1"
+                                                >
+                                                    {item.dominio_proveedor && item.dominio_proveedor !== 'Desconocido' ? item.dominio_proveedor : ''}
+                                                </a>
+                                            </div>
                                         </td>
                                         <td className="px-6 py-4 text-sm text-gray-600">{item.requests_month}</td>
                                         <td className="px-6 py-4 text-center">

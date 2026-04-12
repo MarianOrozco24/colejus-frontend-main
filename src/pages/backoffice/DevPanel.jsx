@@ -62,34 +62,34 @@ const DevPanel = () => {
 
     return (
         <div className="p-4 md:p-6 bg-gray-50 min-h-screen">
-            <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-8 gap-4">
-                <h1 className="text-2xl md:text-3xl font-bold text-primary flex items-center">
+            <div className="flex flex-col xl:flex-row xl:items-center justify-between mb-6 md:mb-8 gap-4 lg:gap-6">
+                <h1 className="text-2xl md:text-3xl font-bold text-primary flex items-center lg:flex-shrink-0">
                     <FaTerminal className="mr-3" /> Panel de Desarrollador
                 </h1>
-                <div className="flex flex-col sm:flex-row gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-row flex-wrap gap-2 md:gap-3 w-full xl:w-auto">
                     <button
                         onClick={() => navigate('/backoffice/user-manager')}
-                        className="flex items-center justify-center px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-opacity-90 transition-all font-semibold shadow-md"
+                        className="flex items-center justify-center px-4 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-opacity-90 transition-all font-semibold shadow-md text-sm w-full lg:w-auto flex-1 whitespace-nowrap"
                     >
-                        <FaUsers className="mr-2" /> Gestionar Usuarios
+                        <FaUsers className="mr-2" /> Usuarios
                     </button>
                     <button
                         onClick={() => navigate('/backoffice/profile-manager')}
-                        className="flex items-center justify-center px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-opacity-90 transition-all font-semibold shadow-md"
+                        className="flex items-center justify-center px-4 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-opacity-90 transition-all font-semibold shadow-md text-sm w-full lg:w-auto flex-1 whitespace-nowrap"
                     >
-                        <FaUserTag className="mr-2" /> Gestionar Roles
+                        <FaUserTag className="mr-2" /> Roles
                     </button>
                     <button
                         onClick={() => navigate('/backoffice/log-history')}
-                        className="flex items-center justify-center px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-opacity-90 transition-all font-semibold shadow-md"
+                        className="flex items-center justify-center px-4 py-2.5 bg-gray-600 text-white rounded-lg hover:bg-opacity-90 transition-all font-semibold shadow-md text-sm w-full lg:w-auto flex-1 whitespace-nowrap"
                     >
-                        <FaHistory className="mr-2" /> Historial de Logs
+                        <FaHistory className="mr-2" /> Historial
                     </button>
                     <button
                         onClick={() => navigate('/backoffice/ip-manager')}
-                        className="flex items-center justify-center px-6 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-all font-semibold shadow-md"
+                        className="flex items-center justify-center px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-all font-semibold shadow-md text-sm w-full lg:w-auto flex-1 whitespace-nowrap"
                     >
-                        <FaShieldAlt className="mr-2" /> Gestionar IPs Bloqueadas
+                        <FaShieldAlt className="mr-2" /> IPs Bloqueadas
                     </button>
                 </div>
             </div>
@@ -141,7 +141,7 @@ const DevPanel = () => {
             </div>
 
             {/* Terminal Logs */}
-            <div className="bg-gray-900 rounded-xl shadow-2xl overflow-hidden flex flex-col h-[400px] md:h-[500px]">
+            <div className="bg-gray-900 rounded-xl shadow-2xl overflow-hidden flex flex-col h-[50vh] min-h-[350px] max-h-[800px] w-full">
                 <div className="bg-gray-800 px-4 py-2 flex items-center justify-between border-b border-gray-700">
                     <span className="text-gray-400 text-xs md:text-sm font-mono flex items-center">
                         <span className="w-2 h-2 md:w-3 md:h-3 bg-red-500 rounded-full mr-2"></span>
