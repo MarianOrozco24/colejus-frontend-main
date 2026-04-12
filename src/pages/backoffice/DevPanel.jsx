@@ -22,24 +22,15 @@ const DevPanel = () => {
 
         fetchRecentLogs();
 
-        let eventSource;
+        let logsInterval;
         if (isStreaming) {
-            eventSource = new EventSource(`${process.env.REACT_APP_BACKEND_URL}/dev/logs`);
-            eventSource.onmessage = (event) => {
-                setLogs((prevLogs) => {
-                    // Evitar duplicados si el mensaje SSE ya estaba en la carga inicial (aunque poco probable en este intervalo)
-                    if (prevLogs.includes(event.data)) return prevLogs;
-                    return [...prevLogs.slice(-500), event.data];
-                });
-            };
-            eventSource.onerror = (err) => {
-                console.error("EventSource failed:", err);
-                eventSource.close();
-            };
+            logsInterval = setInterval(() => {
+                fetchRecentLogs();
+            }, 2000);
         }
 
         return () => {
-            if (eventSource) eventSource.close();
+            if (logsInterval) clearInterval(logsInterval);
         };
     }, [isStreaming]);
 
