@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { useEffect } from "react";
+import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
 import "./App.css";
 import Home from "./pages/Home";
 import Profesionales from "./pages/Profesionales";
@@ -40,9 +41,20 @@ import LogHistory from "./pages/backoffice/LogHistory";
 import UserManager from "./pages/backoffice/UserManager";
 import ProfileManager from "./pages/backoffice/ProfileManager";
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
+
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/profesionales" element={<Profesionales />} />

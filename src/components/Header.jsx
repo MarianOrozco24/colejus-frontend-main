@@ -18,35 +18,36 @@ const Header = () => {
     ];
 
     return (
-        <header className="relative 2xl:h-[75vh] md:h-[85vh] h-auto bg-cover bg-center" style={{ backgroundImage: `url('/image-1.jpeg')` }}>
-            {/* Background overlay */}
-            <div className="absolute inset-0 bg-black opacity-70 md:opacity-60 z-0"></div>
+        <div className="relative bg-gray-100">
+            {/* Hero Header Section */}
+            <header className="relative bg-cover bg-center pt-44 pb-32 md:pt-56 md:pb-40 px-6 text-white text-center" style={{ backgroundImage: `url('/image-1.jpeg')` }}>
+                {/* Background overlay */}
+                <div className="absolute inset-0 bg-black/60 z-0"></div>
 
-            <ResponsiveNav />
+                {/* Navbar */}
+                <div className="absolute top-0 left-0 right-0 z-30">
+                    <ResponsiveNav />
+                </div>
 
-            {/* Centered Content with higher z-index */}
-            <div className="inset-0 flex flex-col justify-center items-center text-white text-center z-20 pt-52 px-8 md:pt-0 md:absolute">
-                <h1 className="text-3xl mb-4 md:text-5xl 2xl:text-6xl z-30" style={{ maxWidth: '800px', lineHeight: '1.2', textShadow: '0 3px 6px rgba(0,0,0,0.7)' }}>
-                    Colegio Público de
-                </h1>
-                <h1 className="text-2xl mb-4 md:text-5xl 2xl:text-6xl z-30" style={{ maxWidth: '800px', lineHeight: '1.2', textShadow: '0 3px 6px rgba(0,0,0,0.7)' }}>
-                    Abogados y Procuradores
-                </h1>
-                <p className="text-sm md:text-lg 2xl:text-xl font-bakersville z-30" style={{ fontFamily: 'Libre Baskerville, serif !important', textShadow: '0 3px 6px rgba(0,0,0,0.7)' }}>
-                    Segunda Circunscripción Judicial de Mendoza. (San Rafael - Gral. Alvear - Malargüe)
-                </p>
-            </div>
-
-            {/* ToolCard Section */}
-            <div className="w-full mt-8 md:absolute md:bottom-0 md:left-1/2 md:transform md:-translate-x-1/2 md:translate-y-1/2 z-10">
-                <div className="container mx-auto">
-                    <div className="w-11/12 md:w-4/5 mx-auto pb-5 pt-8 md:pt-36">
-                        <ToolCard title="Herramientas digitales" tools={[...toolsRow1, ...toolsRow2]} />
+                {/* Hero Content inside flex/relative flow */}
+                <div className="relative z-20 max-w-5xl mx-auto mt-6 flex flex-col items-center">
+                    <div className="bg-[#06092E]/45 backdrop-blur-[6px] py-10 px-6 md:py-12 md:px-16 rounded-3xl border border-white/10 max-w-4xl mx-auto flex flex-col items-center shadow-xl">
+                        <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif text-white tracking-tight leading-tight mb-5 z-30" style={{ textShadow: '0 4px 10px rgba(0,0,0,0.8)' }}>
+                            Colegio Público de <br className="hidden md:inline" /> Abogados y Procuradores
+                        </h1>
+                        <p className="text-sm md:text-lg font-light text-slate-200 tracking-wider max-w-2xl leading-relaxed z-30 font-lato" style={{ textShadow: '0 2px 5px rgba(0,0,0,0.5)' }}>
+                            Segunda Circunscripción Judicial de Mendoza
+                            <span className="block text-yellow-500 font-semibold mt-3 text-[11px] md:text-xs uppercase tracking-[0.25em]">San Rafael • General Alvear • Malargüe</span>
+                        </p>
                     </div>
                 </div>
-            </div>
-        </header>
+            </header>
 
+            {/* ToolCard Section positioned relatively below the Hero with an overlap */}
+            <div className="relative z-20 -mt-16 md:-mt-20 max-w-6xl mx-auto px-4 pb-12">
+                <ToolCard title="Herramientas digitales" tools={[...toolsRow1, ...toolsRow2]} />
+            </div>
+        </div>
     );
 };
 

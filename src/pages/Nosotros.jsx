@@ -25,6 +25,10 @@ const Nosotros = () => {
     eliminarIntegrante,
   } = useIntegrantes(token);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const renderIntegrantesPorCategoria = (categoria) =>
     integrantes.filter((i) => i.categoria === categoria);
 
@@ -193,44 +197,103 @@ const Nosotros = () => {
           </h2>
           <div className="w-24 h-1 bg-secondary mx-auto mb-16"></div>
 
-          {/* PRESIDENTE */}
-          <div className="bg-white/5 shadow rounded-xl py-10 px-6 max-w-xl mx-auto mb-20 border-t-4 border-secondary backdrop-blur-sm">
-            <div className="text-5xl mb-4">👨‍⚖️</div>
-            <h3 className="text-2xl font-bold text-white tracking-wide mb-1">PRESIDENTE</h3>
-            <p className="text-lg text-white/90 font-light mb-2">Dr. Gonzalo Taboas</p>
-            <p className="text-sm italic text-white/60">“Por una abogacía ética, comprometida y unida.”</p>
-          </div>
-
-          {/* TESORERO Y DIRECTORES */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
-
-            {/* Tesorero */}
-            <div className="bg-white/5 border-t-4 border-yellow-500 rounded-xl px-6 py-6 shadow-md hover:shadow-lg transition min-h-[180px] backdrop-blur-sm">
-              <div className="text-3xl mb-2">💼</div>
-              <h3 className="text-md font-bold text-white tracking-wide mb-1">TESORERO</h3>
-              <p className="text-sm text-white/90 font-light">Dr. Luis Jofré</p>
+          {/* MESA EJECUTIVA */}
+          <h3 className="text-2xl font-serif text-white/80 mb-8 tracking-wide">MESA EJECUTIVA</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left mb-16">
+            
+            {/* Presidente */}
+            <div className="bg-white/5 border-t-4 border-secondary rounded-xl px-6 py-6 shadow-md hover:shadow-lg transition min-h-[185px] flex flex-col justify-start items-start gap-2 backdrop-blur-sm">
+              <div className="text-3xl">👨‍⚖️</div>
+              <h3 className="text-md font-bold text-white tracking-wide">PRESIDENTE</h3>
+              <p className="text-sm text-white/90 font-semibold">Dr. Gustavo Delpozzi</p>
             </div>
 
-            {/* Directores */}
+            {/* Vicepresidente */}
+            <div className="bg-white/5 border-t-4 border-secondary rounded-xl px-6 py-6 shadow-md hover:shadow-lg transition min-h-[185px] flex flex-col justify-start items-start gap-2 backdrop-blur-sm">
+              <div className="text-3xl">🏛️</div>
+              <h3 className="text-md font-bold text-white tracking-wide">VICEPRESIDENTE</h3>
+              <p className="text-sm text-white/90 font-semibold">Dr. Diego Tercero</p>
+            </div>
+
+            {/* Secretaria */}
+            <div className="bg-white/5 border-t-4 border-secondary rounded-xl px-6 py-6 shadow-md hover:shadow-lg transition min-h-[185px] flex flex-col justify-start items-start gap-2 backdrop-blur-sm">
+              <div className="text-3xl">📝</div>
+              <h3 className="text-md font-bold text-white tracking-wide">SECRETARIA</h3>
+              <p className="text-sm text-white/90 font-semibold">Dra. Fátima Sat</p>
+            </div>
+
+            {/* Tesorero */}
+            <div className="bg-white/5 border-t-4 border-yellow-500 rounded-xl px-6 py-6 shadow-md hover:shadow-lg transition min-h-[185px] flex flex-col justify-start items-start gap-2 backdrop-blur-sm">
+              <div className="text-3xl">💼</div>
+              <h3 className="text-md font-bold text-white tracking-wide">TESORERO</h3>
+              <p className="text-sm text-white/90 font-semibold">Dr. Sebastián Gijón</p>
+            </div>
+
+          </div>
+
+          {/* PRO-AUTORIDADES */}
+          <h3 className="text-2xl font-serif text-white/80 mb-8 tracking-wide">PRO-AUTORIDADES</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl mx-auto text-left mb-16">
+            
+            {/* Prosecretaria */}
+            <div className="bg-white/5 border-t-4 border-secondary rounded-xl px-6 py-6 shadow-md hover:shadow-lg transition min-h-[160px] flex flex-col justify-start items-start gap-2 backdrop-blur-sm">
+              <div className="text-3xl">✍️</div>
+              <h3 className="text-md font-bold text-white tracking-wide">PROSECRETARIA</h3>
+              <p className="text-sm text-white/90 font-semibold">Dra. Liliana Baldoni</p>
+            </div>
+
+            {/* Protesorero */}
+            <div className="bg-white/5 border-t-4 border-yellow-500 rounded-xl px-6 py-6 shadow-md hover:shadow-lg transition min-h-[160px] flex flex-col justify-start items-start gap-2 backdrop-blur-sm">
+              <div className="text-3xl">💵</div>
+              <h3 className="text-md font-bold text-white tracking-wide">PROTESORERO</h3>
+              <p className="text-sm text-white/90 font-semibold">Dr. Guillermo Fliguer</p>
+            </div>
+
+          </div>
+
+          {/* DIRECTORES */}
+          <h3 className="text-2xl font-serif text-white/80 mb-8 tracking-wide">DIRECTORES / VOCALES</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left mb-16">
             {[
-              'Dr. Ricardo Hernán Albornoz',
-              'Dr. Gatica Ricardo',
-              'Dr. Silvestre Diego',
-              'Dra. Sat Fátima',
-              'Dr. Bermués Francisco Samuel',
-              'Dra. Ortiz María Agustina',
-              'Dr. Díaz Diego Adrián',
-            ].map((name, index) => (
+              { name: 'Dra. Laura Cordero', cargo: 'DIRECTORA' },
+              { name: 'Dr. Diego Silvestre', cargo: 'DIRECTOR' },
+              { name: 'Dra. Naim Yapur', cargo: 'DIRECTORA' },
+              { name: 'Samir Alí Sat', cargo: 'DIRECTOR' },
+              { name: 'Dr. Juan Antonio Parra', cargo: 'DIRECTOR' },
+              { name: 'Dra. Valentina Llorente', cargo: 'DIRECTORA' },
+              { name: 'Dr. Gonzalo E. Pagliano', cargo: 'DIRECTOR' },
+            ].map((item, index) => (
               <div
                 key={index}
-                className="bg-white/5 border-t-4 border-secondary rounded-xl px-6 py-6 shadow-md hover:shadow-lg transition min-h-[180px] flex flex-col justify-start items-start gap-2 backdrop-blur-sm"
+                className="bg-white/5 border-t-4 border-secondary rounded-xl px-6 py-6 shadow-md hover:shadow-lg transition min-h-[160px] flex flex-col justify-start items-start gap-2 backdrop-blur-sm"
               >
                 <div className="text-3xl">👥</div>
-                <h3 className="text-md font-bold text-white tracking-wide">DIRECTOR</h3>
-                <p className="text-sm text-white/90 font-light">{name}</p>
+                <h3 className="text-md font-bold text-white tracking-wide">{item.cargo}</h3>
+                <p className="text-sm text-white/90 font-light">{item.name}</p>
               </div>
             ))}
           </div>
+
+          {/* DELEGACIONES */}
+          <h3 className="text-2xl font-serif text-white/80 mb-8 tracking-wide">DELEGADOS</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl mx-auto text-left">
+            
+            {/* Delegado General Alvear */}
+            <div className="bg-white/5 border-t-4 border-secondary rounded-xl px-6 py-6 shadow-md hover:shadow-lg transition min-h-[160px] flex flex-col justify-start items-start gap-2 backdrop-blur-sm">
+              <div className="text-3xl">📍</div>
+              <h3 className="text-md font-bold text-white tracking-wide">DELEGADO GENERAL ALVEAR</h3>
+              <p className="text-sm text-white/90 font-semibold">Dr. Juan Soratto</p>
+            </div>
+
+            {/* Delegado Malargüe */}
+            <div className="bg-white/5 border-t-4 border-secondary rounded-xl px-6 py-6 shadow-md hover:shadow-lg transition min-h-[160px] flex flex-col justify-start items-start gap-2 backdrop-blur-sm">
+              <div className="text-3xl">📍</div>
+              <h3 className="text-md font-bold text-white tracking-wide">DELEGADO MALARGÜE</h3>
+              <p className="text-sm text-white/90 font-semibold">Dr. Jorge Benjamín Mayoral</p>
+            </div>
+
+          </div>
+
         </div>
       </section>
 

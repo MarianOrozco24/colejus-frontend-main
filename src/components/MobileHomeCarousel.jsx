@@ -1,83 +1,89 @@
 import React from 'react'
 
 const MobileHomeCarousel = () => {
-    // Mock data inside the component
     const slides = [
         {
-            tag: "Cursos y capacitaciones",
-            title: "Ciclo de capacitaciones prácticas para operadores del derecho",
-            text: "organiza Colegio de Abogados y Procuradores y Dr. Manuel A. Sáez.",
-            duration: "25/10/24",
+            title: "Curso de Posgrado en Derecho Procesal Civil",
+            text: "Actualización práctica integral sobre el Código Procesal Civil, Comercial y Tributario de Mendoza y sus últimas reformas.",
+            tag: "Capacitación",
+            duration: "Próximamente",
+            image: "/image-2.jpeg"
         },
         {
-            tag: "Seminarios",
-            title: "Seminario de Ética y Derecho",
-            text: "Una jornada de discusión sobre la ética en el derecho moderno.",
-            duration: "10/11/24",
+            title: "Taller de Práctica Profesional: Sistema IURIX",
+            text: "Manejo práctico del portal IURIX, firma digital avanzada, carga de escritos y notificaciones electrónicas obligatorias.",
+            tag: "Taller Práctico",
+            duration: "Sáb. 13 de Junio",
+            image: "/image-5.jpeg"
         },
         {
-            tag: "Conferencias",
-            title: "Conferencia sobre Nuevas Leyes",
-            text: "Análisis de las leyes que entraron en vigencia en 2024.",
-            duration: "15/12/24",
+            title: "Seminario de Actualización en Derecho Laboral",
+            text: "Nuevas tendencias en la jurisprudencia y criterios prácticos aplicados por las Cámaras del Trabajo de la 2da Circunscripción.",
+            tag: "Seminario",
+            duration: "Jue. 25 de Junio",
+            image: "/image-1.jpeg"
         },
         {
-            tag: "Webinars",
-            title: "Webinar sobre Transformación Digital",
-            text: "Exploración del impacto de la digitalización en el ámbito legal.",
-            duration: "05/01/25",
-        },
+            title: "Charla de Iniciación Profesional",
+            text: "Aspectos prácticos de la matriculación, Caja Forense, honorarios mínimos y primeros pasos clave en el ejercicio libre.",
+            tag: "Jóvenes Abogados",
+            duration: "Mié. 1 de Julio",
+            image: "/carousel-image.jpeg"
+        }
     ];
 
     return (
-        <section className="bg-gray-100 pt-20 2xl:pt-80 md:pt-80 mb-10">
+        <section className="bg-gradient-to-b from-[#f8fafc] to-[#f1f5f9] py-16 px-4">
             <div className="container mx-auto text-center">
                 {/* Title */}
-                <h2 className="text-3xl 2xl:text-6xl md:text-5xl font-normal text-primary">
-                    Mantenete actualizado
-                </h2>
-                <p className="text-base md:text-lg text-gray-600 mt-2" style={{ fontFamily: 'Lato' }}>
-                    Enterate de todos <span className="text-primary">nuestros cursos y capacitaciones</span>
+                <h2 className="text-3xl font-serif font-semibold text-primary tracking-tight mb-2">Formación y Capacitación</h2>
+                <p className="text-sm text-gray-600 max-w-md mx-auto mb-10 font-lato">
+                    Impulsando el desarrollo y la actualización constante de los profesionales del derecho.
                 </p>
 
                 {/* Carousel Wrapper */}
-                <div className="relative mt-20">
-                    <div className="overflow-x-auto">
-                        <div className="flex space-x-4 px-4">
+                <div className="relative mt-8">
+                    <div className="overflow-x-auto scrollbar-hide">
+                        <div className="flex space-x-5 px-2 pb-6 snap-x snap-mandatory">
                             {slides.map((slide, index) => (
-                                <div key={index} className="min-w-[300px] bg-white rounded-lg shadow-md flex flex-col justify-between">
+                                <div key={index} className="min-w-[290px] w-[290px] bg-white rounded-2xl shadow-md snap-start flex flex-col justify-between overflow-hidden border border-slate-100 min-h-[400px]">
                                     {/* Image */}
-                                    <img
-                                        src="/image-5.jpeg"
-                                        alt={slide.title}
-                                        className="w-full h-40 object-cover rounded-t-lg"
-                                    />
-
-                                    {/* Card content */}
-                                    <div className="p-4 flex-grow flex flex-col justify-between">
-                                        <div>
-                                            {/* Tag as a label */}
-                                            <span className="inline-block bg-blue-100 text-blue-500 text-xs font-semibold px-2 py-1 rounded-full mb-2">
+                                    <div className="relative h-40 overflow-hidden">
+                                        <img
+                                            src={slide.image}
+                                            alt={slide.title}
+                                            className="w-full h-full object-cover"
+                                        />
+                                        <div className="absolute top-3 left-3">
+                                            <span className="text-[10px] font-semibold bg-primary/95 text-white px-2.5 py-1 rounded-full shadow-sm">
                                                 {slide.tag}
                                             </span>
+                                        </div>
+                                    </div>
 
+                                    {/* Card content */}
+                                    <div className="p-4 flex-grow flex flex-col justify-between text-left">
+                                        <div>
                                             {/* Title */}
-                                            <h2 className="text-lg font-bold mb-2 text-left">
+                                            <h3 className="text-base font-bold text-gray-800 line-clamp-2 leading-snug mb-2">
                                                 {slide.title}
-                                            </h2>
+                                            </h3>
 
                                             {/* Text */}
-                                            <p className="text-sm text-gray-700 mb-4 text-left">
+                                            <p className="text-xs text-gray-600 font-lato line-clamp-3 leading-relaxed mb-4">
                                                 {slide.text}
                                             </p>
                                         </div>
 
                                         {/* Date and Button Row */}
-                                        <div className="flex justify-between items-center mt-auto">
-                                            <div className="text-sm text-gray-500 font-lato">{slide.duration}</div>
-                                            <button className="bg-primary text-white px-4 py-2 rounded-full text-xs">
-                                                Ver más
-                                            </button>
+                                        <div className="flex justify-between items-center mt-auto pt-3 border-t border-slate-50">
+                                            <div className="text-[10px] text-gray-500 font-semibold flex items-center gap-1">
+                                                <span>📅</span>
+                                                <span>{slide.duration}</span>
+                                            </div>
+                                            <a href="/contacto" className="bg-primary text-white px-4 py-1.5 rounded-full text-xs font-bold shadow-sm">
+                                                Inscribirse
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
@@ -87,9 +93,11 @@ const MobileHomeCarousel = () => {
                 </div>
 
                 {/* Footer Button */}
-                <a href="#blog" className="mt-8 inline-block bg-primary text-white px-6 py-3 rounded-full font-bold">
-                    Ir a blog completo
-                </a>
+                <div className="mt-6">
+                    <a href="/novedades" className="inline-block bg-primary text-white hover:bg-primary/95 px-6 py-2.5 rounded-full font-bold text-sm transition-all shadow-sm">
+                        Ver todas las novedades
+                    </a>
+                </div>
             </div>
         </section>
     );
