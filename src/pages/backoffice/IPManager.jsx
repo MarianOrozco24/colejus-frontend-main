@@ -6,7 +6,20 @@ const IPManager = () => {
     const [ips, setIps] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [blockedRegions, setBlockedRegions] = useState([]);
+    const [regionInput, setRegionInput] = useState('');
+    const [regionType, setRegionType] = useState('country');
     const navigate = useNavigate();
+
+    const fetchBlockedRegions = async () => {
+        try {
+            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/regions/blocked`);
+            const data = await response.json();
+            setBlockedRegions(data);
+        } catch (error) {
+            console.error("Error fetching blocked regions:", error);
+        }
+    };
 
     const fetchIps = async () => {
         try {
@@ -22,9 +35,39 @@ const IPManager = () => {
 
     useEffect(() => {
         fetchIps();
+        fetchBlockedRegions();
         const interval = setInterval(fetchIps, 5000);
         return () => clearInterval(interval);
     }, []);
+
+    const handleBlockRegion = async (e) => {
+        e.preventDefault();
+        if(!regionInput.trim()) return;
+        try {
+            await fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/regions/block`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ region_type: regionType, region_name: regionInput.trim().toUpperCase() })
+            });
+            setRegionInput('');
+            fetchBlockedRegions();
+        } catch (error) {
+            console.error("Error blocking region:", error);
+        }
+    };
+
+    const handleUnblockRegion = async (type, name) => {
+        try {
+            await fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/regions/unblock`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ region_type: type, region_name: name })
+            });
+            fetchBlockedRegions();
+        } catch (error) {
+            console.error("Error unblocking region:", error);
+        }
+    };
 
     const handleBlockAction = async (ip, isBlocked) => {
         try {
@@ -189,6 +232,70 @@ const IPManager = () => {
                             )}
                         </tbody>
                     </table>
+                </div>
+            </div>
+
+            <div className="mt-8 bg-white rounded-xl shadow-md p-4 md:p-6 mb-8">
+                <h3 className="text-lg md:text-xl font-bold flex items-center text-gray-800 mb-4 border-b pb-2">
+                    <FaGlobe className="mr-2 text-primary" /> Bloqueo Regional (Países / Continentes)
+                </h3>
+                <div className="flex flex-col md:flex-row gap-6">
+                    <div className="md:w-1/3">
+                        <form onSubmit={handleBlockRegion} className="flex flex-col gap-3">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Región</label>
+                                <select 
+                                    value={regionType} 
+                                    onChange={(e) => setRegionType(e.target.value)}
+                                    className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-primary outline-none"
+                                >
+                                    <option value="country">País (Ej: AR, US, BR)</option>
+                                    <option value="continent">Continente (Ej: SA, NA, EU)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Código ISO</label>
+                                <input 
+                                    type="text" 
+                                    placeholder="Ej: AR o SA" 
+                                    value={regionInput}
+                                    onChange={(e) => setRegionInput(e.target.value)}
+                                    className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-primary outline-none uppercase"
+                                />
+                                <p className="text-xs text-gray-500 mt-1">Utiliza los códigos ISO de 2 letras que ves en la tabla de IPs.</p>
+                            </div>
+                            <button 
+                                type="submit" 
+                                className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center transition-colors shadow-sm"
+                            >
+                                <FaBan className="mr-2" /> Bloquear Región
+                            </button>
+                        </form>
+                    </div>
+                    <div className="md:w-2/3">
+                        <h4 className="text-sm font-bold text-gray-700 mb-2">Regiones Bloqueadas Activas:</h4>
+                        {blockedRegions.length === 0 ? (
+                            <div className="bg-gray-50 text-gray-500 rounded-lg p-4 text-center text-sm border border-dashed">
+                                No hay ninguna región bloqueada actualmente.
+                            </div>
+                        ) : (
+                            <div className="flex flex-wrap gap-2">
+                                {blockedRegions.map((br) => (
+                                    <div key={br.id} className="bg-red-100 border border-red-200 text-red-800 px-3 py-1.5 rounded-lg flex items-center text-sm shadow-sm">
+                                        <span className="font-bold mr-2 uppercase">{br.region_type === 'country' ? 'PAÍS:' : 'CONT:'}</span>
+                                        <span className="mr-3 font-mono">{br.region_name}</span>
+                                        <button 
+                                            onClick={() => handleUnblockRegion(br.region_type, br.region_name)}
+                                            className="text-red-500 hover:text-red-700 transition-colors"
+                                            title="Desbloquear"
+                                        >
+                                            <FaCheckCircle />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
 
