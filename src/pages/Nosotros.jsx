@@ -1,100 +1,79 @@
 import React, { useEffect } from "react";
 import ResponsiveNav from "../components/ResponsiveNav";
 import Footer from "../components/Footer";
-import derecho_ambiental from "../assets/derecho-ambiental.png";
-import derecho_comercial from "../assets/derecho-comercial.png";
-import derecho_consumo from "../assets/derecho-consumo.png";
-import derecho_familia from "../assets/derecho-familia.png";
-import derecho_laboral from "../assets/derecho-laboral.png";
-import derecho_penal from "../assets/derecho-penal.png";
-import comision_cultura from "../assets/comision-cultura.png";
-import comision_genero from "../assets/comision-genero.png";
-import comision_jovenes from "../assets/comision-jovenes.png";
-import comision_senior from "../assets/comision-senior.png";
+
 const Nosotros = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-
-
-
   return (
-    <div className="bg-gray-100 min-h-screen">
-      <header className="relative min-h-[90vh] pb-28 bg-primary flex flex-col justify-start items-center text-white overflow-hidden">
-        {/* Fondo oscuro institucional fijo */}
-        <div className="absolute inset-0 bg-[#06092E] opacity-95 z-0"></div>
+    <div className="bg-slate-50 min-h-screen text-gray-800 font-lato">
+      
+      {/* 1. HERO SECTION (DARK ELEGANT) */}
+      <header className="relative min-h-[75vh] pb-24 bg-[#06092E] flex flex-col justify-start items-center text-white overflow-hidden">
+        {/* Background overlay with a subtle blue gradient */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#06092E] via-[#080c3e] to-[#040620] z-0"></div>
 
-        {/* Navbar visible y encima de todo */}
+        {/* Navbar */}
         <div className="w-full z-20">
           <ResponsiveNav />
         </div>
 
-        {/* Contenido central */}
-        <div className="flex flex-col justify-center items-center text-center z-10 px-6 flex-1 mt-16 md:mt-28">
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-serif font-semibold mb-6 tracking-tight">
+        {/* Hero Title Content */}
+        <div className="flex flex-col justify-center items-center text-center z-10 px-6 flex-1 mt-28 md:mt-40">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif font-bold mb-6 tracking-tight leading-tight max-w-4xl">
             Conocé el Colegio
           </h1>
-          <p className="text-xl md:text-2xl font-light max-w-3xl leading-relaxed">
+          <p className="text-lg md:text-xl font-light max-w-3xl leading-relaxed text-slate-300">
             Te presentamos nuestro Directorio, Tribunal de Ética, Institutos y Comisiones.
-            Compromiso, ética y formación al servicio de la profesión.
+            Compromiso, ética y formación académica al servicio del derecho.
           </p>
         </div>
 
-        {/* Sección Misión y Visión integrada al fondo azul */}
-        <section className="w-full px-6 mt-20 md:px-28">
-          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Mission and Vision Grid inside Hero (Minimal, Elegant, No Icons) */}
+        <section className="w-full px-6 mt-16 md:px-24 z-10">
+          <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+            
             {/* Misión */}
-            <div
-              className="bg-white/10 text-white rounded-2xl p-8 shadow-md border-l-4 border-secondary backdrop-blur-sm transition-transform hover:scale-[1.01]"
-              data-aos="fade-right"
-            >
-              <div className="flex items-center mb-4 gap-3">
-                <div className="text-secondary text-3xl">🎯</div>
-                <h3 className="text-xl font-semibold">Nuestra Misión</h3>
-              </div>
-              <p className="text-sm leading-relaxed">
-                Brindar el mejor servicio a nuestros colegiados y a la comunidad, gestionando con transparencia y representando al Colegio ante otras instituciones.
+            <div className="bg-white/[0.03] backdrop-blur-md rounded-2xl p-8 border border-white/10 border-l-4 border-l-secondary shadow-lg transition-all duration-300 hover:bg-white/[0.05] hover:scale-[1.005]">
+              <h3 className="text-xl font-serif font-bold text-white mb-3 tracking-wide">
+                Nuestra Misión
+              </h3>
+              <p className="text-sm leading-relaxed text-slate-300 font-light">
+                Brindar el mejor servicio a nuestros colegiados y a la comunidad, gestionando con transparencia y representando al Colegio ante otras instituciones con firmeza y decoro.
               </p>
             </div>
 
             {/* Visión */}
-            <div
-              className="bg-white/10 text-white rounded-2xl p-8 shadow-md border-l-4 border-secondary backdrop-blur-sm transition-transform hover:scale-[1.01]"
-              data-aos="fade-left"
-            >
-              <div className="flex items-center mb-4 gap-3">
-                <div className="text-secondary text-3xl">🚀</div>
-                <h3 className="text-xl font-semibold">Nuestra Visión</h3>
-              </div>
-              <p className="text-sm leading-relaxed">
-                Promover el ejercicio ético de la profesión y fomentar el desarrollo profesional de nuestros abogados, impulsando la formación y la actualización constante.
+            <div className="bg-white/[0.03] backdrop-blur-md rounded-2xl p-8 border border-white/10 border-l-4 border-l-secondary shadow-lg transition-all duration-300 hover:bg-white/[0.05] hover:scale-[1.005]">
+              <h3 className="text-xl font-serif font-bold text-white mb-3 tracking-wide">
+                Nuestra Visión
+              </h3>
+              <p className="text-sm leading-relaxed text-slate-300 font-light">
+                Promover el ejercicio ético de la profesión y fomentar el desarrollo profesional de nuestros abogados, impulsando la formación y la actualización constante en la región.
               </p>
             </div>
+
           </div>
         </section>
       </header>
 
-
-
-
-      <section className="bg-gradient-to-b from-[#f4f6fa] to-[#e9ecf3] py-20 md:py-24 px-6">
-        <div className="container mx-auto max-w-6xl">
-          {/* ICONO + TÍTULO */}
+      {/* 2. HISTORIA SECTION (LIGHT, EDITORIAL STYLE) */}
+      <section className="bg-white py-24 px-6 border-b border-slate-100">
+        <div className="container mx-auto max-w-5xl">
+          
           <div className="text-center mb-16">
-            <div className="flex justify-center mb-4">
-              <span className="text-5xl">⚖️</span>
-            </div>
-            <h2 className="text-5xl md:text-6xl font-serif text-primary mb-3">
-              Historia
+            <span className="text-xs font-bold text-secondary uppercase tracking-[0.2em] block mb-2">Trayectoria</span>
+            <h2 className="text-4xl md:text-5xl font-serif font-bold text-primary mb-4">
+              Nuestra Historia
             </h2>
-            <div className="w-24 h-1 bg-secondary mx-auto"></div>
+            <div className="w-16 h-1 bg-secondary mx-auto"></div>
           </div>
 
-          {/* TEXTO EN COLUMNA DOBLE */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 text-lg text-justify leading-relaxed text-gray-700 font-lato">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 text-[16px] md:text-[17px] text-justify leading-relaxed text-gray-600 font-lato">
             <div className="space-y-6">
-              <p>
+              <p className="first-letter:text-5xl first-letter:font-serif first-letter:font-bold first-letter:text-primary first-letter:float-left first-letter:mr-3 first-letter:mt-1">
                 Con la sanción de la Ley Provincial 1525 en el año 1942, nació en San Rafael – sede de la Segunda Circunscripción Judicial – una corriente decidida a fundar un Colegio Público de Abogados y Procuradores.
               </p>
               <p>
@@ -111,249 +90,272 @@ const Nosotros = () => {
               <p>
                 Actualmente, el Colegio continúa su crecimiento con comisiones activas, participación en federaciones profesionales y una firme defensa de los intereses de la abogacía.
               </p>
-              <p>
-                Hoy más que nunca, reafirmamos que «no basta que cada abogado sea bueno; es preciso que, juntos, todos los abogados seamos algo».
+              <p className="italic font-serif text-primary border-l-2 border-secondary pl-4 py-2 my-4">
+                «No basta que cada abogado sea bueno; es preciso que, juntos, todos los abogados seamos algo».
               </p>
             </div>
           </div>
         </div>
       </section>
 
+      {/* 3. DIRECTORIO SECTION (CORPORATE BOARD STYLE WITH HIGH CONTRAST) */}
+      <section id="directorio" className="bg-slate-100 py-24 px-6 md:px-8 border-b border-slate-200/50">
+        <div className="max-w-6xl mx-auto">
+          
+          <div className="text-center mb-16">
+            <span className="text-xs font-bold text-secondary uppercase tracking-[0.2em] block mb-2">Autoridades</span>
+            <h2 className="text-4xl md:text-5xl font-serif font-bold text-primary mb-4">
+              Directorio del Colegio
+            </h2>
+            <div className="w-16 h-1 bg-secondary mx-auto"></div>
+          </div>
 
-
-
-      <section id="directorio" className="bg-[#06092E] py-24 px-4 md:px-8 text-white">
-        <div className="max-w-6xl mx-auto text-center">
-
-          {/* TÍTULO */}
-          <h2 className="text-4xl md:text-5xl font-serif text-white mb-4">
-            Directorio del Colegio
-          </h2>
-          <div className="w-24 h-1 bg-secondary mx-auto mb-16"></div>
-
-          {/* MESA EJECUTIVA */}
-          <h3 className="text-2xl font-serif text-white/80 mb-8 tracking-wide">MESA EJECUTIVA</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left mb-16">
+          {/* HIERARCHY GRID - FEATURED LEADER CARDS */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
             
-            {/* Presidente */}
-            <div className="bg-white/5 border-t-4 border-secondary rounded-xl px-6 py-6 shadow-md hover:shadow-lg transition min-h-[185px] flex flex-col justify-start items-start gap-2 backdrop-blur-sm">
-              <div className="text-3xl">👨‍⚖️</div>
-              <h3 className="text-md font-bold text-white tracking-wide">PRESIDENTE</h3>
-              <p className="text-sm text-white/90 font-semibold">Dr. Gustavo Delpozzi</p>
+            {/* Presidente Card */}
+            <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-[0_10px_30px_rgba(18,23,74,0.04)] flex flex-col justify-between relative overflow-hidden transition-all duration-300 hover:shadow-md hover:border-slate-300">
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-secondary"></div>
+              <div>
+                <span className="text-[10px] font-bold text-secondary tracking-widest uppercase block mb-2">Presidente</span>
+                <h3 className="text-2xl font-serif font-bold text-primary">Dr. Gustavo Delpozzi</h3>
+              </div>
+              <div className="mt-6 pt-4 border-t border-slate-100 text-xs text-gray-400">
+                Directorio Ejecutivo • 2026 - 2028
+              </div>
             </div>
 
-            {/* Vicepresidente */}
-            <div className="bg-white/5 border-t-4 border-secondary rounded-xl px-6 py-6 shadow-md hover:shadow-lg transition min-h-[185px] flex flex-col justify-start items-start gap-2 backdrop-blur-sm">
-              <div className="text-3xl">🏛️</div>
-              <h3 className="text-md font-bold text-white tracking-wide">VICEPRESIDENTE</h3>
-              <p className="text-sm text-white/90 font-semibold">Dr. Diego Tercero</p>
+            {/* Vicepresidente Card */}
+            <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-[0_10px_30px_rgba(18,23,74,0.04)] flex flex-col justify-between relative overflow-hidden transition-all duration-300 hover:shadow-md hover:border-slate-300">
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-secondary"></div>
+              <div>
+                <span className="text-[10px] font-bold text-secondary tracking-widest uppercase block mb-2">Vicepresidente</span>
+                <h3 className="text-2xl font-serif font-bold text-primary">Dr. Diego Tercero</h3>
+              </div>
+              <div className="mt-6 pt-4 border-t border-slate-100 text-xs text-gray-400">
+                Directorio Ejecutivo • 2026 - 2028
+              </div>
             </div>
 
+          </div>
+
+          {/* MAIN OFFICERS ROW (4 Columns Grid) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+            
             {/* Secretaria */}
-            <div className="bg-white/5 border-t-4 border-secondary rounded-xl px-6 py-6 shadow-md hover:shadow-lg transition min-h-[185px] flex flex-col justify-start items-start gap-2 backdrop-blur-sm">
-              <div className="text-3xl">📝</div>
-              <h3 className="text-md font-bold text-white tracking-wide">SECRETARIA</h3>
-              <p className="text-sm text-white/90 font-semibold">Dra. Fátima Sat</p>
+            <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-md flex flex-col justify-between transition-all hover:shadow-lg hover:-translate-y-0.5">
+              <div>
+                <span className="text-[9px] font-bold text-secondary uppercase tracking-widest block mb-1">Secretaria</span>
+                <h4 className="text-base font-bold text-primary">Dra. Fátima Sat</h4>
+              </div>
             </div>
 
             {/* Tesorero */}
-            <div className="bg-white/5 border-t-4 border-yellow-500 rounded-xl px-6 py-6 shadow-md hover:shadow-lg transition min-h-[185px] flex flex-col justify-start items-start gap-2 backdrop-blur-sm">
-              <div className="text-3xl">💼</div>
-              <h3 className="text-md font-bold text-white tracking-wide">TESORERO</h3>
-              <p className="text-sm text-white/90 font-semibold">Dr. Sebastián Gijón</p>
+            <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-md flex flex-col justify-between transition-all hover:shadow-lg hover:-translate-y-0.5">
+              <div>
+                <span className="text-[9px] font-bold text-secondary uppercase tracking-widest block mb-1">Tesorero</span>
+                <h4 className="text-base font-bold text-primary">Dr. Sebastián Gijón</h4>
+              </div>
             </div>
 
-          </div>
-
-          {/* PRO-AUTORIDADES */}
-          <h3 className="text-2xl font-serif text-white/80 mb-8 tracking-wide">PRO-AUTORIDADES</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl mx-auto text-left mb-16">
-            
             {/* Prosecretaria */}
-            <div className="bg-white/5 border-t-4 border-secondary rounded-xl px-6 py-6 shadow-md hover:shadow-lg transition min-h-[160px] flex flex-col justify-start items-start gap-2 backdrop-blur-sm">
-              <div className="text-3xl">✍️</div>
-              <h3 className="text-md font-bold text-white tracking-wide">PROSECRETARIA</h3>
-              <p className="text-sm text-white/90 font-semibold">Dra. Liliana Baldoni</p>
+            <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-md flex flex-col justify-between transition-all hover:shadow-lg hover:-translate-y-0.5">
+              <div>
+                <span className="text-[9px] font-bold text-secondary uppercase tracking-widest block mb-1">Prosecretaria</span>
+                <h4 className="text-base font-bold text-primary">Dra. Liliana Baldoni</h4>
+              </div>
             </div>
 
             {/* Protesorero */}
-            <div className="bg-white/5 border-t-4 border-yellow-500 rounded-xl px-6 py-6 shadow-md hover:shadow-lg transition min-h-[160px] flex flex-col justify-start items-start gap-2 backdrop-blur-sm">
-              <div className="text-3xl">💵</div>
-              <h3 className="text-md font-bold text-white tracking-wide">PROTESORERO</h3>
-              <p className="text-sm text-white/90 font-semibold">Dr. Guillermo Fliguer</p>
-            </div>
-
-          </div>
-
-          {/* DIRECTORES */}
-          <h3 className="text-2xl font-serif text-white/80 mb-8 tracking-wide">DIRECTORES / VOCALES</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left mb-16">
-            {[
-              { name: 'Dra. Laura Cordero', cargo: 'DIRECTORA' },
-              { name: 'Dr. Diego Silvestre', cargo: 'DIRECTOR' },
-              { name: 'Dra. Naim Yapur', cargo: 'DIRECTORA' },
-              { name: 'Samir Alí Sat', cargo: 'DIRECTOR' },
-              { name: 'Dr. Juan Antonio Parra', cargo: 'DIRECTOR' },
-              { name: 'Dra. Valentina Llorente', cargo: 'DIRECTORA' },
-              { name: 'Dr. Gonzalo E. Pagliano', cargo: 'DIRECTOR' },
-            ].map((item, index) => (
-              <div
-                key={index}
-                className="bg-white/5 border-t-4 border-secondary rounded-xl px-6 py-6 shadow-md hover:shadow-lg transition min-h-[160px] flex flex-col justify-start items-start gap-2 backdrop-blur-sm"
-              >
-                <div className="text-3xl">👥</div>
-                <h3 className="text-md font-bold text-white tracking-wide">{item.cargo}</h3>
-                <p className="text-sm text-white/90 font-light">{item.name}</p>
+            <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-md flex flex-col justify-between transition-all hover:shadow-lg hover:-translate-y-0.5">
+              <div>
+                <span className="text-[9px] font-bold text-secondary uppercase tracking-widest block mb-1">Protesorero</span>
+                <h4 className="text-base font-bold text-primary">Dr. Guillermo Fliguer</h4>
               </div>
-            ))}
+            </div>
+
           </div>
 
-          {/* DELEGACIONES */}
-          <h3 className="text-2xl font-serif text-white/80 mb-8 tracking-wide">DELEGADOS</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl mx-auto text-left">
-            
-            {/* Delegado General Alvear */}
-            <div className="bg-white/5 border-t-4 border-secondary rounded-xl px-6 py-6 shadow-md hover:shadow-lg transition min-h-[160px] flex flex-col justify-start items-start gap-2 backdrop-blur-sm">
-              <div className="text-3xl">📍</div>
-              <h3 className="text-md font-bold text-white tracking-wide">DELEGADO GENERAL ALVEAR</h3>
-              <p className="text-sm text-white/90 font-semibold">Dr. Juan Soratto</p>
+          {/* VOCALES / DIRECTORES GRID */}
+          <div className="border-t border-slate-200 pt-16">
+            <h3 className="text-xl font-serif text-primary text-center font-bold mb-10 tracking-wide uppercase">Directores Vocales</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {[
+                { name: 'Dra. Laura Cordero', cargo: 'Directora Vocal' },
+                { name: 'Dr. Diego Silvestre', cargo: 'Director Vocal' },
+                { name: 'Dra. Naim Yapur', cargo: 'Directora Vocal' },
+                { name: 'Samir Alí Sat', cargo: 'Director Vocal' },
+                { name: 'Dr. Juan Antonio Parra', cargo: 'Director Vocal' },
+                { name: 'Dra. Valentina Llorente', cargo: 'Directora Vocal' },
+                { name: 'Dr. Gonzalo E. Pagliano', cargo: 'Director Vocal' },
+              ].map((item, index) => (
+                <div
+                  key={index}
+                  className="bg-white rounded-xl p-6 border border-slate-200 shadow-md flex flex-col justify-between transition-all hover:shadow-lg hover:-translate-y-0.5"
+                >
+                  <div>
+                    <span className="text-[9px] font-bold text-secondary uppercase tracking-widest block mb-1">{item.cargo}</span>
+                    <h4 className="text-base font-bold text-primary">{item.name}</h4>
+                  </div>
+                </div>
+              ))}
             </div>
+          </div>
 
-            {/* Delegado Malargüe */}
-            <div className="bg-white/5 border-t-4 border-secondary rounded-xl px-6 py-6 shadow-md hover:shadow-lg transition min-h-[160px] flex flex-col justify-start items-start gap-2 backdrop-blur-sm">
-              <div className="text-3xl">📍</div>
-              <h3 className="text-md font-bold text-white tracking-wide">DELEGADO MALARGÜE</h3>
-              <p className="text-sm text-white/90 font-semibold">Dr. Jorge Benjamín Mayoral</p>
+          {/* DELEGADOS */}
+          <div className="border-t border-slate-200 pt-16 mt-16">
+            <h3 className="text-xl font-serif text-primary text-center font-bold mb-10 tracking-wide uppercase">Delegados Departamentales</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
+              
+              {/* Delegado General Alvear */}
+              <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-md flex flex-col justify-between transition-all hover:shadow-lg hover:-translate-y-0.5">
+                <div>
+                  <span className="text-[9px] font-bold text-secondary uppercase tracking-widest block mb-1">Delegado Gral. Alvear</span>
+                  <h4 className="text-base font-bold text-primary">Dr. Juan Soratto</h4>
+                </div>
+              </div>
+
+              {/* Delegado Malargüe */}
+              <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-md flex flex-col justify-between transition-all hover:shadow-lg hover:-translate-y-0.5">
+                <div>
+                  <span className="text-[9px] font-bold text-secondary uppercase tracking-widest block mb-1">Delegado Malargüe</span>
+                  <h4 className="text-base font-bold text-primary">Dr. Jorge Benjamín Mayoral</h4>
+                </div>
+              </div>
+
             </div>
-
           </div>
 
         </div>
       </section>
 
-
-
-      <section className="bg-[#f4f6fa] py-24 px-6 text-gray-900">
-        <div className="container mx-auto text-center">
-
-          {/* Título principal */}
-          <h2 className="text-4xl md:text-5xl font-serif text-primary mb-4">Tribunal de Ética</h2>
-          <div className="w-24 h-1 bg-secondary mx-auto mb-16"></div>
-
-          {/* PRESIDENTE */}
-          <div className="bg-slate-100 shadow rounded-xl py-10 px-6 max-w-xl mx-auto mb-20 border-t-4 border-primary">
-            <div className="text-5xl mb-4">👨‍⚖️</div>
-            <h3 className="text-2xl font-bold text-primary tracking-wide mb-1">PRESIDENTE</h3>
-            <p className="text-lg text-gray-800 font-light">Dr. Horacio Boldrini</p>
-            <p className="text-sm italic text-gray-600 mt-2">“Ejercicio ético, defensa de la abogacía.”</p>
+      {/* 4. TRIBUNAL DE ETICA SECTION (CLEAN OFFICIAL CHARTER WITH CONTAINER AND HIGH CONTRAST) */}
+      <section className="bg-slate-100 py-24 px-6 text-gray-900 border-b border-slate-200/50">
+        <div className="container mx-auto max-w-5xl">
+          
+          <div className="text-center mb-16">
+            <span className="text-xs font-bold text-secondary uppercase tracking-[0.2em] block mb-2">Tribunal</span>
+            <h2 className="text-4xl md:text-5xl font-serif font-bold text-primary mb-4">
+              Tribunal de Ética
+            </h2>
+            <div className="w-16 h-1 bg-secondary mx-auto"></div>
           </div>
 
-          {/* TITULARES */}
-          <h3 className="text-xl md:text-2xl font-serif font-semibold text-primary mb-10">MIEMBROS TITULARES</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-16">
-            {[
-              "Dra. Guillén Alida E. N.",
-              "Dr. Llorente Ernesto",
-              "Dr. Herrera Abalos Jorge",
-              "Dr. Juri Sticca Alfredo",
-              "Dr. Angriman Juan Marcos",
-              "Dra. Masini María Pía"
-            ].map((nombre, i) => (
-              <div key={i} className="bg-white rounded-xl shadow p-6 border-t-4 border-secondary text-left">
-                <div className="text-3xl mb-2">👥</div>
-                <h4 className="text-md font-bold text-primary mb-1">MIEMBRO TITULAR</h4>
-                <p className="text-sm text-gray-800">{nombre}</p>
+          {/* PRESIDENTE FEATURED */}
+          <div className="bg-white border border-slate-200 rounded-2xl py-8 px-6 max-w-xl mx-auto mb-12 text-center shadow-[0_10px_30px_rgba(18,23,74,0.04)] border-t-4 border-t-primary">
+            <span className="text-[10px] font-bold text-slate-400 tracking-wider uppercase block mb-1">Presidente del Tribunal</span>
+            <h3 className="text-2xl font-serif font-bold text-primary mb-2">Dr. Horacio Boldrini</h3>
+            <p className="text-xs italic text-gray-500 font-lato max-w-xs mx-auto">“Ejercicio ético y responsable en la defensa y decoro de la abogacía.”</p>
+          </div>
+
+          {/* TITULARES & SUPLENTES WRAPPED IN A PREMIUM WHITE CONTAINER CARD */}
+          <div className="bg-white rounded-2xl p-8 md:p-12 border border-slate-200 shadow-[0_15px_40px_-10px_rgba(0,0,0,0.05)] max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+              
+              {/* MIEMBROS TITULARES */}
+              <div>
+                <h3 className="text-lg font-serif font-bold text-primary mb-6 pb-2 border-b border-slate-100 uppercase tracking-wider text-center md:text-left">
+                  Miembros Titulares
+                </h3>
+                <div className="space-y-4">
+                  {[
+                    "Dra. Guillén Alida E. N.",
+                    "Dr. Llorente Ernesto",
+                    "Dr. Herrera Abalos Jorge",
+                    "Dr. Juri Sticca Alfredo",
+                    "Dr. Angriman Juan Marcos",
+                    "Dra. Masini María Pía"
+                  ].map((nombre, i) => (
+                    <div key={i} className="flex justify-between items-center py-2.5 border-b border-slate-100 last:border-0">
+                      <span className="text-[15px] font-semibold text-gray-700">{nombre}</span>
+                      <span className="text-[10px] text-secondary bg-secondary/5 font-bold uppercase tracking-wider px-2 py-0.5 rounded-md">Vocal</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
+
+              {/* MIEMBROS SUPLENTES */}
+              <div>
+                <h3 className="text-lg font-serif font-bold text-primary mb-6 pb-2 border-b border-slate-100 uppercase tracking-wider text-center md:text-left">
+                  Miembros Suplentes
+                </h3>
+                <div className="space-y-4">
+                  {[
+                    "Dr. Piedecasas Juan Manuel",
+                    "Dr. Germanó Pablo",
+                    "Dr. Correa Santiago Tomas",
+                    "Dr. Fajardo Martin Luis",
+                    "Dr. Fernandez Tíndaro",
+                    "Dr. Bondino Miguel Angel",
+                    "Dr. Andres Adriel"
+                  ].map((nombre, i) => (
+                    <div key={i} className="flex justify-between items-center py-2.5 border-b border-slate-100 last:border-0">
+                      <span className="text-[15px] font-medium text-gray-600">{nombre}</span>
+                      <span className="text-[10px] text-slate-400 bg-slate-100 font-bold uppercase tracking-wider px-2 py-0.5 rounded-md">Suplente</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+            </div>
           </div>
 
-          {/* SUPLENTES */}
-          <h3 className="text-xl md:text-2xl font-serif font-semibold text-primary mb-10">MIEMBROS SUPLENTES</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {[
-              "Dr. Piedecasas Juan Manuel",
-              "Dr. Germanó Pablo",
-              "Dr. Correa Santiago Tomas",
-              "Dr. Fajardo Martin Luis",
-              "Dr. Fernandez Tíndaro",
-              "Dr. Bondino Miguel Angel",
-              "Dr. Andres Adriel"
-            ].map((nombre, i) => (
-              <div key={i} className="bg-white rounded-xl shadow p-6 border-t-4 border-primary text-left">
-                <div className="text-3xl mb-2">👥</div>
-                <h4 className="text-md font-bold text-primary mb-1">MIEMBRO SUPLENTE</h4>
-                <p className="text-sm text-gray-800">{nombre}</p>
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
-
-
+      {/* 5. COMISIONES E INSTITUTOS SECTION (DARK, MODERN MINIMALIST CARDS) */}
       <section className="bg-[#0A0F2C] py-24 px-6">
         <div className="container mx-auto text-center">
-
-          {/* Título con barra institucional */}
+          
           <div className="mb-16">
-            <h2 className="text-4xl md:text-5xl font-serif text-white mb-2">
+            <span className="text-xs font-bold text-secondary uppercase tracking-[0.2em] block mb-2">Comunidades</span>
+            <h2 className="text-4xl md:text-5xl font-serif font-bold text-white mb-4">
               Comisiones e Institutos
             </h2>
-            <div className="w-24 h-1 bg-secondary mx-auto"></div>
+            <div className="w-16 h-1 bg-secondary mx-auto"></div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             {[
-              { icon: comision_jovenes, title: "Comisión de Jóvenes", name: "Dra. Naim Yapur" },
-              { icon: comision_senior, title: "Comisión Senior", name: "Dr. Daniel Repullés" },
-              { icon: derecho_familia, title: "Instituto de Derecho de Familia", name: "Dra. Pía Masini" },
-              { icon: "🏛️", title: "Instituto de Derecho Administrativo", name: "Dr. Daniel Vignoni" },
-              { icon: comision_cultura, title: "Comisión de Deporte y Cultura", name: "Dr. Mauricio Luzuriaga" },
-              { icon: derecho_laboral, title: "Instituto de Derecho Laboral", name: "Dr. Javier Torres" },
-              { icon: derecho_comercial, title: "Instituto de Derecho Comercial", name: "Dra. Alida Guillén" },
-              { icon: derecho_ambiental, title: "Instituto de Derecho Ambiental", name: "Dr. Adriano Indiveri" },
-              { icon: derecho_penal, title: "Instituto de Derecho Penal, Procesal Penal y Criminología", name: "Dra. Mariela Herrera" },
-              { icon: derecho_consumo, title: "Instituto de Derecho de Consumo", name: "Dra. Cecilia Martínez" },
-              { icon: comision_genero, title: "Comisión de Perspectiva de Género e Igualdad", name: "Dra. Celeste Marchetti" },
-              { icon: "📜", title: "Instituto de Derecho Constitucional", name: "Dr. Enzo Orosito" },
-              { icon: "💛", title: "Comisión de Mediación, Conciliación y Arbitraje", name: "Dra. Laura Rehder" },
-              { icon: "📋", title: "Instituto de Seguridad Social", name: "Dra. Bibiana López Olivieri" },
-              { icon: "🌄", title: "Comisión de Abogados de General Alvear", name: "Dr. Raúl Gomeza" },
+              { title: "Comisión de Jóvenes", name: "Dra. Naim Yapur" },
+              { title: "Comisión Senior", name: "Dr. Daniel Repullés" },
+              { title: "Instituto de Derecho de Familia", name: "Dra. Pía Masini" },
+              { title: "Instituto de Derecho Administrativo", name: "Dr. Daniel Vignoni" },
+              { title: "Comisión de Deporte y Cultura", name: "Dr. Mauricio Luzuriaga" },
+              { title: "Instituto de Derecho Laboral", name: "Dr. Javier Torres" },
+              { title: "Instituto de Derecho Comercial", name: "Dra. Alida Guillén" },
+              { title: "Instituto de Derecho Ambiental", name: "Dr. Adriano Indiveri" },
+              { title: "Instituto de Derecho Penal, Procesal Penal y Criminología", name: "Dra. Mariela Herrera" },
+              { title: "Instituto de Derecho de Consumo", name: "Dra. Cecilia Martínez" },
+              { title: "Comisión de Perspectiva de Género e Igualdad", name: "Dra. Celeste Marchetti" },
+              { title: "Instituto de Derecho Constitucional", name: "Dr. Enzo Orosito" },
+              { title: "Comisión de Mediación, Conciliación y Arbitraje", name: "Dra. Laura Rehder" },
+              { title: "Instituto de Seguridad Social", name: "Dra. Bibiana López Olivieri" },
+              { title: "Comisión de Abogados de General Alvear", name: "Dr. Raúl Gomeza" },
             ].map((item, i) => (
               <div
                 key={i}
-                className="bg-[#151A39] rounded-xl shadow-md p-6 text-center border-t-4 border-primary hover:shadow-lg transition-shadow duration-300"
+                className="group bg-[#151A39]/60 hover:bg-[#1C234E] rounded-2xl p-6 text-center border-t-2 border-primary/20 hover:border-t-secondary hover:-translate-y-1 transition-all duration-300 shadow-sm flex flex-col justify-center min-h-[140px] border border-white/[0.02]"
               >
-                {typeof item.icon === "string" && item.icon.startsWith("data:image") ? (
-                  <img src={item.icon} alt={item.title} className="w-16 h-16 mx-auto mb-4 object-contain" />
-                ) : typeof item.icon === "string" && item.icon.length <= 4 ? (
-                  <div className="text-4xl mb-4">{item.icon}</div>
-                ) : (
-                  <img src={item.icon} alt={item.title} className="w-16 h-16 mx-auto mb-4 object-contain" />
-                )}
-
-                <h3 className="text-base md:text-lg font-bold text-white mb-2">
+                <h3 className="text-base font-bold text-white mb-2 group-hover:text-secondary transition-colors duration-300">
                   {item.title}
                 </h3>
-                <p className="text-sm text-gray-300">{item.name}</p>
+                <p className="text-xs text-slate-400 font-light font-lato">{item.name}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-
-
-
-
-
-      <section className="bg-gray-100 pt-8 pb-24">
+      {/* 6. LINKS DE INTERES SECTION (MINIMALIST) */}
+      <section className="bg-white pt-12 pb-24 border-t border-slate-100">
         <div className="container mx-auto">
-          <div className="text-center mb-10">
-            <h3 className="text-2xl font-semibold text-primary">Links de interés</h3>
+          <div className="text-center mb-12">
+            <h3 className="text-lg font-serif font-bold text-primary uppercase tracking-wider">Enlaces de Interés</h3>
+            <div className="w-10 h-0.5 bg-secondary mx-auto mt-2"></div>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-x-12 gap-y-6">
+          <div className="flex flex-wrap justify-center gap-x-10 gap-y-6 max-w-4xl mx-auto px-6">
             {[
               { label: "Poder judicial Mza", href: "#poder-judicial-mza" },
               { label: "Listas diarias", href: "#listas-diarias" },
@@ -367,18 +369,14 @@ const Nosotros = () => {
               <a
                 key={index}
                 href={link.href}
-                className="flex items-center gap-2 text-sm font-lato text-gray-600 hover:text-primary transition"
+                className="text-sm font-lato text-gray-500 hover:text-secondary font-medium transition-colors"
               >
-                <span className="text-lg">🏛️</span>
                 {link.label}
               </a>
             ))}
           </div>
         </div>
       </section>
-
-
-
 
       <Footer />
     </div>

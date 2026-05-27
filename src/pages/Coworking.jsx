@@ -205,9 +205,9 @@ const Coworking = () => {
 
     return (
         <div className="bg-gray-50 min-h-screen font-lato">
-            <header className="relative min-h-[45vh] pb-16 bg-primary flex flex-col justify-start items-center text-white overflow-hidden">
-                {/* Fondo oscuro institucional */}
-                <div className="absolute inset-0 bg-[#06092E] opacity-95 z-0"></div>
+            <header className="relative min-h-[50vh] pb-16 bg-[#06092E] flex flex-col justify-start items-center text-white text-center overflow-hidden">
+                {/* Fondo con degradado elegante a juego con el resto del sitio */}
+                <div className="absolute inset-0 bg-gradient-to-b from-[#06092E] via-[#080c3e] to-[#040620] z-0"></div>
 
                 {/* Navbar */}
                 <div className="w-full z-20">
@@ -215,15 +215,16 @@ const Coworking = () => {
                 </div>
 
                 {/* Hero Content */}
-                <div className="flex flex-col justify-center items-center text-center z-10 px-6 flex-grow mt-16 md:mt-24">
+                <div className="flex flex-col justify-center items-center text-center z-10 px-6 flex-grow mt-28 md:mt-36 w-full max-w-4xl">
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold mb-4 tracking-tight">
                         Reserva de Salas
                     </h1>
-                    <p className="text-lg md:text-xl font-light max-w-2xl leading-relaxed text-slate-300">
+                    <p className="text-slate-300 font-light max-w-2xl text-sm md:text-base font-lato leading-relaxed">
                         Espacios modernos, tecnológicos y profesionales diseñados para potenciar tus reuniones, capacitaciones y jornadas de trabajo.
                     </p>
                 </div>
             </header>
+
 
             {/* Stepper Navigation */}
             <div className="max-w-6xl mx-auto px-6 py-8">

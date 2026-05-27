@@ -20,7 +20,7 @@ const Header = () => {
     return (
         <div className="relative bg-gray-100">
             {/* Hero Header Section */}
-            <header className="relative bg-cover bg-center pt-44 pb-32 md:pt-56 md:pb-40 px-6 text-white text-center" style={{ backgroundImage: `url('/image-1.jpeg')` }}>
+            <header className="relative bg-cover bg-center pt-28 pb-20 md:pt-56 md:pb-40 px-6 text-white text-center" style={{ backgroundImage: `url('/image-1.jpeg')` }}>
                 {/* Background overlay */}
                 <div className="absolute inset-0 bg-black/60 z-0"></div>
 

@@ -5,39 +5,46 @@ import Footer from "../components/Footer";
 import { fetchAllNews } from "../api/news/fetchAllNews";
 import { useNavigate } from "react-router-dom";
 
-const NewsCard = ({ uuid, title, description, readTime, tags, subtitle }) => {
-  const navigate = useNavigate();
-
-  const handleRead = () => {
-    navigate(`/noticias/${uuid}`);
-  };
-
+const NewsCard = ({ uuid, title, subtitle, readTime, tags, image, link }) => {
   return (
-  <div className="bg-white rounded-md shadow-sm overflow-hidden hover:shadow-md transition-shadow mb-8">
-      <div className="p-4">
-        <div className="mb-3">
-          {tags.map((item, index) => (
-            <span
-              key={index}
-              className="bg-[#3B3DA8] text-white text-xs px-2 mx-1 py-0.5 rounded-full"
-            >
-              {item.name}
-            </span>
-          ))}
+    <div className="bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-md hover:-translate-y-1 transition-all duration-300 mb-8 flex flex-col justify-between h-[450px]">
+      <div>
+        <div className="relative h-44 overflow-hidden bg-slate-200">
+          <img
+            src={image}
+            alt={title}
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute top-3 left-3 max-w-[150px] truncate">
+            {tags.map((item, index) => (
+              <span
+                key={index}
+                className="bg-[#06092E] text-white text-[10px] font-semibold px-2.5 py-1 rounded-full shadow-sm uppercase"
+              >
+                {item.name}
+              </span>
+            ))}
+          </div>
         </div>
-        <h3 className="text-lg font-medium mb-2 text-gray-900">{title}</h3>
-        <p className="text-gray-500 text-sm mb-3 line-clamp-2">{subtitle}</p>
-        <div className="flex items-center justify-between">
-          <span className="text-gray-400 text-sm flex items-center gap-1">
-            <FaRegClock className="text-xs" /> {readTime}m
-          </span>
-          <button
-            onClick={handleRead}
-            className="text-[#3B3DA8] hover:text-[#2F307F] text-sm font-medium font-lato"
-          >
-            Leer
-          </button>
+        <div className="p-5">
+          <h3 className="text-sm font-bold text-gray-800 line-clamp-3 leading-snug mb-2 hover:text-primary transition-colors" title={title}>
+            {title}
+          </h3>
+          <p className="text-gray-500 text-xs font-lato line-clamp-3 leading-relaxed">{subtitle}</p>
         </div>
+      </div>
+      <div className="p-5 border-t border-slate-100 flex items-center justify-between mt-auto">
+        <span className="text-gray-400 text-[10px] font-semibold flex items-center gap-1">
+          <FaRegClock className="text-xs" /> {readTime}m
+        </span>
+        <a
+          href={link}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-xs font-bold text-secondary hover:text-primary transition-colors flex items-center gap-1"
+        >
+          Leer artículo <span>↗</span>
+        </a>
       </div>
     </div>
   );
@@ -58,22 +65,51 @@ const Novedades = () => {
     const loadNews = async () => {
       setLoading(true);
       try {
-        const response = await fetchAllNews();
-        if (response.status === 200) {
-          const fetchedNews = response.data.news;
-          setAllNews(fetchedNews);
+        // Obtenemos el feed jurídico real-time de Microjuris
+        const rssUrl = "https://aldia.microjuris.com/feed/";
+        const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+        const data = await response.json();
+        
+        if (data.status === "ok" && data.items) {
+          const formattedNews = data.items.map((item, index) => {
+            // Limpiar etiquetas de HTML
+            const cleanDesc = item.description 
+              ? item.description.replace(/<[^>]*>?/gm, '').trim() 
+              : '';
 
-          const total = Math.ceil(fetchedNews.length / ITEMS_PER_PAGE);
+            // Obtener categoría del feed
+            const cat = item.categories && item.categories.length > 0
+              ? item.categories[0].charAt(0).toUpperCase() + item.categories[0].slice(1)
+              : "Doctrina";
+
+            // Fallbacks de imágenes premium
+            const fallbacks = ["/image-1.jpeg", "/image-2.jpeg", "/image-5.jpeg", "/carousel-image.jpeg"];
+            const img = item.thumbnail || item.enclosure?.link || fallbacks[index % fallbacks.length];
+
+            return {
+              uuid: item.guid || index,
+              title: item.title,
+              subtitle: cleanDesc,
+              reading_duration: 3, // Tiempo estándar estimado
+              tags: [{ name: cat }],
+              image: img,
+              link: item.link
+            };
+          });
+
+          setAllNews(formattedNews);
+
+          const total = Math.ceil(formattedNews.length / ITEMS_PER_PAGE);
           setTotalPages(total);
 
           const start = 0;
           const end = ITEMS_PER_PAGE;
-          setNews(fetchedNews.slice(start, end));
+          setNews(formattedNews.slice(start, end));
         } else {
-          setError(response.data.message);
+          setError("No se pudo obtener el canal de novedades.");
         }
       } catch (err) {
-        setError("Error al cargar las noticias");
+        setError("Error al cargar las noticias del ámbito jurídico.");
       } finally {
         setLoading(false);
       }
@@ -110,21 +146,26 @@ const Novedades = () => {
 
   return (
     <div className="bg-gray-100 min-h-screen">
-      <header className="relative h-[65vh] bg-primary bg-cover bg-center flex flex-col justify-center items-center text-white text-center">
-        <div
-          className="absolute inset-0 opacity-60 z-0"
-          style={{ backgroundColor: "#06092E" }}
-        ></div>
+      <header className="relative min-h-[50vh] pb-16 bg-[#06092E] flex flex-col justify-start items-center text-white text-center overflow-hidden">
+        {/* Fondo con degradado elegante a juego con Nosotros */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#06092E] via-[#080c3e] to-[#040620] z-0"></div>
 
-        <ResponsiveNav />
+        {/* Navbar */}
+        <div className="w-full z-20">
+          <ResponsiveNav />
+        </div>
 
-        <div className="absolute inset-0 flex flex-col justify-center items-center text-white z-10 px-4 pt-40 md:pt-0">
+        {/* Contenido principal del título */}
+        <div className="flex flex-col justify-center items-center text-center z-10 px-6 flex-1 mt-28 md:mt-36">
           <h1
-            className="2xl:text-7xl md:text-5xl font-normal mb-2"
-            style={{ lineHeight: "1.5" }}
+            className="text-4xl md:text-6xl font-serif font-bold mb-4 tracking-tight"
+            style={{ lineHeight: "1.2" }}
           >
             Mantenete actualizado
           </h1>
+          <p className="text-slate-300 font-light max-w-2xl text-sm md:text-base font-lato leading-relaxed">
+            Enterate de los últimos fallos jurisprudenciales, novedades normativas y doctrina legal de interés profesional en tiempo real.
+          </p>
         </div>
       </header>
 
@@ -138,14 +179,16 @@ const Novedades = () => {
                 key={index}
                 uuid={item.uuid}
                 title={item.title}
-                description={item.description}
+                subtitle={item.subtitle}
                 readTime={item.reading_duration}
                 tags={item.tags}
-                subtitle={item.subtitle}
+                image={item.image}
+                link={item.link}
               />
             ))
           )}
         </div>
+
 
         {/* Paginación */}
         {news.length > 0 && totalPages > 1 && (
