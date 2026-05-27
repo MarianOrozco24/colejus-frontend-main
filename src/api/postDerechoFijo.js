@@ -122,7 +122,7 @@ export const postDerechoFijoPresencial = async (form_data) => {
     // Formatos típicos: attachment; filename="boleta_123.pdf"
     const dispo = response.headers.get("Content-Disposition") || "";
     let filename = "boleta.pdf";
-    const match = dispo.match(/filename\*?=(?:UTF-8''|")?([^\";]+)/i);
+    const match = dispo.match(/filename\*?=(?:UTF-8''|")?([^";]+)/i);
     if (match && match[1]) {
       // Decodificamos por si viene URL-encoded
       try {

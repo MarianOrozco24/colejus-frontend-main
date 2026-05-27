@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import ResponsiveNav from "../components/ResponsiveNav";
-import { FaRegClock, FaSearch } from "react-icons/fa";
+import { FaRegClock } from "react-icons/fa";
 import Footer from "../components/Footer";
 import { fetchAllNews } from "../api/news/fetchAllNews";
 import { useNavigate } from "react-router-dom";
@@ -66,8 +66,8 @@ const Novedades = () => {
           const total = Math.ceil(fetchedNews.length / ITEMS_PER_PAGE);
           setTotalPages(total);
 
-          const start = (currentPage - 1) * ITEMS_PER_PAGE;
-          const end = start + ITEMS_PER_PAGE;
+          const start = 0;
+          const end = ITEMS_PER_PAGE;
           setNews(fetchedNews.slice(start, end));
         } else {
           setError(response.data.message);

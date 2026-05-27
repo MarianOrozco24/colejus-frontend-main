@@ -90,6 +90,9 @@ const NavBarMobile = () => {
                   <Link to="/links-de-interes" className="text-base">
                     Links de interés
                   </Link>
+                  <Link to="/coworking" className="text-base">
+                    Reserva de Salas
+                  </Link>
                 </div>
               )}
             </div>
@@ -102,6 +105,9 @@ const NavBarMobile = () => {
             </Link>
             <Link to="/profesionales" className="text-lg font-semibold">
               Profesionales
+            </Link>
+            <Link to="/coworking" className="text-lg font-semibold">
+              Coworking
             </Link>
             <Link to="/contacto" className="text-lg font-semibold">
               Contacto

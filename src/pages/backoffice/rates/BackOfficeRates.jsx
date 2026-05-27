@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
+import { FaPlus, FaEdit } from "react-icons/fa";
 import { fetchAllRates } from "../../../api/rates/fetchAllRates";
 
 const BackOfficeRates = () => {
@@ -8,8 +8,6 @@ const BackOfficeRates = () => {
     const [rates, setRates] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedRate, setSelectedRate] = useState(null);
 
     const fetchRates = async () => {
         const token = localStorage.getItem("authToken");
@@ -45,10 +43,7 @@ const BackOfficeRates = () => {
         navigate(`/backoffice/editar-tasa/${rateUuid}`);
     };
 
-    const handleDeleteClick = (rateItem) => {
-        setSelectedRate(rateItem);
-        setIsModalOpen(true);
-    };
+
 
     const formatDate = (dateString) => {
         if (!dateString) return 'Actualmente';
@@ -121,12 +116,6 @@ const BackOfficeRates = () => {
                                         <button className="text-gray-500 hover:text-secondary">
                                             <FaEdit size={20} onClick={() => handleEditOpen(item.uuid)} />
                                         </button>
-                                        <button
-                                            className="text-gray-500 hover:text-red-500"
-                                            disabled={!item.end_date}
-                                        >
-                                            <FaTrash size={20} onClick={() => handleDeleteClick(item)} />
-                                        </button>
                                     </td>
                                 </tr>
                             ))}
@@ -156,9 +145,6 @@ const BackOfficeRates = () => {
                                 <div className="flex items-center justify-end gap-3 text-gray-500">
                                     <button onClick={() => handleEditOpen(item.uuid)} className="hover:text-secondary">
                                         <FaEdit />
-                                    </button>
-                                    <button onClick={() => handleDeleteClick(item)} disabled={!item.end_date} className="hover:text-red-500 disabled:opacity-50">
-                                        <FaTrash />
                                     </button>
                                 </div>
                             </div>

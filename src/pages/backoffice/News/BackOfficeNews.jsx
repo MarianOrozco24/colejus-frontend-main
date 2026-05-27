@@ -23,7 +23,6 @@ const BackOfficeNews = () => {
     const [selectedNews, setSelectedNews] = useState(null);
 
     const fetchNews = async (page) => {
-        const token = localStorage.getItem("authToken");
         setLoading(true);
 
         try {

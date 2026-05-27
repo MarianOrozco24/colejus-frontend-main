@@ -1,5 +1,5 @@
 import React from 'react'
-import { FaFacebook, FaFacebookF, FaInstagram, FaWhatsapp } from 'react-icons/fa';
+import { FaFacebook, FaInstagram, FaWhatsapp } from 'react-icons/fa';
 import { Action, Fab } from 'react-tiny-fab';
 
 const MobileFooter = () => {

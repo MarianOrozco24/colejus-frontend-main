@@ -10,6 +10,7 @@ import Edictos from "./pages/Edictos/Edictos";
 import LinksInteres from "./pages/LinksInteres";
 import Nosotros from "./pages/Nosotros";
 import Login from "./pages/Login";
+import Coworking from "./pages/Coworking";
 import Layout from "./pages/backoffice/Layout";
 import BackOfficeNews from "./pages/backoffice/News/BackOfficeNews";
 import NewNewsPage from "./pages/backoffice/News/NewNewsPage";
@@ -69,6 +70,7 @@ function App() {
         <Route path="/noticias/:uuid" element={<VerNoticia />} />
         <Route path="/payment/success" element={<PaymentSuccess />} />
         <Route path="/payment/failure" element={<PaymentFailure />} />
+        <Route path="/coworking" element={<Coworking />} />
 
 
         <Route path="/login" element={<Login />} />

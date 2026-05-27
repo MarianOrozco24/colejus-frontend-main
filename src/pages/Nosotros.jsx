@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import ResponsiveNav from "../components/ResponsiveNav";
 import Footer from "../components/Footer";
-import CourtCarousel from "../components/CourtCarousel";
 import derecho_ambiental from "../assets/derecho-ambiental.png";
 import derecho_comercial from "../assets/derecho-comercial.png";
 import derecho_consumo from "../assets/derecho-consumo.png";
@@ -12,77 +11,12 @@ import comision_cultura from "../assets/comision-cultura.png";
 import comision_genero from "../assets/comision-genero.png";
 import comision_jovenes from "../assets/comision-jovenes.png";
 import comision_senior from "../assets/comision-senior.png";
-import { useIntegrantes } from "../api/integrantes/integrantes";
-
 const Nosotros = () => {
-  const token = localStorage.getItem("authToken");
-
-  const {
-    integrantes,
-    loading,
-    fetchIntegrantes,
-    agregarIntegrante,
-    eliminarIntegrante,
-  } = useIntegrantes(token);
-
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  const renderIntegrantesPorCategoria = (categoria) =>
-    integrantes.filter((i) => i.categoria === categoria);
 
-  const baseInfo = {
-    name: "Dra. Rocío Rodríguez",
-    position: "Vocal suplente",
-    tuition: "25195",
-  };
-
-  const agruparPorCargo = (integrantes) => {
-    const agrupados = {};
-    integrantes.forEach((i) => {
-      if (!agrupados[i.cargo]) {
-        agrupados[i.cargo] = [];
-      }
-      agrupados[i.cargo].push(i);
-    });
-    return agrupados;
-  };
-
-  const generateArray = (baseObject, count) => {
-    return Array.from({ length: count }, () => ({ ...baseObject }));
-  };
-
-  const partners = generateArray(baseInfo, 12);
-  const court = generateArray(baseInfo, 12);
-
-  const commissions = [
-    {
-      src: comision_cultura,
-      alt: "Cultura y deporte",
-      title: "Cultura y deporte",
-    },
-    {
-      src: derecho_familia,
-      alt: "Derecho familiar",
-      title: "Derecho familiar",
-    },
-    {
-      src: comision_genero,
-      alt: "Genero",
-      title: "Género",
-    },
-    {
-      src: comision_jovenes,
-      alt: "Jóvenes abogados",
-      title: "Jóvenes abogados",
-    },
-    {
-      src: comision_senior,
-      alt: "Senior",
-      title: "Senior",
-    },
-  ];
 
 
   return (

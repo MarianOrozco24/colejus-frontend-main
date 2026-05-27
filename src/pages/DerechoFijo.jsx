@@ -632,7 +632,7 @@ const DerechoFijo = () => {
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-10 z-50">
           <div className="bg-white p-6 rounded shadow-lg w-80 text-center">
             {modalMessage}
-            <button onClick={() => setModalVisible(false)} className="mt-4 bg-indigo-500 text-white px-4 py-2 rounded font-lato">
+            <button onClick={handleCloseModal} className="mt-4 bg-indigo-500 text-white px-4 py-2 rounded font-lato">
               Cerrar
             </button>
           </div>
