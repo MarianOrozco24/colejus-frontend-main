@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useIntegrantes } from "../../../api/integrantes/integrantes";
 import DeleteIntegrantes from "./DeleteIntegrantes";
+import { hasPermission } from "../../../utils/hasPermission";
 
 const categoriasDisponibles = [
   "Integrantes",
@@ -9,6 +10,7 @@ const categoriasDisponibles = [
 ];
 
 const Integrantes = () => {
+  const canManage = hasPermission("manage_integrantes");
   const token = localStorage.getItem("authToken");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [integranteAEliminar, setIntegranteAEliminar] = useState(null);
@@ -51,12 +53,14 @@ const Integrantes = () => {
             <strong>{i.nombre}</strong> — {i.cargo}{" "}
             {i.telefono && `| Tel. ${i.telefono}`}
           </span>
-          <button
-            onClick={() => confirmarEliminacion(i)}
-            className="text-red-600 hover:text-red-800"
-          >
-            Eliminar
-          </button>
+          {canManage && (
+            <button
+              onClick={() => confirmarEliminacion(i)}
+              className="text-red-600 hover:text-red-800"
+            >
+              Eliminar
+            </button>
+          )}
         </li>
       ));
   };
@@ -84,56 +88,58 @@ const Integrantes = () => {
         Administrar Integrantes
       </h2>
 
-      <form
-        onSubmit={handleSubmit}
-        className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8"
-      >
-        <input
-          type="text"
-          name="nombre"
-          placeholder="Nombre"
-          value={formData.nombre}
-          onChange={handleChange}
-          className="border p-2 rounded"
-          required
-        />
-        <input
-          type="text"
-          name="telefono"
-          placeholder="Teléfono"
-          value={formData.telefono}
-          onChange={handleChange}
-          className="border p-2 rounded"
-        />
-        <input
-          type="text"
-          name="cargo"
-          placeholder="Cargo"
-          value={formData.cargo}
-          onChange={handleChange}
-          className="border p-2 rounded"
-          required
-        />
-        <select
-          name="categoria"
-          value={formData.categoria}
-          onChange={handleChange}
-          className="border p-2 rounded"
+      {canManage && (
+        <form
+          onSubmit={handleSubmit}
+          className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8"
         >
-          {categoriasDisponibles.map((cat) => (
-            <option key={cat} value={cat}>
-              {cat}
-            </option>
-          ))}
-        </select>
+          <input
+            type="text"
+            name="nombre"
+            placeholder="Nombre"
+            value={formData.nombre}
+            onChange={handleChange}
+            className="border p-2 rounded"
+            required
+          />
+          <input
+            type="text"
+            name="telefono"
+            placeholder="Teléfono"
+            value={formData.telefono}
+            onChange={handleChange}
+            className="border p-2 rounded"
+          />
+          <input
+            type="text"
+            name="cargo"
+            placeholder="Cargo"
+            value={formData.cargo}
+            onChange={handleChange}
+            className="border p-2 rounded"
+            required
+          />
+          <select
+            name="categoria"
+            value={formData.categoria}
+            onChange={handleChange}
+            className="border p-2 rounded"
+          >
+            {categoriasDisponibles.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
 
-        <button
-          type="submit"
-          className="bg-secondary text-white px-4 py-2 rounded col-span-2"
-        >
-          Agregar Integrante
-        </button>
-      </form>
+          <button
+            type="submit"
+            className="bg-secondary text-white px-4 py-2 rounded col-span-2"
+          >
+            Agregar Integrante
+          </button>
+        </form>
+      )}
 
       {loading ? (
         <p>Cargando integrantes...</p>

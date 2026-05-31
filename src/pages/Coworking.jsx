@@ -1,56 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import ResponsiveNav from '../components/ResponsiveNav';
 import Footer from '../components/Footer';
-import { 
-    FaUsers, FaWifi, FaTv, FaCalendarAlt, FaClock, FaArrowLeft, 
-    FaCheckCircle, FaUser, FaEnvelope, FaPhone, FaIdCard, 
-    FaPrint, FaChevronRight, FaVolumeUp, FaVideo, FaInfoCircle
+import {
+    FaUsers, FaWifi, FaTv, FaCalendarAlt, FaClock, FaArrowLeft,
+    FaCheckCircle, FaUser, FaEnvelope, FaPhone, FaIdCard,
+    FaPrint, FaChevronRight, FaVolumeUp, FaVideo, FaInfoCircle,
+    FaSpinner
 } from 'react-icons/fa';
 
-const roomsData = [
-    {
-        id: 'executive_meeting',
-        name: 'Sala de Reuniones Ejecutiva',
-        capacity: '10 personas',
-        price: 1500,
-        image: '/meeting_room_exec.png',
-        description: 'Ideal para reuniones de directorio, negociaciones, conciliaciones o presentaciones corporativas. Ambiente climatizado y privado.',
-        amenities: [
-            { icon: <FaUsers className="mr-2" />, text: 'Mesa de directorio para 10 pers.' },
-            { icon: <FaTv className="mr-2" />, text: 'Pantalla Smart TV 55"' },
-            { icon: <FaWifi className="mr-2" />, text: 'Wi-Fi Simétrico de Alta Velocidad' },
-            { icon: <FaVideo className="mr-2" />, text: 'Cámara para Videoconferencias' }
-        ]
-    },
-    {
-        id: 'sum_auditorium',
-        name: 'SUM / Auditorio Multiuso',
-        capacity: '30 personas',
-        price: 3000,
-        image: '/auditorium_sum.png',
-        description: 'Perfecto para capacitaciones, charlas informativas, asambleas o talleres grupales. Mobiliario modular configurable.',
-        amenities: [
-            { icon: <FaUsers className="mr-2" />, text: 'Capacidad de hasta 30 personas' },
-            { icon: <FaTv className="mr-2" />, text: 'Proyector HD & Pantalla Gigante' },
-            { icon: <FaVolumeUp className="mr-2" />, text: 'Sistema de Audio & Micrófonos' },
-            { icon: <FaWifi className="mr-2" />, text: 'Wi-Fi de Alta Velocidad' }
-        ]
-    },
-    {
-        id: 'individual_box',
-        name: 'Box de Enfoque Individual',
-        capacity: '1 persona',
-        price: 500,
-        image: '/individual_box.png',
-        description: 'Espacio optimizado para el trabajo individual concentrado, videollamadas privadas o estudio. Aislado acústicamente.',
-        amenities: [
-            { icon: <FaUser className="mr-2" />, text: 'Escritorio Individual Amplio' },
-            { icon: <FaWifi className="mr-2" />, text: 'Wi-Fi de Alta Velocidad' },
-            { icon: <FaInfoCircle className="mr-2" />, text: 'Ergonomía & Tomas de Carga Directa' },
-            { icon: <FaInfoCircle className="mr-2" />, text: 'Panel de Absorción Acústica' }
-        ]
-    }
-];
+// Map amenity text keywords to icons
+const getAmenityIcon = (text) => {
+    const lower = text.toLowerCase();
+    if (lower.includes('wi-fi') || lower.includes('wifi')) return <FaWifi className="mr-2" />;
+    if (lower.includes('tv') || lower.includes('pantalla') || lower.includes('proyector')) return <FaTv className="mr-2" />;
+    if (lower.includes('audio') || lower.includes('micrófono') || lower.includes('microfono')) return <FaVolumeUp className="mr-2" />;
+    if (lower.includes('video') || lower.includes('cámara') || lower.includes('camara')) return <FaVideo className="mr-2" />;
+    if (lower.includes('capacidad') || lower.includes('personas') || lower.includes('directorio')) return <FaUsers className="mr-2" />;
+    if (lower.includes('escritorio') || lower.includes('individual')) return <FaUser className="mr-2" />;
+    return <FaInfoCircle className="mr-2" />;
+};
 
 // Horarios desde las 8:00 hasta las 20:00
 const timeSlots = Array.from({ length: 12 }, (_, i) => {
@@ -66,7 +34,11 @@ const Coworking = () => {
     const [selectedDate, setSelectedDate] = useState('');
     const [selectedSlots, setSelectedSlots] = useState([]);
     const [bookedSlots, setBookedSlots] = useState([]);
-    
+
+    // Dynamic rooms from API
+    const [roomsData, setRoomsData] = useState([]);
+    const [roomsLoading, setRoomsLoading] = useState(true);
+
     // API loading / error states
     const [apiLoading, setApiLoading] = useState(false);
     const [error, setError] = useState('');
@@ -85,7 +57,7 @@ const Coworking = () => {
 
     useEffect(() => {
         window.scrollTo(0, 0);
-        
+
         // Inicializar fecha con el día de mañana por defecto
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
@@ -93,6 +65,28 @@ const Coworking = () => {
         const mm = String(tomorrow.getMonth() + 1).padStart(2, '0');
         const dd = String(tomorrow.getDate()).padStart(2, '0');
         setSelectedDate(`${yyyy}-${mm}-${dd}`);
+    }, []);
+
+    // Fetch rooms from API
+    useEffect(() => {
+        const fetchRooms = async () => {
+            setRoomsLoading(true);
+            try {
+                const res = await fetch(`${BACKEND_URL}/rooms`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setRoomsData(data);
+                } else {
+                    setError('No se pudieron cargar las salas disponibles.');
+                }
+            } catch (err) {
+                setError('Error de conexión al cargar las salas.');
+                console.error(err);
+            } finally {
+                setRoomsLoading(false);
+            }
+        };
+        fetchRooms();
     }, []);
 
     // Cargar reserva de slots reales al cambiar fecha o sala
@@ -129,7 +123,7 @@ const Coworking = () => {
 
     const handleSlotClick = (slot) => {
         if (bookedSlots.includes(slot) || apiLoading) return;
-        
+
         if (selectedSlots.includes(slot)) {
             setSelectedSlots(selectedSlots.filter(s => s !== slot));
         } else {
@@ -259,44 +253,61 @@ const Coworking = () => {
 
                 {/* Step 1: Select Room */}
                 {step === 1 && (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-                        {roomsData.map(room => (
-                            <div key={room.id} className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 hover:shadow-2xl transition-all duration-300 flex flex-col group">
-                                <div className="relative h-56 overflow-hidden">
-                                    <img 
-                                        src={room.image} 
-                                        alt={room.name} 
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500" 
-                                    />
-                                    <div className="absolute top-4 right-4 bg-primary text-white text-sm font-bold px-3 py-1.5 rounded-full shadow-md">
-                                        ${room.price} / hs
-                                    </div>
-                                </div>
-                                <div className="p-6 flex-grow flex flex-col justify-between">
-                                    <div>
-                                        <h3 className="text-xl font-serif font-bold text-primary mb-2">{room.name}</h3>
-                                        <p className="text-xs font-bold text-secondary tracking-widest uppercase mb-4">Capacidad: {room.capacity}</p>
-                                        <p className="text-sm text-gray-600 leading-relaxed mb-6">{room.description}</p>
-                                        
-                                        <div className="space-y-2 mb-6">
-                                            {room.amenities.map((item, idx) => (
-                                                <div key={idx} className="flex items-center text-xs text-gray-700">
-                                                    <span className="text-secondary">{item.icon}</span>
-                                                    {item.text}
-                                                </div>
-                                            ))}
+                    roomsLoading ? (
+                        <div className="flex flex-col items-center justify-center py-20">
+                            <FaSpinner className="animate-spin text-4xl text-secondary mb-4" />
+                            <span className="text-sm font-bold text-gray-500">Cargando salas disponibles...</span>
+                        </div>
+                    ) : roomsData.length === 0 ? (
+                        <div className="text-center py-20 text-gray-400">
+                            <p className="font-bold text-lg">No hay salas disponibles actualmente.</p>
+                            <p className="text-sm mt-1">Por favor, intenta nuevamente más tarde.</p>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+                            {roomsData.map(room => (
+                                <div key={room.id} className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 hover:shadow-2xl transition-all duration-300 flex flex-col group">
+                                    <div className="relative h-56 overflow-hidden">
+                                        <img
+                                            src={room.image}
+                                            alt={room.name}
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
+                                        />
+                                        <div className="absolute top-4 right-4 bg-primary text-white text-sm font-bold px-3 py-1.5 rounded-full shadow-md">
+                                            ${room.price} / hs
                                         </div>
                                     </div>
-                                    <button 
-                                        onClick={() => handleRoomSelect(room)}
-                                        className="w-full py-3 bg-primary hover:bg-secondary text-white font-bold rounded-xl transition-all shadow-md group-hover:shadow-lg flex items-center justify-center gap-2"
-                                    >
-                                        Reservar esta sala <FaChevronRight className="text-xs" />
-                                    </button>
+                                    <div className="p-6 flex-grow flex flex-col justify-between">
+                                        <div>
+                                            <h3 className="text-xl font-serif font-bold text-primary mb-2">{room.name}</h3>
+                                            <p className="text-xs font-bold text-secondary tracking-widest uppercase mb-4">Capacidad: {room.capacity}</p>
+                                            <p className="text-sm text-gray-600 leading-relaxed mb-6">{room.description}</p>
+
+                                            {room.amenities && room.amenities.length > 0 && (
+                                                <div className="space-y-2 mb-6">
+                                                    {room.amenities.map((item, idx) => {
+                                                        const text = typeof item === 'string' ? item : item.text;
+                                                        return (
+                                                            <div key={idx} className="flex items-center text-xs text-gray-700">
+                                                                <span className="text-secondary">{getAmenityIcon(text)}</span>
+                                                                {text}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <button
+                                            onClick={() => handleRoomSelect(room)}
+                                            className="w-full py-3 bg-primary hover:bg-secondary text-white font-bold rounded-xl transition-all shadow-md group-hover:shadow-lg flex items-center justify-center gap-2"
+                                        >
+                                            Reservar esta sala <FaChevronRight className="text-xs" />
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    )
                 )}
 
                 {/* Step 2: Date and Horarios */}
@@ -313,7 +324,7 @@ const Coworking = () => {
 
                         <div className="flex flex-col md:flex-row md:items-center justify-between border-b pb-6 mb-8 gap-4">
                             <div className="flex items-center gap-4">
-                                <button 
+                                <button
                                     onClick={handleBack}
                                     className="p-3 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full transition-colors"
                                 >
@@ -337,12 +348,12 @@ const Coworking = () => {
                                     <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
                                         <FaCalendarAlt className="text-secondary" /> Selecciona la Fecha
                                     </label>
-                                    <input 
+                                    <input
                                         type="date"
                                         className="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-secondary font-bold text-gray-700 bg-white"
                                         value={selectedDate}
                                         onChange={(e) => setSelectedDate(e.target.value)}
-                                        min={new Date().toISOString().split('T')[0]} 
+                                        min={new Date().toISOString().split('T')[0]}
                                     />
                                 </div>
 
@@ -375,11 +386,10 @@ const Coworking = () => {
                                         setStep(3);
                                     }}
                                     disabled={selectedSlots.length === 0 || apiLoading}
-                                    className={`w-full py-4 rounded-xl font-bold transition-all shadow-md flex items-center justify-center gap-2 ${
-                                        selectedSlots.length > 0 && !apiLoading
-                                            ? 'bg-primary hover:bg-secondary text-white cursor-pointer hover:shadow-lg' 
-                                            : 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'
-                                    }`}
+                                    className={`w-full py-4 rounded-xl font-bold transition-all shadow-md flex items-center justify-center gap-2 ${selectedSlots.length > 0 && !apiLoading
+                                        ? 'bg-primary hover:bg-secondary text-white cursor-pointer hover:shadow-lg'
+                                        : 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'
+                                        }`}
                                 >
                                     Siguiente paso <FaChevronRight className="text-xs" />
                                 </button>
@@ -396,19 +406,18 @@ const Coworking = () => {
                                     {timeSlots.map((slot) => {
                                         const isBooked = bookedSlots.includes(slot);
                                         const isSelected = selectedSlots.includes(slot);
-                                        
+
                                         return (
                                             <button
                                                 key={slot}
                                                 onClick={() => handleSlotClick(slot)}
                                                 disabled={isBooked || apiLoading}
-                                                className={`py-4 rounded-xl font-bold border transition-all text-sm shadow-sm flex flex-col items-center justify-center ${
-                                                    isBooked 
-                                                        ? 'bg-red-50 text-red-400 border-red-100 cursor-not-allowed' 
-                                                        : isSelected 
-                                                            ? 'bg-secondary text-white border-secondary scale-102 ring-2 ring-blue-300' 
-                                                            : 'bg-white hover:bg-slate-50 text-gray-700 border-gray-200 hover:border-gray-300'
-                                                }`}
+                                                className={`py-4 rounded-xl font-bold border transition-all text-sm shadow-sm flex flex-col items-center justify-center ${isBooked
+                                                    ? 'bg-red-50 text-red-400 border-red-100 cursor-not-allowed'
+                                                    : isSelected
+                                                        ? 'bg-secondary text-white border-secondary scale-102 ring-2 ring-blue-300'
+                                                        : 'bg-white hover:bg-slate-50 text-gray-700 border-gray-200 hover:border-gray-300'
+                                                    }`}
                                             >
                                                 <span>{slot}</span>
                                                 <span className="text-[10px] mt-1 font-normal opacity-85">
@@ -451,7 +460,7 @@ const Coworking = () => {
                         )}
 
                         <div className="flex items-center gap-4 border-b pb-6 mb-8">
-                            <button 
+                            <button
                                 onClick={handleBack}
                                 className="p-3 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full transition-colors"
                             >
@@ -469,7 +478,7 @@ const Coworking = () => {
                                     <label className="block text-sm font-bold text-gray-700 flex items-center gap-2">
                                         <FaUser className="text-secondary text-xs" /> Nombre Completo
                                     </label>
-                                    <input 
+                                    <input
                                         required
                                         type="text"
                                         placeholder="Ej: Dra. María Pérez"
@@ -482,7 +491,7 @@ const Coworking = () => {
                                     <label className="block text-sm font-bold text-gray-700 flex items-center gap-2">
                                         <FaIdCard className="text-secondary text-xs" /> Matrícula Profesional
                                     </label>
-                                    <input 
+                                    <input
                                         required
                                         type="text"
                                         placeholder="Ej: 12590"
@@ -498,7 +507,7 @@ const Coworking = () => {
                                     <label className="block text-sm font-bold text-gray-700 flex items-center gap-2">
                                         <FaEnvelope className="text-secondary text-xs" /> Correo Electrónico
                                     </label>
-                                    <input 
+                                    <input
                                         required
                                         type="email"
                                         placeholder="Ej: maria.perez@example.com"
@@ -511,7 +520,7 @@ const Coworking = () => {
                                     <label className="block text-sm font-bold text-gray-700 flex items-center gap-2">
                                         <FaPhone className="text-secondary text-xs" /> Teléfono / WhatsApp
                                     </label>
-                                    <input 
+                                    <input
                                         required
                                         type="tel"
                                         placeholder="Ej: +54 260 4123456"
@@ -524,7 +533,7 @@ const Coworking = () => {
 
                             <div className="space-y-2">
                                 <label className="block text-sm font-bold text-gray-700">Motivo del Uso / Observaciones</label>
-                                <textarea 
+                                <textarea
                                     placeholder="Detalla brevemente para qué utilizarás la sala (Ej: Audiencia, Reunión con cliente, Dictado de curso, etc.)"
                                     rows="4"
                                     className="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-secondary bg-white text-gray-700 font-medium"

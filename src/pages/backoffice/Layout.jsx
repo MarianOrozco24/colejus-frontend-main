@@ -14,6 +14,8 @@ import {
   FaBars,
   FaTimes,
   FaTerminal,
+  FaExclamationTriangle,
+  FaDoorOpen,
   FaCalendarAlt,
 } from "react-icons/fa";
 
@@ -32,18 +34,79 @@ const Layout = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const [showValidationModal, setShowValidationModal] = useState(false);
+  const [validationMessage, setValidationMessage] = useState("");
+
+  useEffect(() => {
+    const checkValidation = async () => {
+      const isLawyer = profiles.some(p => (p.name || p.profile_name || '').toLowerCase() === 'lawyer');
+      const isAdminOrDevUser = profiles.some(p => ['admin', 'dev'].includes((p.name || p.profile_name || '').toLowerCase()));
+      const isValidationDisabled = localStorage.getItem("disableMembershipValidation") === "true";
+
+      if (isLawyer && !isAdminOrDevUser && !isValidationDisabled && token) {
+        try {
+          const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/lawyer_payments/validate`, {
+            headers: {
+              "Authorization": `Bearer ${token}`
+            }
+          });
+          const data = await res.json();
+          if (res.status === 402 || !data.paid) {
+            setValidationMessage(data.message || "Falta de pago de la membresía del mes en curso.");
+            setShowValidationModal(true);
+          }
+        } catch (err) {
+          console.error("Error validating payment:", err);
+        }
+      }
+    };
+
+    checkValidation();
+  }, [profiles, token]);
+
+
   const pathToPermission = {
+    "/backoffice/nueva-noticia": "manage_news",
+    "/backoffice/editar-noticia": "manage_news",
+    
     "/backoffice/capacitaciones": "view_trainings",
+    "/backoffice/nueva-capacitacion": "manage_trainings",
+    "/backoffice/editar-capacitacion": "manage_trainings",
+    
     "/backoffice/categorias": "view_tags",
+    
     "/backoffice/edictos": "view_edicts",
+    "/backoffice/nuevo-edicto": "manage_edicts",
+    "/backoffice/editar-edicto": "manage_edicts",
+    
     "/backoffice/profesionales": "view_professionals",
+    "/backoffice/nuevo-profesional": "manage_professionals",
+    "/backoffice/editar-profesional": "manage_professionals",
+    
     "/backoffice/tasas": "view_rates",
+    "/backoffice/nueva-tasa": "manage_rates",
+    
     "/backoffice/historial-recibos": "view_receipts",
+    
     "/backoffice/dashboard-ingresos": "view_revenue",
-    "/backoffice/update-derecho-fijo": "view_collection_admin",
+    
+    "/backoffice/pagos-membresias": "view_lawyer_payments",
+    
+    "/backoffice/administrador-cobros": "view_collection_admin",
+    
     "/backoffice/integrantes": "view_integrantes",
+    "/backoffice/salas-coworking": "view_rooms",
     "/backoffice/reservar-sala": "book_rooms",
   };
+
+  const devPaths = [
+    "/backoffice/dev-panel",
+    "/backoffice/ip-manager",
+    "/backoffice/log-history",
+    "/backoffice/user-manager",
+    "/backoffice/profile-manager"
+  ];
+
 
   useEffect(() => {
     if (!token) {
@@ -54,6 +117,14 @@ const Layout = () => {
     const currentPath = location.pathname;
     const isDevUser = profiles.some(p => p.profile_name?.toLowerCase() === 'dev');
 
+    // 1. Guard dev paths
+    const isDevPath = devPaths.some(p => currentPath.startsWith(p));
+    if (isDevPath && !isDevUser) {
+      navigate("/backoffice");
+      return;
+    }
+
+    // 2. Guard standard paths
     if (!isDevUser) {
       const matchedPath = Object.keys(pathToPermission).find(p => currentPath.startsWith(p));
       if (matchedPath) {
@@ -62,7 +133,9 @@ const Layout = () => {
           navigate("/backoffice"); 
         }
       } else if (currentPath === "/backoffice") {
+        // Guard root backoffice index (news list)
         if (!hasPermission("view_news")) {
+          // Redirect to the first permitted section
           const firstPermittedLink = navLinks.find(link => {
             if (link.to === "/backoffice") return false;
             if (link.to === "/backoffice/dev-panel") return isDevUser;
@@ -71,39 +144,13 @@ const Layout = () => {
           if (firstPermittedLink) {
             navigate(firstPermittedLink.to);
           } else {
+            // No permissions at all in backoffice
             navigate("/");
           }
         }
       }
     }
   }, [location.pathname, token, profiles, navigate]);
-
-  // const moduleToPath = {
-  //     Perfiles: "/backoffice/profiles",
-  //     Usuarios: "/backoffice/users",
-  //     Clientes: "/backoffice/clients",
-  //     Proveedor: "/backoffice/providers",
-  //     Productos: "/backoffice/products",
-  //     Categorías: "/backoffice/categories",
-  // };
-
-  // const allowedLinks = profiles
-  //     ? profiles.flatMap((profile) =>
-  //         profile.accesses.map((access) => access.name)
-  //     )
-  //     : [];
-
-  // useEffect(() => {
-  //     const currentPathAccess = Object.values(moduleToPath).find((path) =>
-  //         location.pathname.startsWith(path)
-  //     );
-  //     if (
-  //         currentPathAccess &&
-  //         !allowedLinks.includes(`view_${currentPathAccess.slice(6).toLowerCase()}`)
-  //     ) {
-  //         navigate("/home");
-  //     }
-  // }, [allowedLinks, location.pathname, navigate, moduleToPath]);
 
   const handleLogout = () => {
     localStorage.removeItem("authToken");
@@ -120,8 +167,15 @@ const Layout = () => {
     { to: "/backoffice/tasas", label: "Tasas", icon: FaDollarSign, permission: "view_rates" },
     { to: "/backoffice/historial-recibos", label: "Historial de Recibos", icon: FaReceipt, permission: "view_receipts" },
     { to: "/backoffice/dashboard-ingresos", label: "Dashboard Ingresos", icon: FaReceipt, permission: "view_revenue" },
+<<<<<<< Updated upstream
     { to: "/backoffice/update-derecho-fijo", label: "Actualizar Derecho Fijo", icon: FaUsers, permission: "view_collection_admin" },
     { to: "/backoffice/integrantes", label: "Nosotros", icon: FaUsers, permission: "view_integrantes" },
+=======
+    { to: "/backoffice/pagos-membresias", label: "Membresías Abogados", icon: FaDollarSign, permission: "view_lawyer_payments" },
+    { to: "/backoffice/administrador-cobros", label: "Administrador de Cobros", icon: FaDollarSign, permission: "view_collection_admin" },
+    { to: "/backoffice/integrantes", label: "Nosotros", icon: FaUsers, permission: "view_integrantes" },
+    { to: "/backoffice/salas-coworking", label: "Salas Coworking", icon: FaDoorOpen, permission: "view_rooms" },
+>>>>>>> Stashed changes
     { to: "/backoffice/reservar-sala", label: "Reservar Sala", icon: FaCalendarAlt, permission: "book_rooms" },
     ...(isDev ? [{ to: "/backoffice/dev-panel", label: "Dev Panel", icon: FaTerminal }] : []),
   ];
@@ -130,7 +184,11 @@ const Layout = () => {
     if (link.permission) {
       return hasPermission(link.permission);
     }
+<<<<<<< Updated upstream
     return true; // Dev Panel handled by isDev condition
+=======
+    return true; // Dev Panel already handled by isDev condition
+>>>>>>> Stashed changes
   });
 
   const SidebarContent = () => (
@@ -213,6 +271,33 @@ const Layout = () => {
           <Outlet />
         </main>
       </div>
+
+      {/* Validation Warning Modal */}
+      {showValidationModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-65 flex items-center justify-center p-4 z-50 animate-fade-in font-lato">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-red-100">
+            <div className="bg-red-600 p-6 text-white text-lg font-bold flex items-center gap-3">
+              <FaExclamationTriangle className="text-white text-xl animate-bounce" /> Membresía Pendiente
+            </div>
+            <div className="p-6 space-y-4">
+              <p className="text-gray-700 text-sm leading-relaxed">
+                {validationMessage || "Estimado/a abogado/a, se ha detectado que tiene pendiente el pago de la membresía correspondiente al mes en curso."}
+              </p>
+              <p className="text-gray-500 text-xs font-medium">
+                Por favor, diríjase a la sección de pagos o contáctese con la administración para regularizar su situación.
+              </p>
+              <div className="flex justify-end pt-2">
+                <button
+                  onClick={() => setShowValidationModal(false)}
+                  className="px-6 py-2.5 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-all text-sm shadow-md"
+                >
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

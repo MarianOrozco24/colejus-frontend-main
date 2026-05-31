@@ -15,14 +15,16 @@ const UserManager = () => {
     const fetchData = async () => {
         try {
             setLoading(true);
+            const token = localStorage.getItem("authToken");
+            const headers = { 'Authorization': `Bearer ${token}` };
             const [usersRes, profilesRes] = await Promise.all([
-                fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/users`),
-                fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/profiles`)
+                fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/users`, { headers }),
+                fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/profiles`, { headers })
             ]);
             const usersData = await usersRes.json();
             const profilesData = await profilesRes.json();
-            setUsers(usersData);
-            setProfiles(profilesData);
+            setUsers(Array.isArray(usersData) ? usersData : []);
+            setProfiles(Array.isArray(profilesData) ? profilesData : []);
             setLoading(false);
         } catch (error) {
             console.error("Error fetching data:", error);
@@ -36,9 +38,13 @@ const UserManager = () => {
 
     const toggleBlock = async (uuid) => {
         try {
+            const token = localStorage.getItem("authToken");
             const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/users/block`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify({ uuid })
             });
             if (response.ok) fetchData();
@@ -50,10 +56,14 @@ const UserManager = () => {
     const handleSubmitUser = async (e) => {
         e.preventDefault();
         try {
+            const token = localStorage.getItem("authToken");
             const url = isEditing ? `${process.env.REACT_APP_BACKEND_URL}/dev/users/edit` : `${process.env.REACT_APP_BACKEND_URL}/dev/users/create`;
             const response = await fetch(url, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify(newUser)
             });
             if (response.ok) {

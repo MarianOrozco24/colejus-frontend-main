@@ -4,9 +4,11 @@ import { FaPlus, FaEdit, FaTrash, FaSearch } from "react-icons/fa";
 import { fetchAllProfessionals } from "../../../api/professionals/fetchAllProfessionals";
 import { deleteProfessionalsById } from "../../../api/professionals/deleteProfessionalsById";
 import DeleteProfessionalModal from "./DeleteProfessionalModal";
+import { hasPermission } from "../../../utils/hasPermission";
 
 const BackOfficeProfessionals = () => {
   const navigate = useNavigate();
+  const canManage = hasPermission("manage_professionals");
 
   const [professionals, setProfessionals] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -91,12 +93,14 @@ const BackOfficeProfessionals = () => {
         <h1 className="text-2xl font-bold text-primary">
           Sección <span className="text-secondary">profesionales</span>
         </h1>
-        <button
-          onClick={handleNewOpen}
-          className="flex items-center space-x-2 px-4 py-2 bg-secondary text-white rounded-full shadow hover:bg-secondary-dark"
-        >
-          <FaPlus /><span>Nuevo profesional</span>
-        </button>
+        {canManage && (
+          <button
+            onClick={handleNewOpen}
+            className="flex items-center space-x-2 px-4 py-2 bg-secondary text-white rounded-full shadow hover:bg-secondary-dark"
+          >
+            <FaPlus /><span>Nuevo profesional</span>
+          </button>
+        )}
       </div>
 
       {/* Buscador */}
@@ -122,13 +126,13 @@ const BackOfficeProfessionals = () => {
       ) : (
         <div className="bg-white rounded-lg shadow">
           <div className="overflow-x-auto hidden md:block">
-            <table className="min-w-[720px] text-left border-separate border-spacing-0">
+            <table className="min-w-[720px] text-left border-separate border-spacing-0 w-full">
               <thead>
                 <tr>
                   <th className="p-4 text-sm font-medium text-gray-500 w-1/12">Matrícula</th>
                   <th className="p-4 text-sm font-medium text-gray-500 w-3/12">Nombre</th>
                   <th className="p-4 text-sm font-medium text-gray-500 w-3/12">Teléfono</th>
-                  <th className="p-4 text-sm font-medium text-gray-500 text-center w-3/12">Acciones</th>
+                  {canManage && <th className="p-4 text-sm font-medium text-gray-500 text-center w-3/12">Acciones</th>}
                 </tr>
               </thead>
               <tbody>
@@ -137,14 +141,16 @@ const BackOfficeProfessionals = () => {
                     <td className="p-4 text-md text-gray-500">{item.tuition}</td>
                     <td className="p-4 text-md text-gray-500">{item.name}</td>
                     <td className="p-4 text-md text-gray-800">{item.phone}</td>
-                    <td className="p-4 flex items-center justify-center space-x-4">
-                      <button onClick={() => handleEditOpen(item.uuid)} className="text-gray-500 hover:text-secondary">
-                        <FaEdit size={20} />
-                      </button>
-                      <button onClick={() => handleDeleteClick(item)} className="text-gray-500 hover:text-red-500">
-                        <FaTrash size={20} />
-                      </button>
-                    </td>
+                    {canManage && (
+                      <td className="p-4 flex items-center justify-center space-x-4">
+                        <button onClick={() => handleEditOpen(item.uuid)} className="text-gray-500 hover:text-secondary">
+                          <FaEdit size={20} />
+                        </button>
+                        <button onClick={() => handleDeleteClick(item)} className="text-gray-500 hover:text-red-500">
+                          <FaTrash size={20} />
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
@@ -156,14 +162,16 @@ const BackOfficeProfessionals = () => {
                 <div className="text-xs text-gray-500">Matrícula #{item.tuition}</div>
                 <div className="text-base font-semibold text-primary">{item.name}</div>
                 <div className="text-sm text-gray-700">{item.phone}</div>
-                <div className="flex items-center justify-end gap-3 text-gray-500">
-                  <button onClick={() => handleEditOpen(item.uuid)} className="hover:text-secondary">
-                    <FaEdit />
-                  </button>
-                  <button onClick={() => handleDeleteClick(item)} className="hover:text-red-500">
-                    <FaTrash />
-                  </button>
-                </div>
+                {canManage && (
+                  <div className="flex items-center justify-end gap-3 text-gray-500">
+                    <button onClick={() => handleEditOpen(item.uuid)} className="hover:text-secondary">
+                      <FaEdit />
+                    </button>
+                    <button onClick={() => handleDeleteClick(item)} className="hover:text-red-500">
+                      <FaTrash />
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>

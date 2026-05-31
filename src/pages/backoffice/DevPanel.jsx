@@ -9,12 +9,30 @@ const DevPanel = () => {
     const [isStreaming, setIsStreaming] = useState(true);
     const navigate = useNavigate();
 
+    const [isValidationDisabled, setIsValidationDisabled] = useState(
+        localStorage.getItem("disableMembershipValidation") === "true"
+    );
+
+    const handleToggleValidation = (disabled) => {
+        setIsValidationDisabled(disabled);
+        localStorage.setItem("disableMembershipValidation", disabled ? "true" : "false");
+    };
+
     useEffect(() => {
         const fetchRecentLogs = async () => {
             try {
-                const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/logs/recent`);
+                const token = localStorage.getItem("authToken");
+                const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/logs/recent`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
                 const data = await response.json();
-                setLogs(data);
+                if (response.ok && Array.isArray(data)) {
+                    setLogs(data);
+                } else {
+                    console.error("Error fetching logs:", data.message || "Invalid logs format");
+                }
             } catch (error) {
                 console.error("Error fetching recent logs:", error);
             }
@@ -37,9 +55,16 @@ const DevPanel = () => {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/stats`);
+                const token = localStorage.getItem("authToken");
+                const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/stats`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
                 const data = await response.json();
-                setStats(data);
+                if (response.ok) {
+                    setStats(data);
+                }
             } catch (error) {
                 console.error("Error fetching stats:", error);
             }
@@ -94,7 +119,7 @@ const DevPanel = () => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 mb-6 lg:mb-8">
                 {/* CPU Usage Card */}
                 <div className="bg-white p-4 md:p-6 rounded-xl shadow-md border-l-4 border-blue-500">
                     <div className="flex items-center justify-between mb-4">
@@ -124,6 +149,32 @@ const DevPanel = () => {
                             className="bg-purple-600 h-2.5 rounded-full transition-all duration-500"
                             style={{ width: `${stats.memory_usage}%` }}
                         ></div>
+                    </div>
+                </div>
+
+                {/* Membership Validation Toggle Card */}
+                <div className="bg-white p-4 md:p-6 rounded-xl shadow-md border-l-4 border-yellow-500 flex flex-col justify-between">
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-lg font-semibold flex items-center text-gray-800">
+                            <FaShieldAlt className="mr-2 text-yellow-500" /> Validación de Membresía
+                        </h2>
+                    </div>
+                    <div className="flex items-center justify-between mt-2">
+                        <div>
+                            <p className="text-sm font-bold text-gray-700">Estado de Validación</p>
+                            <p className="text-xs text-gray-400 mt-0.5">
+                                {!isValidationDisabled ? "Activo (Controlar pagos al ingresar)" : "Inactivo (Omitir validaciones)"}
+                            </p>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                            <input 
+                                type="checkbox" 
+                                checked={!isValidationDisabled} 
+                                onChange={(e) => handleToggleValidation(!e.target.checked)}
+                                className="sr-only peer" 
+                            />
+                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary"></div>
+                        </label>
                     </div>
                 </div>
             </div>

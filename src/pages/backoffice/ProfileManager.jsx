@@ -18,14 +18,16 @@ const ProfileManager = () => {
     const fetchData = async () => {
         try {
             setLoading(true);
+            const token = localStorage.getItem("authToken");
+            const headers = { 'Authorization': `Bearer ${token}` };
             const [profilesRes, accessesRes] = await Promise.all([
-                fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/profiles`),
-                fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/accesses`)
+                fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/profiles`, { headers }),
+                fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/accesses`, { headers })
             ]);
             const profilesData = await profilesRes.json();
             const accessesData = await accessesRes.json();
-            setProfiles(profilesData);
-            setAccesses(accessesData);
+            setProfiles(Array.isArray(profilesData) ? profilesData : []);
+            setAccesses(Array.isArray(accessesData) ? accessesData : []);
             setLoading(false);
         } catch (error) {
             console.error("Error fetching rules data:", error);
@@ -39,9 +41,13 @@ const ProfileManager = () => {
 
     const toggleBlock = async (uuid) => {
         try {
+            const token = localStorage.getItem("authToken");
             const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/profiles/block`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify({ uuid })
             });
             if (response.ok) fetchData();
@@ -53,13 +59,17 @@ const ProfileManager = () => {
     const handleSubmitProfile = async (e) => {
         e.preventDefault();
         try {
+            const token = localStorage.getItem("authToken");
             const url = isEditing 
                 ? `${process.env.REACT_APP_BACKEND_URL}/dev/profiles/edit` 
                 : `${process.env.REACT_APP_BACKEND_URL}/dev/profiles/create`;
                 
             const response = await fetch(url, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify(currentProfile)
             });
             

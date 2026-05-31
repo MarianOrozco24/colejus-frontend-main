@@ -13,9 +13,18 @@ const LogHistory = () => {
     const fetchLogFiles = async () => {
         try {
             setLoading(true);
-            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/logs/history`);
+            const token = localStorage.getItem("authToken");
+            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/logs/history`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
             const data = await response.json();
-            setLogFiles(data);
+            if (response.ok && Array.isArray(data)) {
+                setLogFiles(data);
+            } else {
+                console.error("Error fetching log files:", data.message || "Failed to load log history");
+            }
             setLoading(false);
         } catch (error) {
             console.error("Error fetching log files:", error);
@@ -27,7 +36,12 @@ const LogHistory = () => {
         try {
             setLoadingContent(true);
             setSelectedFile(filename);
-            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/logs/view/${filename}`);
+            const token = localStorage.getItem("authToken");
+            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/logs/view/${filename}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
             const text = await response.text();
             setLogContent(text);
             setLoadingContent(false);
