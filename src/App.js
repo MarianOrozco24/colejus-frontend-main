@@ -10,7 +10,6 @@ import Edictos from "./pages/Edictos/Edictos";
 import LinksInteres from "./pages/LinksInteres";
 import Nosotros from "./pages/Nosotros";
 import Login from "./pages/Login";
-import Coworking from "./pages/Coworking";
 import Layout from "./pages/backoffice/Layout";
 import BackOfficeNews from "./pages/backoffice/News/BackOfficeNews";
 import NewNewsPage from "./pages/backoffice/News/NewNewsPage";
@@ -41,6 +40,7 @@ import IPManager from "./pages/backoffice/IPManager";
 import LogHistory from "./pages/backoffice/LogHistory";
 import UserManager from "./pages/backoffice/UserManager";
 import ProfileManager from "./pages/backoffice/ProfileManager";
+import BookRoom from "./pages/backoffice/rooms/BookRoom";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -70,7 +70,6 @@ function App() {
         <Route path="/noticias/:uuid" element={<VerNoticia />} />
         <Route path="/payment/success" element={<PaymentSuccess />} />
         <Route path="/payment/failure" element={<PaymentFailure />} />
-        <Route path="/coworking" element={<Coworking />} />
 
 
         <Route path="/login" element={<Login />} />
@@ -106,6 +105,7 @@ function App() {
           <Route path="log-history" element={<LogHistory />} />
           <Route path="user-manager" element={<UserManager />} />
           <Route path="profile-manager" element={<ProfileManager />} />
+          <Route path="reservar-sala" element={<BookRoom />} />
 
 
         </Route>

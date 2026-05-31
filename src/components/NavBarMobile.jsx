@@ -30,7 +30,7 @@ const pages = [
     content: 'Consulta de profesionales y matrícula'
   },
   {
-    path: '/coworking',
+    path: '/backoffice/reservar-sala',
     title: 'Coworking',
     content: 'Reserva de salas de coworking y espacios de reunión'
   },
@@ -223,7 +223,7 @@ const NavBarMobile = () => {
                   <Link to="/links-de-interes" onClick={togglePanel} className="text-base">
                     Links de interés
                   </Link>
-                  <Link to="/coworking" onClick={togglePanel} className="text-base">
+                  <Link to="/backoffice/reservar-sala" onClick={togglePanel} className="text-base">
                     Reserva de Salas
                   </Link>
                 </div>
@@ -239,7 +239,7 @@ const NavBarMobile = () => {
             <Link to="/profesionales" onClick={togglePanel} className="text-lg font-semibold">
               Profesionales
             </Link>
-            <Link to="/coworking" onClick={togglePanel} className="text-lg font-semibold">
+            <Link to="/backoffice/reservar-sala" onClick={togglePanel} className="text-lg font-semibold">
               Coworking
             </Link>
             <Link to="/contacto" onClick={togglePanel} className="text-lg font-semibold">

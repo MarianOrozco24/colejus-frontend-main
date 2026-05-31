@@ -125,7 +125,7 @@ const NavBar = () => {
                             <Link to="/links-de-interes" className="block px-4 py-2 text-primary hover:bg-gray-100 text-inherit">
                                 Links de interés
                             </Link>
-                            <Link to="/coworking" className="block px-4 py-2 text-primary hover:bg-gray-100 text-inherit">
+                            <Link to="/backoffice/reservar-sala" className="block px-4 py-2 text-primary hover:bg-gray-100 text-inherit">
                                 Reserva de Salas
                             </Link>
                         </div>
@@ -134,7 +134,7 @@ const NavBar = () => {
                 <Link to="/novedades" className="hover:text-gray-300 text-inherit">Novedades</Link>
                 <Link to="/nosotros" className="hover:text-gray-300 text-inherit">Nosotros</Link>
                 <Link to="/profesionales" className="hover:text-gray-300 text-inherit">Profesionales</Link>
-                <Link to="/coworking" className="hover:text-gray-300 text-inherit">Coworking</Link>
+                <Link to="/backoffice/reservar-sala" className="hover:text-gray-300 text-inherit">Coworking</Link>
                 <Link to="/contacto" className="hover:text-gray-300 text-inherit">Contacto</Link>
             </div>
         </nav>
