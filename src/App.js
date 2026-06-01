@@ -41,7 +41,6 @@ import LogHistory from "./pages/backoffice/LogHistory";
 import UserManager from "./pages/backoffice/UserManager";
 import ProfileManager from "./pages/backoffice/ProfileManager";
 import LawyerPayments from "./pages/backoffice/LawyerPayments";
-import BackOfficeRooms from "./pages/backoffice/rooms/BackOfficeRooms";
 import BookRoom from "./pages/backoffice/rooms/BookRoom";
 
 function ScrollToTop() {
@@ -108,7 +107,6 @@ function App() {
           <Route path="log-history" element={<LogHistory />} />
           <Route path="user-manager" element={<UserManager />} />
           <Route path="profile-manager" element={<ProfileManager />} />
-          <Route path="salas-coworking" element={<BackOfficeRooms />} />
           <Route path="reservar-sala" element={<BookRoom />} />
 
 

@@ -15,7 +15,6 @@ import {
   FaTimes,
   FaTerminal,
   FaExclamationTriangle,
-  FaDoorOpen,
   FaCalendarAlt,
 } from "react-icons/fa";
 
@@ -95,7 +94,6 @@ const Layout = () => {
     "/backoffice/administrador-cobros": "view_collection_admin",
     
     "/backoffice/integrantes": "view_integrantes",
-    "/backoffice/salas-coworking": "view_rooms",
     "/backoffice/reservar-sala": "book_rooms",
   };
 
@@ -170,7 +168,6 @@ const Layout = () => {
     { to: "/backoffice/pagos-membresias", label: "Membresías Abogados", icon: FaDollarSign, permission: "view_lawyer_payments" },
     { to: "/backoffice/administrador-cobros", label: "Administrador de Cobros", icon: FaDollarSign, permission: "view_collection_admin" },
     { to: "/backoffice/integrantes", label: "Nosotros", icon: FaUsers, permission: "view_integrantes" },
-    { to: "/backoffice/salas-coworking", label: "Salas Coworking", icon: FaDoorOpen, permission: "view_rooms" },
     { to: "/backoffice/reservar-sala", label: "Reservar Sala", icon: FaCalendarAlt, permission: "book_rooms" },
     ...(isDev ? [{ to: "/backoffice/dev-panel", label: "Dev Panel", icon: FaTerminal }] : []),
   ];
