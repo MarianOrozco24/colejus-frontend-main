@@ -34,6 +34,7 @@ const Coworking = () => {
     const [selectedDate, setSelectedDate] = useState('');
     const [selectedSlots, setSelectedSlots] = useState([]);
     const [bookedSlots, setBookedSlots] = useState([]);
+    const [attendees, setAttendees] = useState(1);
 
     // Dynamic rooms from API
     const [roomsData, setRoomsData] = useState([]);
@@ -89,14 +90,14 @@ const Coworking = () => {
         fetchRooms();
     }, []);
 
-    // Cargar reserva de slots reales al cambiar fecha o sala
+    // Cargar reserva de slots reales al cambiar fecha, sala o asistentes
     useEffect(() => {
         const fetchOccupiedSlots = async () => {
             if (selectedRoom && selectedDate) {
                 setApiLoading(true);
                 setError('');
                 try {
-                    const response = await fetch(`${BACKEND_URL}/bookings/occupied?room_id=${selectedRoom.id}&date=${selectedDate}`);
+                    const response = await fetch(`${BACKEND_URL}/bookings/occupied?room_id=${selectedRoom.id}&date=${selectedDate}&attendees=${attendees}`);
                     if (response.ok) {
                         const data = await response.json();
                         setBookedSlots(data);
@@ -114,10 +115,13 @@ const Coworking = () => {
             }
         };
         fetchOccupiedSlots();
-    }, [selectedRoom, selectedDate]);
+    }, [selectedRoom, selectedDate, attendees]);
 
     const handleRoomSelect = (room) => {
         setSelectedRoom(room);
+        if (attendees > room.capacity) {
+            setAttendees(room.capacity);
+        }
         setStep(2);
     };
 
@@ -165,6 +169,7 @@ const Coworking = () => {
                     user_phone: formData.phone,
                     user_tuition: formData.tuition,
                     purpose: formData.purpose,
+                    attendees: attendees,
                     idempotency_key: currentKey
                 })
             });
@@ -280,7 +285,7 @@ const Coworking = () => {
                                     <div className="p-6 flex-grow flex flex-col justify-between">
                                         <div>
                                             <h3 className="text-xl font-serif font-bold text-primary mb-2">{room.name}</h3>
-                                            <p className="text-xs font-bold text-secondary tracking-widest uppercase mb-4">Capacidad: {room.capacity}</p>
+                                            <p className="text-xs font-bold text-secondary tracking-widest uppercase mb-4">Capacidad: {room.capacity} personas</p>
                                             <p className="text-sm text-gray-600 leading-relaxed mb-6">{room.description}</p>
 
                                             {room.amenities && room.amenities.length > 0 && (
@@ -344,17 +349,36 @@ const Coworking = () => {
                         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
                             {/* Left panel: Date Picker */}
                             <div className="md:col-span-4 space-y-6">
-                                <div className="bg-slate-50 p-6 rounded-2xl border">
-                                    <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                                        <FaCalendarAlt className="text-secondary" /> Selecciona la Fecha
-                                    </label>
-                                    <input
-                                        type="date"
-                                        className="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-secondary font-bold text-gray-700 bg-white"
-                                        value={selectedDate}
-                                        onChange={(e) => setSelectedDate(e.target.value)}
-                                        min={new Date().toISOString().split('T')[0]}
-                                    />
+                                <div className="bg-slate-50 p-6 rounded-2xl border space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                                            <FaCalendarAlt className="text-secondary" /> Selecciona la Fecha
+                                        </label>
+                                        <input
+                                            type="date"
+                                            className="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-secondary font-bold text-gray-700 bg-white"
+                                            value={selectedDate}
+                                            onChange={(e) => setSelectedDate(e.target.value)}
+                                            min={new Date().toISOString().split('T')[0]}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                                            <FaUsers className="text-secondary" /> Cantidad de Personas
+                                        </label>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            max={selectedRoom.capacity}
+                                            className="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-secondary font-bold text-gray-700 bg-white"
+                                            value={attendees}
+                                            onChange={(e) => {
+                                                const val = parseInt(e.target.value) || 1;
+                                                setAttendees(val < 1 ? 1 : val);
+                                            }}
+                                        />
+                                        <p className="text-[10px] text-gray-400 mt-1 font-bold">Máximo: {selectedRoom.capacity} personas</p>
+                                    </div>
                                 </div>
 
                                 <div className="bg-slate-50 p-6 rounded-2xl border space-y-4">
@@ -362,6 +386,10 @@ const Coworking = () => {
                                     <div className="flex justify-between text-sm">
                                         <span className="text-gray-500">Fecha elegida:</span>
                                         <span className="font-bold text-gray-800">{selectedDate.split('-').reverse().join('/')}</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-gray-500">Personas:</span>
+                                        <span className="font-bold text-gray-800">{attendees} personas</span>
                                     </div>
                                     <div className="flex justify-between text-sm">
                                         <span className="text-gray-500">Horas seleccionadas:</span>
@@ -618,6 +646,10 @@ const Coworking = () => {
                                         <span className="font-bold text-slate-700">{selectedDate.split('-').reverse().join('/')}</span>
                                     </div>
                                     <div>
+                                        <span className="text-xs text-gray-400 block uppercase">Cantidad de Asistentes</span>
+                                        <span className="font-bold text-slate-700">{attendees} personas</span>
+                                    </div>
+                                    <div className="col-span-2">
                                         <span className="text-xs text-gray-400 block uppercase">Bloques Reservados</span>
                                         <span className="font-bold text-secondary">{selectedSlots.length} horas ({selectedSlots.length} slots)</span>
                                     </div>

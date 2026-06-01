@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { hasPermission } from '../../../utils/hasPermission';
 import {
     FaUsers, FaWifi, FaTv, FaCalendarAlt, FaClock, FaArrowLeft,
     FaCheckCircle, FaUser, FaEnvelope, FaPhone, FaIdCard,
     FaPrint, FaChevronRight, FaVolumeUp, FaVideo, FaInfoCircle,
     FaSpinner, FaPlus, FaEdit, FaTrash, FaTimes, FaCheck,
-    FaToggleOn, FaToggleOff, FaExclamationTriangle
+    FaToggleOn, FaToggleOff, FaExclamationTriangle, FaChartBar
 } from 'react-icons/fa';
 
 // Map amenity text keywords to icons
@@ -29,11 +30,23 @@ const timeSlots = Array.from({ length: 12 }, (_, i) => {
 const BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || 'http://127.0.0.1:5000/api').replace('localhost', '127.0.0.1');
 
 const BookRoom = () => {
+    const navigate = useNavigate();
+    const token = localStorage.getItem('authToken');
     const [step, setStep] = useState(1);
+
+    const [profiles] = useState(() => {
+        const p = localStorage.getItem("profiles");
+        return p ? JSON.parse(p) : [];
+    });
+
+    const isAdminOrDev = profiles.some(p =>
+        ['admin', 'administrador', 'dev'].includes((p.name || p.profile_name || '').toLowerCase())
+    );
     const [selectedRoom, setSelectedRoom] = useState(null);
     const [selectedDate, setSelectedDate] = useState('');
     const [selectedSlots, setSelectedSlots] = useState([]);
     const [bookedSlots, setBookedSlots] = useState([]);
+    const [attendees, setAttendees] = useState(1);
 
     // Dynamic rooms from API
     const [roomsData, setRoomsData] = useState([]);
@@ -44,6 +57,58 @@ const BookRoom = () => {
     const [error, setError] = useState('');
     const [successMsg, setSuccessMsg] = useState('');
     const [idempotencyKey, setIdempotencyKey] = useState('');
+
+    // Accompanying lawyers selection states
+    const [allLawyers, setAllLawyers] = useState([]);
+    const [selectedCompanions, setSelectedCompanions] = useState([]);
+    const [lawyerSearchTerm, setLawyerSearchTerm] = useState('');
+    const [showLawyerSuggestions, setShowLawyerSuggestions] = useState(false);
+
+    // Fetch all lawyers for companion selection
+    useEffect(() => {
+        const fetchLawyers = async () => {
+            if (!token) return;
+            try {
+                const res = await fetch(`${BACKEND_URL}/bookings/lawyers`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setAllLawyers(data);
+                }
+            } catch (err) {
+                console.error("Error loading lawyers:", err);
+            }
+        };
+        fetchLawyers();
+    }, [token]);
+
+    const addCompanion = (lawyer) => {
+        if (selectedRoom && (1 + selectedCompanions.length >= selectedRoom.capacity)) {
+            setError(`No puedes agregar más personas. La capacidad máxima de la sala es de ${selectedRoom.capacity} personas.`);
+            return;
+        }
+        const updated = [...selectedCompanions, lawyer];
+        setSelectedCompanions(updated);
+        setAttendees(1 + updated.length);
+        setLawyerSearchTerm('');
+        setShowLawyerSuggestions(false);
+        setError('');
+    };
+
+    const removeCompanion = (companionUuid) => {
+        const updated = selectedCompanions.filter(c => c.uuid !== companionUuid);
+        setSelectedCompanions(updated);
+        setAttendees(1 + updated.length);
+        setError('');
+    };
+
+    const filteredLawyers = allLawyers.filter(lawyer => {
+        const isSelf = lawyer.email.toLowerCase() === (localStorage.getItem("email") || '').toLowerCase();
+        const isAlreadySelected = selectedCompanions.some(c => c.uuid === lawyer.uuid);
+        const matchesSearch = lawyer.name.toLowerCase().includes(lawyerSearchTerm.toLowerCase());
+        return !isSelf && !isAlreadySelected && matchesSearch;
+    });
 
     // Booking form data (pre-filled with logged-in user)
     const [formData, setFormData] = useState({
@@ -77,7 +142,6 @@ const BookRoom = () => {
     // Permissions
     const canViewAllRooms = hasPermission('view_rooms');
     const canManageRooms = hasPermission('manage_rooms');
-    const token = localStorage.getItem('authToken');
 
     // Fetch rooms from API (loads active or all based on permissions)
     const fetchRooms = useCallback(async () => {
@@ -107,6 +171,26 @@ const BookRoom = () => {
         fetchRooms();
     }, [fetchRooms]);
 
+    // Auto-select first active room when rooms list loads, and keep selectedRoom in sync with roomsData
+    useEffect(() => {
+        if (roomsData.length > 0) {
+            if (!selectedRoom) {
+                const activeRoom = roomsData.find(r => r.is_active);
+                setSelectedRoom(activeRoom || roomsData[0]);
+            } else {
+                const updatedRoom = roomsData.find(r => r.id === selectedRoom.id);
+                if (updatedRoom) {
+                    if (updatedRoom !== selectedRoom) {
+                        setSelectedRoom(updatedRoom);
+                    }
+                } else {
+                    setSelectedRoom(roomsData[0]);
+                }
+            }
+        }
+    }, [roomsData, selectedRoom]);
+
+
     // Initial default booking date: tomorrow
     useEffect(() => {
         const tomorrow = new Date();
@@ -117,7 +201,7 @@ const BookRoom = () => {
         setSelectedDate(`${yyyy}-${mm}-${dd}`);
     }, []);
 
-    // Load actual booked slots when changing room or date
+    // Load actual booked slots when changing room, date or attendees count
     useEffect(() => {
         const fetchOccupiedSlots = async () => {
             if (selectedRoom && selectedDate) {
@@ -126,7 +210,7 @@ const BookRoom = () => {
                 try {
                     const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
                     const response = await fetch(
-                        `${BACKEND_URL}/bookings/occupied?room_id=${selectedRoom.id}&date=${selectedDate}`,
+                        `${BACKEND_URL}/bookings/occupied?room_id=${selectedRoom.id}&date=${selectedDate}&attendees=${attendees}`,
                         { headers }
                     );
                     if (response.ok) {
@@ -146,11 +230,14 @@ const BookRoom = () => {
             }
         };
         fetchOccupiedSlots();
-    }, [selectedRoom, selectedDate, token]);
+    }, [selectedRoom, selectedDate, attendees, token]);
 
     const handleRoomSelect = (room) => {
         if (!room.is_active) return;
         setSelectedRoom(room);
+        if (attendees > room.capacity) {
+            setAttendees(room.capacity);
+        }
         setStep(2);
     };
 
@@ -198,6 +285,8 @@ const BookRoom = () => {
                     user_phone: formData.phone,
                     user_tuition: formData.tuition,
                     purpose: formData.purpose,
+                    attendees: attendees,
+                    companions: selectedCompanions.map(c => ({ name: c.name, email: c.email })),
                     idempotency_key: currentKey
                 })
             });
@@ -389,14 +478,25 @@ const BookRoom = () => {
                     </h1>
                     <p className="text-sm text-gray-500 mt-1">Elegí la sala, fecha y horarios para registrar tu reserva.</p>
                 </div>
-                {canManageRooms && step === 1 && (
-                    <button
-                        onClick={openCreateModal}
-                        className="px-5 py-2.5 bg-secondary hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-md flex items-center gap-2 text-sm"
-                    >
-                        <FaPlus /> Nueva Sala
-                    </button>
-                )}
+                <div className="flex gap-2 flex-wrap items-center">
+                    {isAdminOrDev && (
+                        <button
+                            onClick={() => navigate('/backoffice/estadisticas-salas')}
+                            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all shadow-md flex items-center gap-2 text-xs md:text-sm"
+                            title="Estadísticas de Salas"
+                        >
+                            <FaChartBar /> Estadísticas
+                        </button>
+                    )}
+                    {canManageRooms && step === 1 && (
+                        <button
+                            onClick={openCreateModal}
+                            className="px-5 py-2.5 bg-secondary hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-md flex items-center gap-2 text-sm"
+                        >
+                            <FaPlus /> Nueva Sala
+                        </button>
+                    )}
+                </div>
             </div>
 
             {/* Notification Alerts */}
@@ -435,7 +535,7 @@ const BookRoom = () => {
                     </div>
                 </div>
 
-                {/* Step 1: Select Room */}
+                {/* Step 1: Select Room & Date */}
                 {step === 1 && (
                     roomsLoading ? (
                         <div className="flex flex-col items-center justify-center py-20">
@@ -447,109 +547,262 @@ const BookRoom = () => {
                             <p className="font-bold text-lg">No hay salas disponibles actualmente.</p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {roomsData.map(room => (
-                                <div
-                                    key={room.id}
-                                    className={`bg-white rounded-2xl overflow-hidden shadow-md border transition-all duration-350 flex flex-col group ${
-                                        !room.is_active ? 'opacity-65 border-red-200 shadow-inner' : 'border-gray-150 hover:shadow-xl'
-                                    }`}
-                                >
-                                    <div className="relative h-52 overflow-hidden bg-slate-100">
-                                        {room.image ? (
-                                            <img
-                                                src={room.image}
-                                                alt={room.name}
-                                                className="w-full h-full object-cover group-hover:scale-102 transition-all duration-500"
-                                            />
-                                        ) : (
-                                            <div className="flex items-center justify-center h-full">
-                                                <FaCalendarAlt className="text-4xl text-gray-300" />
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                            {/* Left panel: Date Picker & Rooms List (costado) */}
+                            <div className="lg:col-span-4 space-y-6">
+                                {/* Date Picker & Attendees */}
+                                <div className="bg-slate-50 p-5 rounded-2xl border border-gray-150 shadow-sm space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                                            <FaCalendarAlt className="text-secondary" /> Selecciona la Fecha
+                                        </label>
+                                        <input
+                                            type="date"
+                                            className="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-secondary font-bold text-gray-700 bg-white"
+                                            value={selectedDate}
+                                            onChange={(e) => setSelectedDate(e.target.value)}
+                                            min={new Date().toISOString().split('T')[0]}
+                                        />
+                                    </div>
+                                    <div className="relative">
+                                        <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                                            <FaUsers className="text-secondary" /> Colegas Acompañantes
+                                        </label>
+                                        <input
+                                            type="text"
+                                            placeholder="Buscar colega por nombre..."
+                                            className="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-secondary text-sm font-bold text-gray-700 bg-white"
+                                            value={lawyerSearchTerm}
+                                            onChange={(e) => {
+                                                setLawyerSearchTerm(e.target.value);
+                                                setShowLawyerSuggestions(true);
+                                            }}
+                                            onFocus={() => setShowLawyerSuggestions(true)}
+                                        />
+
+                                        {/* Suggestions Dropdown */}
+                                        {showLawyerSuggestions && lawyerSearchTerm.trim() && (
+                                            <div className="absolute z-50 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                                                {filteredLawyers.length > 0 ? (
+                                                    filteredLawyers.map(lawyer => (
+                                                        <div
+                                                            key={lawyer.uuid}
+                                                            onClick={() => addCompanion(lawyer)}
+                                                            className="p-3 hover:bg-slate-50 cursor-pointer flex flex-col border-b border-gray-50 last:border-b-0"
+                                                        >
+                                                            <span className="text-xs font-bold text-gray-800">{lawyer.name}</span>
+                                                            <span className="text-[10px] text-gray-400">{lawyer.email}</span>
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <div className="p-3 text-center text-xs text-gray-400">
+                                                        No se encontraron abogados
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
-                                        <div className="absolute top-4 right-4 bg-primary text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md">
-                                            ${room.price} / hs
+
+                                        {/* Click outside to close suggestion dropdown */}
+                                        {showLawyerSuggestions && (
+                                            <div 
+                                                className="fixed inset-0 z-45" 
+                                                onClick={() => setShowLawyerSuggestions(false)}
+                                            />
+                                        )}
+
+                                        {/* Total Attendees Info */}
+                                        <div className="mt-2 text-xs font-bold text-gray-500 bg-slate-100 p-2.5 rounded-lg flex justify-between items-center">
+                                            <span>Asistentes totales:</span>
+                                            <span className="text-primary font-black">{attendees} / {selectedRoom ? selectedRoom.capacity : 100}</span>
                                         </div>
-                                        {!room.is_active && (
-                                            <div className="absolute top-4 left-4 bg-red-600 text-white text-[10px] font-extrabold px-3 py-1.5 rounded-full shadow-md uppercase">
-                                                Inactiva
+
+                                        {/* Selected Companions badges */}
+                                        {selectedCompanions.length > 0 && (
+                                            <div className="mt-3 space-y-2">
+                                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Acompañantes seleccionados:</span>
+                                                <div className="flex flex-wrap gap-1.5">
+                                                    {selectedCompanions.map(companion => (
+                                                        <span key={companion.uuid} className="inline-flex items-center gap-1.5 bg-blue-50 text-secondary text-xs px-2.5 py-1.5 rounded-lg font-bold border border-blue-100">
+                                                            {companion.name}
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => removeCompanion(companion.uuid)}
+                                                                className="text-gray-400 hover:text-red-500 font-bold ml-0.5 focus:outline-none"
+                                                            >
+                                                                &times;
+                                                            </button>
+                                                        </span>
+                                                    ))}
+                                                </div>
                                             </div>
                                         )}
                                     </div>
-                                    <div className="p-6 flex-grow flex flex-col justify-between">
-                                        <div>
-                                            <h3 className="text-lg font-serif font-bold text-primary mb-1">{room.name}</h3>
-                                            <p className="text-xs font-bold text-secondary tracking-widest uppercase mb-3">Capacidad: {room.capacity}</p>
-                                            <p className="text-sm text-gray-600 leading-relaxed mb-4 line-clamp-3">{room.description}</p>
+                                </div>
 
-                                            {room.amenities && room.amenities.length > 0 && (
-                                                <div className="flex flex-wrap gap-1.5 mb-6">
-                                                    {room.amenities.map((item, idx) => {
-                                                        const text = typeof item === 'string' ? item : item.text;
-                                                        return (
-                                                            <span key={idx} className="bg-slate-50 text-slate-700 text-[10px] px-2.5 py-1 rounded-md font-semibold border flex items-center">
-                                                                {getAmenityIcon(text)}
-                                                                {text}
+                                {/* Rooms List */}
+                                <div className="space-y-4">
+                                    <h4 className="font-bold text-gray-700 text-sm uppercase tracking-wider pl-1">
+                                        Salas Disponibles
+                                    </h4>
+                                    <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-1">
+                                        {roomsData.map(room => {
+                                            const isSelected = selectedRoom?.id === room.id;
+                                            return (
+                                                <div
+                                                    key={room.id}
+                                                    onClick={() => setSelectedRoom(room)}
+                                                    className={`p-3 rounded-xl border cursor-pointer transition-all flex items-center gap-3 ${
+                                                        isSelected
+                                                            ? 'bg-blue-50/70 border-secondary ring-1 ring-secondary shadow-sm'
+                                                            : 'bg-white border-gray-200 hover:bg-slate-50'
+                                                    } ${!room.is_active ? 'opacity-60' : ''}`}
+                                                >
+                                                    <div className="w-16 h-16 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0 relative">
+                                                        {room.image ? (
+                                                            <img
+                                                                src={room.image}
+                                                                alt={room.name}
+                                                                className="w-full h-full object-cover"
+                                                            />
+                                                        ) : (
+                                                            <div className="flex items-center justify-center h-full bg-slate-200">
+                                                                <FaCalendarAlt className="text-gray-400 text-lg" />
+                                                            </div>
+                                                        )}
+                                                        {!room.is_active && (
+                                                            <span className="absolute inset-0 bg-red-650/80 text-white text-[8px] font-extrabold flex items-center justify-center uppercase tracking-wider">
+                                                                Inactiva
                                                             </span>
-                                                        );
-                                                    })}
+                                                        )}
+                                                    </div>
+                                                    <div className="flex-grow min-w-0">
+                                                        <h5 className="text-sm font-bold text-primary truncate">{room.name}</h5>
+                                                        <p className="text-xs text-gray-500 font-semibold">Capacidad: {room.capacity} personas</p>
+                                                        <p className="text-xs font-bold text-secondary mt-0.5">${room.price} / hs</p>
+                                                    </div>
                                                 </div>
-                                            )}
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Right panel: Active/Selected Room Details (Large view) */}
+                            <div className="lg:col-span-8">
+                                {selectedRoom ? (
+                                    <div className="bg-white rounded-2xl border border-gray-150 overflow-hidden shadow-md flex flex-col h-full justify-between">
+                                        <div>
+                                            {/* Large Room Image */}
+                                            <div className="relative h-72 sm:h-96 bg-slate-100 overflow-hidden">
+                                                {selectedRoom.image ? (
+                                                    <img
+                                                        src={selectedRoom.image}
+                                                        alt={selectedRoom.name}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <div className="flex items-center justify-center h-full bg-slate-200">
+                                                        <FaCalendarAlt className="text-6xl text-gray-300" />
+                                                    </div>
+                                                )}
+                                                <div className="absolute top-4 right-4 bg-primary text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg">
+                                                    ${selectedRoom.price} / hs
+                                                </div>
+                                                {!selectedRoom.is_active && (
+                                                    <div className="absolute top-4 left-4 bg-red-600 text-white text-xs font-extrabold px-4 py-2 rounded-full shadow-lg uppercase">
+                                                        Inactiva
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Room Details */}
+                                            <div className="p-6 sm:p-8">
+                                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                                                    <h3 className="text-2xl font-serif font-bold text-primary">{selectedRoom.name}</h3>
+                                                    <span className="text-sm font-bold text-secondary bg-blue-50 px-3 py-1 rounded-full border border-blue-100 self-start sm:self-auto">
+                                                        Capacidad: {selectedRoom.capacity} personas
+                                                    </span>
+                                                </div>
+                                                <p className="text-gray-600 leading-relaxed text-base mb-6">{selectedRoom.description}</p>
+
+                                                {selectedRoom.amenities && selectedRoom.amenities.length > 0 && (
+                                                    <div>
+                                                        <h4 className="font-bold text-primary text-sm uppercase tracking-wider mb-3">Comodidades</h4>
+                                                        <div className="flex flex-wrap gap-2">
+                                                            {selectedRoom.amenities.map((item, idx) => {
+                                                                const text = typeof item === 'string' ? item : item.text;
+                                                                return (
+                                                                    <span key={idx} className="bg-slate-50 text-slate-700 text-xs px-3 py-1.5 rounded-lg font-semibold border border-gray-150 flex items-center">
+                                                                        {getAmenityIcon(text)}
+                                                                        {text}
+                                                                    </span>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
 
-                                        <div className="space-y-2">
-                                            <button
-                                                onClick={() => handleRoomSelect(room)}
-                                                disabled={!room.is_active}
-                                                className={`w-full py-2.5 font-bold rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 text-sm ${
-                                                    room.is_active
-                                                        ? 'bg-primary hover:bg-secondary text-white hover:shadow'
-                                                        : 'bg-gray-150 text-gray-400 cursor-not-allowed shadow-none'
-                                                }`}
-                                            >
-                                                {room.is_active ? 'Reservar esta sala' : 'No disponible'} <FaChevronRight className="text-[10px]" />
-                                            </button>
-
-                                            {canManageRooms && (
-                                                <div className="flex items-center gap-2 pt-2 border-t mt-2">
+                                        {/* Actions & Manage panel */}
+                                        <div className="p-6 sm:p-8 border-t bg-slate-50 flex flex-col gap-4">
+                                            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 w-full">
+                                                <div className="w-full sm:w-auto">
                                                     <button
-                                                        onClick={(e) => openEditModal(room, e)}
-                                                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-50 text-blue-700 rounded-lg text-xs font-bold hover:bg-blue-100 transition-all border border-blue-100"
-                                                    >
-                                                        <FaEdit /> Editar
-                                                    </button>
-                                                    <button
-                                                        onClick={(e) => handleToggleActiveRoom(room, e)}
-                                                        className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all border ${
-                                                            room.is_active
-                                                                ? 'bg-orange-50 text-orange-700 hover:bg-orange-100 border-orange-100'
-                                                                : 'bg-green-50 text-green-700 hover:bg-green-100 border-green-100'
+                                                        onClick={() => handleRoomSelect(selectedRoom)}
+                                                        disabled={!selectedRoom.is_active}
+                                                        className={`w-full sm:w-auto px-8 py-3.5 font-bold rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-sm ${
+                                                            selectedRoom.is_active
+                                                                ? 'bg-primary hover:bg-secondary text-white hover:shadow-lg hover:scale-[1.01]'
+                                                                : 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'
                                                         }`}
-                                                        title={room.is_active ? 'Desactivar' : 'Activar'}
                                                     >
-                                                        {room.is_active ? <FaToggleOff /> : <FaToggleOn />}
-                                                    </button>
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            setDeleteConfirm(room.id);
-                                                        }}
-                                                        className="flex items-center justify-center gap-1.5 px-3 py-2 bg-red-50 text-red-700 rounded-lg text-xs font-bold hover:bg-red-100 transition-all border border-red-100"
-                                                        title="Eliminar"
-                                                    >
-                                                        <FaTrash />
+                                                        {selectedRoom.is_active ? 'Reservar esta sala' : 'No disponible'} <FaChevronRight className="text-xs" />
                                                     </button>
                                                 </div>
-                                            )}
 
-                                            {deleteConfirm === room.id && (
-                                                <div className="pt-2">
-                                                    <div className="bg-red-50 p-3 rounded-xl border border-red-200 text-center">
-                                                        <p className="text-xs text-red-700 font-bold mb-2">¿Eliminar sala definitivamente?</p>
+                                                {canManageRooms && (
+                                                    <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
+                                                        <button
+                                                            onClick={(e) => openEditModal(selectedRoom, e)}
+                                                            className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 bg-blue-50 text-blue-700 rounded-xl text-xs font-bold hover:bg-blue-100 transition-all border border-blue-100"
+                                                        >
+                                                            <FaEdit /> Editar
+                                                        </button>
+                                                        <button
+                                                            onClick={(e) => handleToggleActiveRoom(selectedRoom, e)}
+                                                            className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold transition-all border ${
+                                                                selectedRoom.is_active
+                                                                    ? 'bg-orange-50 text-orange-700 hover:bg-orange-100 border-orange-100'
+                                                                    : 'bg-green-50 text-green-700 hover:bg-green-100 border-green-100'
+                                                            }`}
+                                                            title={selectedRoom.is_active ? 'Desactivar' : 'Activar'}
+                                                        >
+                                                            {selectedRoom.is_active ? <FaToggleOff /> : <FaToggleOn />}
+                                                            <span className="ml-1">{selectedRoom.is_active ? 'Desactivar' : 'Activar'}</span>
+                                                        </button>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setDeleteConfirm(selectedRoom.id);
+                                                            }}
+                                                            className="flex items-center justify-center gap-1.5 px-4 py-2.5 bg-red-50 text-red-700 rounded-xl text-xs font-bold hover:bg-red-100 transition-all border border-red-100"
+                                                            title="Eliminar"
+                                                        >
+                                                            <FaTrash />
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {deleteConfirm === selectedRoom.id && (
+                                                <div className="w-full">
+                                                    <div className="bg-red-50 p-4 rounded-xl border border-red-200 text-center">
+                                                        <p className="text-sm text-red-700 font-bold mb-3">¿Eliminar sala definitivamente?</p>
                                                         <div className="flex gap-2 justify-center">
                                                             <button
-                                                                onClick={(e) => handleRoomDelete(room.id, e)}
-                                                                className="px-3 py-1 bg-red-600 text-white text-xs rounded-lg font-bold hover:bg-red-700 transition-all"
+                                                                onClick={(e) => handleRoomDelete(selectedRoom.id, e)}
+                                                                className="px-4 py-2 bg-red-600 text-white text-xs rounded-lg font-bold hover:bg-red-700 transition-all"
                                                             >
                                                                 Confirmar
                                                             </button>
@@ -558,7 +811,7 @@ const BookRoom = () => {
                                                                     e.stopPropagation();
                                                                     setDeleteConfirm(null);
                                                                 }}
-                                                                className="px-3 py-1 bg-gray-200 text-gray-700 text-xs rounded-lg font-bold hover:bg-gray-300 transition-all"
+                                                                className="px-4 py-2 bg-gray-200 text-gray-700 text-xs rounded-lg font-bold hover:bg-gray-300 transition-all"
                                                             >
                                                                 Cancelar
                                                             </button>
@@ -568,8 +821,12 @@ const BookRoom = () => {
                                             )}
                                         </div>
                                     </div>
-                                </div>
-                            ))}
+                                ) : (
+                                    <div className="bg-white rounded-2xl border border-gray-150 p-12 text-center text-gray-400">
+                                        <p className="font-bold text-lg">Selecciona una sala para ver sus detalles.</p>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     )
                 )}
@@ -608,17 +865,92 @@ const BookRoom = () => {
                         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
                             {/* Left panel: Date Picker */}
                             <div className="md:col-span-4 space-y-6">
-                                <div className="bg-slate-50 p-6 rounded-2xl border">
-                                    <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                                        <FaCalendarAlt className="text-secondary" /> Selecciona la Fecha
-                                    </label>
-                                    <input
-                                        type="date"
-                                        className="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-secondary font-bold text-gray-700 bg-white"
-                                        value={selectedDate}
-                                        onChange={(e) => setSelectedDate(e.target.value)}
-                                        min={new Date().toISOString().split('T')[0]}
-                                    />
+                                <div className="bg-slate-50 p-6 rounded-2xl border space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                                            <FaCalendarAlt className="text-secondary" /> Selecciona la Fecha
+                                        </label>
+                                        <input
+                                            type="date"
+                                            className="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-secondary font-bold text-gray-700 bg-white"
+                                            value={selectedDate}
+                                            onChange={(e) => setSelectedDate(e.target.value)}
+                                            min={new Date().toISOString().split('T')[0]}
+                                        />
+                                    </div>
+                                    <div className="relative">
+                                        <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                                            <FaUsers className="text-secondary" /> Colegas Acompañantes
+                                        </label>
+                                        <input
+                                            type="text"
+                                            placeholder="Buscar colega por nombre..."
+                                            className="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-secondary text-sm font-bold text-gray-700 bg-white"
+                                            value={lawyerSearchTerm}
+                                            onChange={(e) => {
+                                                setLawyerSearchTerm(e.target.value);
+                                                setShowLawyerSuggestions(true);
+                                            }}
+                                            onFocus={() => setShowLawyerSuggestions(true)}
+                                        />
+
+                                        {/* Suggestions Dropdown */}
+                                        {showLawyerSuggestions && lawyerSearchTerm.trim() && (
+                                            <div className="absolute z-50 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                                                {filteredLawyers.length > 0 ? (
+                                                    filteredLawyers.map(lawyer => (
+                                                        <div
+                                                            key={lawyer.uuid}
+                                                            onClick={() => addCompanion(lawyer)}
+                                                            className="p-3 hover:bg-slate-50 cursor-pointer flex flex-col border-b border-gray-50 last:border-b-0"
+                                                        >
+                                                            <span className="text-xs font-bold text-gray-800">{lawyer.name}</span>
+                                                            <span className="text-[10px] text-gray-400">{lawyer.email}</span>
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <div className="p-3 text-center text-xs text-gray-400">
+                                                        No se encontraron abogados
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {/* Click outside to close suggestion dropdown */}
+                                        {showLawyerSuggestions && (
+                                            <div 
+                                                className="fixed inset-0 z-45" 
+                                                onClick={() => setShowLawyerSuggestions(false)}
+                                            />
+                                        )}
+
+                                        {/* Total Attendees Info */}
+                                        <div className="mt-2 text-xs font-bold text-gray-500 bg-slate-100 p-2.5 rounded-lg flex justify-between items-center">
+                                            <span>Asistentes totales:</span>
+                                            <span className="text-primary font-black">{attendees} / {selectedRoom.capacity}</span>
+                                        </div>
+
+                                        {/* Selected Companions badges */}
+                                        {selectedCompanions.length > 0 && (
+                                            <div className="mt-3 space-y-2">
+                                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Acompañantes seleccionados:</span>
+                                                <div className="flex flex-wrap gap-1.5">
+                                                    {selectedCompanions.map(companion => (
+                                                        <span key={companion.uuid} className="inline-flex items-center gap-1.5 bg-blue-50 text-secondary text-xs px-2.5 py-1.5 rounded-lg font-bold border border-blue-100">
+                                                            {companion.name}
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => removeCompanion(companion.uuid)}
+                                                                className="text-gray-400 hover:text-red-500 font-bold ml-0.5 focus:outline-none"
+                                                            >
+                                                                &times;
+                                                            </button>
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
 
                                 <div className="bg-slate-50 p-6 rounded-2xl border space-y-4">
@@ -626,6 +958,10 @@ const BookRoom = () => {
                                     <div className="flex justify-between text-sm">
                                         <span className="text-gray-500">Fecha elegida:</span>
                                         <span className="font-bold text-gray-800">{selectedDate.split('-').reverse().join('/')}</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-gray-500">Personas:</span>
+                                        <span className="font-bold text-gray-800">{attendees} personas</span>
                                     </div>
                                     <div className="flex justify-between text-sm">
                                         <span className="text-gray-500">Horas seleccionadas:</span>
@@ -878,6 +1214,18 @@ const BookRoom = () => {
                                         <span className="font-bold text-slate-700">{selectedDate.split('-').reverse().join('/')}</span>
                                     </div>
                                     <div>
+                                        <span className="text-xs text-gray-400 block uppercase">Cantidad de Asistentes</span>
+                                        <span className="font-bold text-slate-700">{attendees} personas</span>
+                                    </div>
+                                    {selectedCompanions.length > 0 && (
+                                        <div className="col-span-2">
+                                            <span className="text-xs text-gray-400 block uppercase">Colegas Acompañantes</span>
+                                            <span className="font-bold text-slate-700">
+                                                {selectedCompanions.map(c => c.name).join(', ')}
+                                            </span>
+                                        </div>
+                                    )}
+                                    <div className="col-span-2">
                                         <span className="text-xs text-gray-400 block uppercase">Bloques Reservados</span>
                                         <span className="font-bold text-secondary">{selectedSlots.length} horas ({selectedSlots.length} slots)</span>
                                     </div>
@@ -929,6 +1277,8 @@ const BookRoom = () => {
                                     setStep(1);
                                     setSelectedRoom(null);
                                     setSelectedSlots([]);
+                                    setSelectedCompanions([]);
+                                    setAttendees(1);
                                     setFormData({
                                         name: localStorage.getItem("username") || '',
                                         email: localStorage.getItem("email") || '',
@@ -981,14 +1331,15 @@ const BookRoom = () => {
                             {/* Capacity & Price */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
-                                    <label className="block text-sm font-bold text-gray-700">Capacidad *</label>
+                                    <label className="block text-sm font-bold text-gray-700">Capacidad (personas) *</label>
                                     <input
                                         required
-                                        type="text"
-                                        placeholder="Ej: 10 personas"
+                                        type="number"
+                                        min="1"
+                                        placeholder="Ej: 10"
                                         className="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-secondary text-sm bg-white text-gray-700"
                                         value={roomForm.capacity}
-                                        onChange={(e) => setRoomForm({ ...roomForm, capacity: e.target.value })}
+                                        onChange={(e) => setRoomForm({ ...roomForm, capacity: parseInt(e.target.value) || '' })}
                                     />
                                 </div>
                                 <div className="space-y-1.5">

@@ -95,6 +95,7 @@ const Layout = () => {
     
     "/backoffice/integrantes": "view_integrantes",
     "/backoffice/reservar-sala": "book_rooms",
+    "/backoffice/estadisticas-salas": "view_rooms",
   };
 
   const devPaths = [
