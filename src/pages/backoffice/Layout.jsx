@@ -167,15 +167,10 @@ const Layout = () => {
     { to: "/backoffice/tasas", label: "Tasas", icon: FaDollarSign, permission: "view_rates" },
     { to: "/backoffice/historial-recibos", label: "Historial de Recibos", icon: FaReceipt, permission: "view_receipts" },
     { to: "/backoffice/dashboard-ingresos", label: "Dashboard Ingresos", icon: FaReceipt, permission: "view_revenue" },
-<<<<<<< Updated upstream
-    { to: "/backoffice/update-derecho-fijo", label: "Actualizar Derecho Fijo", icon: FaUsers, permission: "view_collection_admin" },
-    { to: "/backoffice/integrantes", label: "Nosotros", icon: FaUsers, permission: "view_integrantes" },
-=======
     { to: "/backoffice/pagos-membresias", label: "Membresías Abogados", icon: FaDollarSign, permission: "view_lawyer_payments" },
     { to: "/backoffice/administrador-cobros", label: "Administrador de Cobros", icon: FaDollarSign, permission: "view_collection_admin" },
     { to: "/backoffice/integrantes", label: "Nosotros", icon: FaUsers, permission: "view_integrantes" },
     { to: "/backoffice/salas-coworking", label: "Salas Coworking", icon: FaDoorOpen, permission: "view_rooms" },
->>>>>>> Stashed changes
     { to: "/backoffice/reservar-sala", label: "Reservar Sala", icon: FaCalendarAlt, permission: "book_rooms" },
     ...(isDev ? [{ to: "/backoffice/dev-panel", label: "Dev Panel", icon: FaTerminal }] : []),
   ];
@@ -184,11 +179,7 @@ const Layout = () => {
     if (link.permission) {
       return hasPermission(link.permission);
     }
-<<<<<<< Updated upstream
     return true; // Dev Panel handled by isDev condition
-=======
-    return true; // Dev Panel already handled by isDev condition
->>>>>>> Stashed changes
   });
 
   const SidebarContent = () => (
