@@ -48,7 +48,7 @@ const Login = () => {
         // Navigate to home
         navigate("/backoffice");
       } else {
-        setErrorMessage(response.data?.message || "Usuario no autorizado");
+        setErrorMessage(response.data?.error || response.data?.message || "Usuario no autorizado");
         setShowErrorModal(true);
       }
     } catch (error) {
