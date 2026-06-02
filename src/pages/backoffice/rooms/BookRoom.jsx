@@ -57,6 +57,7 @@ const BookRoom = () => {
     const [error, setError] = useState('');
     const [successMsg, setSuccessMsg] = useState('');
     const [idempotencyKey, setIdempotencyKey] = useState('');
+    const [hasProfessionalProfile, setHasProfessionalProfile] = useState(false);
 
     // Accompanying lawyers selection states
     const [allLawyers, setAllLawyers] = useState([]);
@@ -81,6 +82,32 @@ const BookRoom = () => {
             }
         };
         fetchLawyers();
+    }, [token]);
+
+    // Fetch user's professional profile to pre-fill booking form
+    useEffect(() => {
+        const fetchProfile = async () => {
+            if (!token) return;
+            try {
+                const res = await fetch(`${BACKEND_URL}/professionals/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setFormData(prev => ({
+                        ...prev,
+                        name: data.name || prev.name,
+                        email: data.email || prev.email,
+                        phone: data.phone || prev.phone,
+                        tuition: data.tuition || prev.tuition
+                    }));
+                    setHasProfessionalProfile(true);
+                }
+            } catch (err) {
+                console.error("Error fetching my professional profile:", err);
+            }
+        };
+        fetchProfile();
     }, [token]);
 
     const addCompanion = (lawyer) => {
@@ -151,7 +178,7 @@ const BookRoom = () => {
             const url = canViewAllRooms ? `${BACKEND_URL}/rooms/all` : `${BACKEND_URL}/rooms`;
             const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
             const res = await fetch(url, { headers });
-            
+
             if (res.ok) {
                 const data = await res.json();
                 setRoomsData(data);
@@ -604,8 +631,8 @@ const BookRoom = () => {
 
                                         {/* Click outside to close suggestion dropdown */}
                                         {showLawyerSuggestions && (
-                                            <div 
-                                                className="fixed inset-0 z-45" 
+                                            <div
+                                                className="fixed inset-0 z-45"
                                                 onClick={() => setShowLawyerSuggestions(false)}
                                             />
                                         )}
@@ -651,11 +678,10 @@ const BookRoom = () => {
                                                 <div
                                                     key={room.id}
                                                     onClick={() => setSelectedRoom(room)}
-                                                    className={`p-3 rounded-xl border cursor-pointer transition-all flex items-center gap-3 ${
-                                                        isSelected
-                                                            ? 'bg-blue-50/70 border-secondary ring-1 ring-secondary shadow-sm'
-                                                            : 'bg-white border-gray-200 hover:bg-slate-50'
-                                                    } ${!room.is_active ? 'opacity-60' : ''}`}
+                                                    className={`p-3 rounded-xl border cursor-pointer transition-all flex items-center gap-3 ${isSelected
+                                                        ? 'bg-blue-50/70 border-secondary ring-1 ring-secondary shadow-sm'
+                                                        : 'bg-white border-gray-200 hover:bg-slate-50'
+                                                        } ${!room.is_active ? 'opacity-60' : ''}`}
                                                 >
                                                     <div className="w-16 h-16 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0 relative">
                                                         {room.image ? (
@@ -751,11 +777,10 @@ const BookRoom = () => {
                                                     <button
                                                         onClick={() => handleRoomSelect(selectedRoom)}
                                                         disabled={!selectedRoom.is_active}
-                                                        className={`w-full sm:w-auto px-8 py-3.5 font-bold rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-sm ${
-                                                            selectedRoom.is_active
-                                                                ? 'bg-primary hover:bg-secondary text-white hover:shadow-lg hover:scale-[1.01]'
-                                                                : 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'
-                                                        }`}
+                                                        className={`w-full sm:w-auto px-8 py-3.5 font-bold rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-sm ${selectedRoom.is_active
+                                                            ? 'bg-primary hover:bg-secondary text-white hover:shadow-lg hover:scale-[1.01]'
+                                                            : 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'
+                                                            }`}
                                                     >
                                                         {selectedRoom.is_active ? 'Reservar esta sala' : 'No disponible'} <FaChevronRight className="text-xs" />
                                                     </button>
@@ -771,11 +796,10 @@ const BookRoom = () => {
                                                         </button>
                                                         <button
                                                             onClick={(e) => handleToggleActiveRoom(selectedRoom, e)}
-                                                            className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold transition-all border ${
-                                                                selectedRoom.is_active
-                                                                    ? 'bg-orange-50 text-orange-700 hover:bg-orange-100 border-orange-100'
-                                                                    : 'bg-green-50 text-green-700 hover:bg-green-100 border-green-100'
-                                                            }`}
+                                                            className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold transition-all border ${selectedRoom.is_active
+                                                                ? 'bg-orange-50 text-orange-700 hover:bg-orange-100 border-orange-100'
+                                                                : 'bg-green-50 text-green-700 hover:bg-green-100 border-green-100'
+                                                                }`}
                                                             title={selectedRoom.is_active ? 'Desactivar' : 'Activar'}
                                                         >
                                                             {selectedRoom.is_active ? <FaToggleOff /> : <FaToggleOn />}
@@ -918,8 +942,8 @@ const BookRoom = () => {
 
                                         {/* Click outside to close suggestion dropdown */}
                                         {showLawyerSuggestions && (
-                                            <div 
-                                                className="fixed inset-0 z-45" 
+                                            <div
+                                                className="fixed inset-0 z-45"
                                                 onClick={() => setShowLawyerSuggestions(false)}
                                             />
                                         )}
@@ -985,11 +1009,10 @@ const BookRoom = () => {
                                         setStep(3);
                                     }}
                                     disabled={selectedSlots.length === 0 || apiLoading}
-                                    className={`w-full py-4 rounded-xl font-bold transition-all shadow-md flex items-center justify-center gap-2 ${
-                                        selectedSlots.length > 0 && !apiLoading
-                                            ? 'bg-primary hover:bg-secondary text-white cursor-pointer hover:shadow-lg'
-                                            : 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'
-                                    }`}
+                                    className={`w-full py-4 rounded-xl font-bold transition-all shadow-md flex items-center justify-center gap-2 ${selectedSlots.length > 0 && !apiLoading
+                                        ? 'bg-primary hover:bg-secondary text-white cursor-pointer hover:shadow-lg'
+                                        : 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'
+                                        }`}
                                 >
                                     Siguiente paso <FaChevronRight className="text-xs" />
                                 </button>
@@ -1012,13 +1035,12 @@ const BookRoom = () => {
                                                 key={slot}
                                                 onClick={() => handleSlotClick(slot)}
                                                 disabled={isBooked || apiLoading}
-                                                className={`py-4 rounded-xl font-bold border transition-all text-sm shadow-sm flex flex-col items-center justify-center ${
-                                                    isBooked
-                                                        ? 'bg-red-50 text-red-400 border-red-100 cursor-not-allowed'
-                                                        : isSelected
-                                                            ? 'bg-secondary text-white border-secondary scale-102 ring-2 ring-blue-300'
-                                                            : 'bg-white hover:bg-slate-50 text-gray-700 border-gray-200 hover:border-gray-300'
-                                                }`}
+                                                className={`py-4 rounded-xl font-bold border transition-all text-sm shadow-sm flex flex-col items-center justify-center ${isBooked
+                                                    ? 'bg-red-50 text-red-400 border-red-100 cursor-not-allowed'
+                                                    : isSelected
+                                                        ? 'bg-secondary text-white border-secondary scale-102 ring-2 ring-blue-300'
+                                                        : 'bg-white hover:bg-slate-50 text-gray-700 border-gray-200 hover:border-gray-300'
+                                                    }`}
                                             >
                                                 <span>{slot}</span>
                                                 <span className="text-[10px] mt-1 font-normal opacity-85">
@@ -1083,9 +1105,14 @@ const BookRoom = () => {
                                         required
                                         type="text"
                                         placeholder="Ej: Dra. María Pérez"
-                                        className="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-secondary bg-white text-gray-700 font-medium"
+                                        className={`w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-secondary font-medium transition-all ${
+                                            hasProfessionalProfile
+                                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200'
+                                                : 'bg-white text-gray-700 border-gray-300'
+                                        }`}
                                         value={formData.name}
                                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                        readOnly={hasProfessionalProfile}
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -1096,9 +1123,14 @@ const BookRoom = () => {
                                         required
                                         type="text"
                                         placeholder="Ej: 12590"
-                                        className="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-secondary bg-white text-gray-700 font-medium"
+                                        className={`w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-secondary font-medium transition-all ${
+                                            hasProfessionalProfile
+                                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200'
+                                                : 'bg-white text-gray-700 border-gray-300'
+                                        }`}
                                         value={formData.tuition}
                                         onChange={(e) => setFormData({ ...formData, tuition: e.target.value })}
+                                        readOnly={hasProfessionalProfile}
                                     />
                                 </div>
                             </div>
@@ -1112,9 +1144,14 @@ const BookRoom = () => {
                                         required
                                         type="email"
                                         placeholder="Ej: maria.perez@example.com"
-                                        className="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-secondary bg-white text-gray-700 font-medium"
+                                        className={`w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-secondary font-medium transition-all ${
+                                            hasProfessionalProfile
+                                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200'
+                                                : 'bg-white text-gray-700 border-gray-300'
+                                        }`}
                                         value={formData.email}
                                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                        readOnly={hasProfessionalProfile}
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -1125,7 +1162,7 @@ const BookRoom = () => {
                                         required
                                         type="tel"
                                         placeholder="Ej: +54 260 4123456"
-                                        className="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-secondary bg-white text-gray-700 font-medium"
+                                        className="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-secondary font-medium transition-all bg-white text-gray-700 border-gray-300"
                                         value={formData.phone}
                                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                     />
