@@ -9,7 +9,7 @@ const UserManager = () => {
     const [search, setSearch] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
-    const [newUser, setNewUser] = useState({ uuid: '', name: '', email: '', password: '', profiles: [] });
+    const [newUser, setNewUser] = useState({ uuid: '', name: '', email: '', password: '', profiles: [], tuition: '' });
     const navigate = useNavigate();
 
     const fetchData = async () => {
@@ -68,7 +68,7 @@ const UserManager = () => {
             });
             if (response.ok) {
                 setShowModal(false);
-                setNewUser({ uuid: '', name: '', email: '', password: '', profiles: [] });
+                setNewUser({ uuid: '', name: '', email: '', password: '', profiles: [], tuition: '' });
                 setIsEditing(false);
                 fetchData();
             } else {
@@ -117,7 +117,7 @@ const UserManager = () => {
                     <button
                         onClick={() => {
                             setIsEditing(false);
-                            setNewUser({ uuid: '', name: '', email: '', password: '', profiles: [] });
+                            setNewUser({ uuid: '', name: '', email: '', password: '', profiles: [], tuition: '' });
                             setShowModal(true);
                         }}
                         className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-opacity-90 transition-all font-semibold flex items-center gap-2 shadow-md"
@@ -248,6 +248,18 @@ const UserManager = () => {
                                     onChange={e => setNewUser({ ...newUser, password: e.target.value })}
                                 />
                             </div>
+                            {!isEditing && (
+                                <div>
+                                    <label className="block text-sm font-bold text-gray-700 mb-1">Matrícula Profesional (Opcional)</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Ej: 12345"
+                                        className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none"
+                                        value={newUser.tuition || ''}
+                                        onChange={e => setNewUser({ ...newUser, tuition: e.target.value })}
+                                    />
+                                </div>
+                            )}
                             <div>
                                 <label className="block text-sm font-bold text-gray-700 mb-1">Roles (Perfiles)</label>
                                 <div className="max-h-32 overflow-y-auto border rounded-lg p-2 space-y-1">
