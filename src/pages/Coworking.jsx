@@ -130,8 +130,14 @@ const Coworking = () => {
 
         if (selectedSlots.includes(slot)) {
             setSelectedSlots(selectedSlots.filter(s => s !== slot));
+            setError('');
         } else {
+            if (selectedSlots.length >= 3) {
+                setError('No puedes reservar más de 3 horas por turno.');
+                return;
+            }
             setSelectedSlots([...selectedSlots, slot].sort());
+            setError('');
         }
     };
 
