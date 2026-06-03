@@ -134,7 +134,6 @@ const NavBar = () => {
                 <Link to="/novedades" className="hover:text-gray-300 text-inherit">Novedades</Link>
                 <Link to="/nosotros" className="hover:text-gray-300 text-inherit">Nosotros</Link>
                 <Link to="/profesionales" className="hover:text-gray-300 text-inherit">Profesionales</Link>
-                <Link to="/backoffice/reservar-sala" className="hover:text-gray-300 text-inherit">Coworking</Link>
                 <Link to="/contacto" className="hover:text-gray-300 text-inherit">Contacto</Link>
             </div>
         </nav>

@@ -58,6 +58,9 @@ const BookRoom = () => {
     const [successMsg, setSuccessMsg] = useState('');
     const [idempotencyKey, setIdempotencyKey] = useState('');
     const [hasProfessionalProfile, setHasProfessionalProfile] = useState(false);
+    const [myBookingsForDate, setMyBookingsForDate] = useState([]);
+    const [bookingDeleteConfirm, setBookingDeleteConfirm] = useState(null);
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
 
     // Accompanying lawyers selection states
     const [allLawyers, setAllLawyers] = useState([]);
@@ -109,6 +112,25 @@ const BookRoom = () => {
         };
         fetchProfile();
     }, [token]);
+
+    // Fetch user's existing bookings for the selected date
+    useEffect(() => {
+        const fetchMyBookings = async () => {
+            if (!token || !selectedDate) return;
+            try {
+                const res = await fetch(`${BACKEND_URL}/bookings/my-bookings?date=${selectedDate}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setMyBookingsForDate(data);
+                }
+            } catch (err) {
+                console.error("Error fetching my bookings:", err);
+            }
+        };
+        fetchMyBookings();
+    }, [selectedDate, token, refreshTrigger]);
 
     const addCompanion = (lawyer) => {
         if (selectedRoom && (1 + selectedCompanions.length >= selectedRoom.capacity)) {
@@ -257,7 +279,7 @@ const BookRoom = () => {
             }
         };
         fetchOccupiedSlots();
-    }, [selectedRoom, selectedDate, attendees, token]);
+    }, [selectedRoom, selectedDate, attendees, token, refreshTrigger]);
 
     const handleRoomSelect = (room) => {
         if (!room.is_active) return;
@@ -273,8 +295,14 @@ const BookRoom = () => {
 
         if (selectedSlots.includes(slot)) {
             setSelectedSlots(selectedSlots.filter(s => s !== slot));
+            setError('');
         } else {
+            if (selectedSlots.length >= 3) {
+                setError('No puedes reservar más de 3 horas por turno.');
+                return;
+            }
             setSelectedSlots([...selectedSlots, slot].sort());
+            setError('');
         }
     };
 
@@ -330,6 +358,34 @@ const BookRoom = () => {
             }
         } catch (err) {
             setError('Error de conexión al procesar la reserva. Por favor intenta nuevamente.');
+            console.error(err);
+        } finally {
+            setApiLoading(false);
+        }
+    };
+
+    const executeCancelBooking = async (bookingId) => {
+        setApiLoading(true);
+        setError('');
+        setSuccessMsg('');
+        try {
+            const res = await fetch(`${BACKEND_URL}/bookings/${bookingId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (res.ok) {
+                setSuccessMsg('Reserva cancelada correctamente.');
+                setBookingDeleteConfirm(null);
+                setRefreshTrigger(prev => prev + 1);
+                setTimeout(() => setSuccessMsg(''), 4000);
+            } else {
+                const data = await res.json();
+                setError(data.error || 'Error al cancelar la reserva.');
+            }
+        } catch (err) {
+            setError('Error de conexión al cancelar la reserva.');
             console.error(err);
         } finally {
             setApiLoading(false);
@@ -495,6 +551,71 @@ const BookRoom = () => {
         }
     };
 
+    // Helper to group and format user's own bookings for display
+    const renderUserBookingsWarning = () => {
+        if (!myBookingsForDate || myBookingsForDate.length === 0) return null;
+
+        // Group bookings by room name
+        const bookingsByRoom = myBookingsForDate.reduce((acc, booking) => {
+            const roomName = booking.room_name || 'Sala de Coworking';
+            if (!acc[roomName]) {
+                acc[roomName] = [];
+            }
+            acc[roomName].push(booking);
+            return acc;
+        }, {});
+
+        return (
+            <div className="bg-amber-50 text-amber-800 p-4 rounded-xl border border-amber-200 font-medium mb-4 text-xs md:text-sm flex flex-col gap-2 shadow-sm animate-fade-in no-print">
+                <div className="flex items-center gap-2 font-bold text-amber-900">
+                    <FaInfoCircle className="text-amber-600 text-base" />
+                    <span>Ya tenés reservas registradas para esta fecha:</span>
+                </div>
+                <div className="space-y-2 pl-6">
+                    {Object.entries(bookingsByRoom).map(([roomName, bookings]) => {
+                        const sortedBookings = [...bookings].sort((a, b) => a.time_slot.localeCompare(b.time_slot));
+                        const slots = sortedBookings.map(b => b.time_slot);
+                        const firstBookingId = sortedBookings[0]?.id;
+
+                        return (
+                            <div key={roomName} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-100 last:border-b-0 pb-1.5 last:pb-0">
+                                <span>
+                                    • <span className="font-bold">{roomName}</span>: {slots.length} {slots.length === 1 ? 'hora' : 'horas'} ({slots.join(', ')})
+                                </span>
+                                
+                                {bookingDeleteConfirm === firstBookingId ? (
+                                    <div className="flex items-center gap-1.5 self-end sm:self-auto">
+                                        <span className="text-[10px] text-red-650 font-bold">¿Cancelar?</span>
+                                        <button
+                                            onClick={() => executeCancelBooking(firstBookingId)}
+                                            className="bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm transition-all"
+                                        >
+                                            Sí
+                                        </button>
+                                        <button
+                                            onClick={() => setBookingDeleteConfirm(null)}
+                                            className="bg-gray-200 hover:bg-gray-300 text-gray-700 text-[10px] font-bold px-2 py-0.5 rounded shadow-sm transition-all"
+                                        >
+                                            No
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <button
+                                        onClick={() => setBookingDeleteConfirm(firstBookingId)}
+                                        className="text-red-600 hover:text-red-800 font-bold transition-all text-xs flex items-center gap-1 bg-red-50 hover:bg-red-100 px-2 py-0.5 rounded-lg border border-red-200 shadow-sm self-end sm:self-auto"
+                                        title="Cancelar esta reserva"
+                                    >
+                                        <FaTrash className="text-[9px]" /> Cancelar
+                                    </button>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div className="max-w-6xl mx-auto font-lato">
             {/* Header section with optional Create Room button */}
@@ -591,6 +712,7 @@ const BookRoom = () => {
                                             min={new Date().toISOString().split('T')[0]}
                                         />
                                     </div>
+                                    {renderUserBookingsWarning()}
                                     <div className="relative">
                                         <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
                                             <FaUsers className="text-secondary" /> Colegas Acompañantes
@@ -902,6 +1024,7 @@ const BookRoom = () => {
                                             min={new Date().toISOString().split('T')[0]}
                                         />
                                     </div>
+                                    {renderUserBookingsWarning()}
                                     <div className="relative">
                                         <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
                                             <FaUsers className="text-secondary" /> Colegas Acompañantes

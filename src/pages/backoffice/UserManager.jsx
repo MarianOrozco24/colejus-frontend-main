@@ -10,6 +10,7 @@ const UserManager = () => {
     const [showModal, setShowModal] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [newUser, setNewUser] = useState({ uuid: '', name: '', email: '', password: '', profiles: [], tuition: '' });
+    const [deleteConfirmUuid, setDeleteConfirmUuid] = useState(null);
     const navigate = useNavigate();
 
     const fetchData = async () => {
@@ -41,7 +42,7 @@ const UserManager = () => {
             const token = localStorage.getItem("authToken");
             const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/users/block`, {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
@@ -53,6 +54,28 @@ const UserManager = () => {
         }
     };
 
+    const handleDeleteUser = async (uuid) => {
+        try {
+            const token = localStorage.getItem("authToken");
+            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/users/${uuid}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (response.ok) {
+                setDeleteConfirmUuid(null);
+                fetchData();
+            } else {
+                const data = await response.json();
+                alert("Error al eliminar usuario: " + (data.error || "No se pudo completar la acción"));
+            }
+        } catch (error) {
+            console.error("Error deleting user:", error);
+            alert("Error de red al eliminar usuario.");
+        }
+    };
+
     const handleSubmitUser = async (e) => {
         e.preventDefault();
         try {
@@ -60,7 +83,7 @@ const UserManager = () => {
             const url = isEditing ? `${process.env.REACT_APP_BACKEND_URL}/dev/users/edit` : `${process.env.REACT_APP_BACKEND_URL}/dev/users/create`;
             const response = await fetch(url, {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
@@ -189,18 +212,50 @@ const UserManager = () => {
                                         )}
                                     </td>
                                     <td className="px-6 py-4 flex gap-2">
-                                        <button
-                                            onClick={() => handleEditUser(user)}
-                                            className="text-xs font-bold px-4 py-2 rounded-lg transition-all bg-blue-600 text-white hover:bg-blue-700"
-                                        >
-                                            Editar
-                                        </button>
-                                        <button
-                                            onClick={() => toggleBlock(user.uuid)}
-                                            className={`text-xs font-bold px-4 py-2 rounded-lg transition-all ${user.deleted_at ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-red-600 text-white hover:bg-red-700'}`}
-                                        >
-                                            {user.deleted_at ? 'Desbloquear' : 'Bloquear'}
-                                        </button>
+                                        {deleteConfirmUuid === user.uuid ? (
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-xs text-red-600 font-bold whitespace-nowrap">¿Eliminar?</span>
+                                                <button
+                                                    onClick={() => handleDeleteUser(user.uuid)}
+                                                    className="text-xs font-bold px-3 py-1.5 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-all"
+                                                >
+                                                    Sí
+                                                </button>
+                                                <button
+                                                    onClick={() => setDeleteConfirmUuid(null)}
+                                                    className="text-xs font-bold px-3 py-1.5 rounded-lg bg-gray-500 text-white hover:bg-gray-600 transition-all"
+                                                >
+                                                    No
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <button
+                                                    onClick={() => {
+                                                        setDeleteConfirmUuid(null);
+                                                        handleEditUser(user);
+                                                    }}
+                                                    className="text-xs font-bold px-4 py-2 rounded-lg transition-all bg-blue-600 text-white hover:bg-blue-700"
+                                                >
+                                                    Editar
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        setDeleteConfirmUuid(null);
+                                                        toggleBlock(user.uuid);
+                                                    }}
+                                                    className={`text-xs font-bold px-4 py-2 rounded-lg transition-all ${user.deleted_at ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-yellow-600 text-white hover:bg-yellow-700'}`}
+                                                >
+                                                    {user.deleted_at ? 'Desbloquear' : 'Bloquear'}
+                                                </button>
+                                                <button
+                                                    onClick={() => setDeleteConfirmUuid(user.uuid)}
+                                                    className="text-xs font-bold px-4 py-2 rounded-lg transition-all bg-red-600 text-white hover:bg-red-700"
+                                                >
+                                                    Eliminar
+                                                </button>
+                                            </>
+                                        )}
                                     </td>
                                 </tr>
                             ))}
@@ -230,7 +285,7 @@ const UserManager = () => {
                                 <label className="block text-sm font-bold text-gray-700 mb-1">Email</label>
                                 <input
                                     required
-                                    type="email"
+                                    type="text"
                                     className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none"
                                     value={newUser.email}
                                     onChange={e => setNewUser({ ...newUser, email: e.target.value })}
