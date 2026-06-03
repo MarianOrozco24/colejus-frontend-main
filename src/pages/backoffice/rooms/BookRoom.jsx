@@ -29,6 +29,18 @@ const timeSlots = Array.from({ length: 12 }, (_, i) => {
 
 const BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || 'http://127.0.0.1:5000/api').replace('localhost', '127.0.0.1');
 
+const getImageUrl = (imagePath) => {
+    if (!imagePath) return null;
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+        return imagePath;
+    }
+    if (imagePath.startsWith('/static/')) {
+        const origin = BACKEND_URL.replace('/api', '');
+        return `${origin}${imagePath}`;
+    }
+    return imagePath;
+};
+
 const BookRoom = () => {
     const navigate = useNavigate();
     const token = localStorage.getItem('authToken');
@@ -187,6 +199,8 @@ const BookRoom = () => {
         is_active: true
     });
     const [newAmenity, setNewAmenity] = useState('');
+    const [uploadingImage, setUploadingImage] = useState(false);
+    const [uploadError, setUploadError] = useState('');
 
     // Permissions
     const canViewAllRooms = hasPermission('view_rooms');
@@ -402,6 +416,40 @@ const BookRoom = () => {
         window.print();
     };
 
+    const handleFileChange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        setUploadingImage(true);
+        setUploadError('');
+
+        const formDataObj = new FormData();
+        formDataObj.append('image', file);
+
+        try {
+            const res = await fetch(`${BACKEND_URL}/rooms/upload-image`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formDataObj
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                setRoomForm(prev => ({ ...prev, image: data.image_url }));
+            } else {
+                const errData = await res.json();
+                setUploadError(errData.error || 'Error al subir la imagen.');
+            }
+        } catch (err) {
+            setUploadError('Error de conexión al subir la imagen.');
+            console.error(err);
+        } finally {
+            setUploadingImage(false);
+        }
+    };
+
     // Room CRUD Handlers
     const resetRoomForm = () => {
         setRoomForm({
@@ -415,6 +463,7 @@ const BookRoom = () => {
         });
         setNewAmenity('');
         setEditingRoom(null);
+        setUploadError('');
     };
 
     const openCreateModal = () => {
@@ -809,7 +858,7 @@ const BookRoom = () => {
                                                     <div className="w-16 h-16 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0 relative">
                                                         {room.image ? (
                                                             <img
-                                                                src={room.image}
+                                                                src={getImageUrl(room.image)}
                                                                 alt={room.name}
                                                                 className="w-full h-full object-cover"
                                                             />
@@ -845,7 +894,7 @@ const BookRoom = () => {
                                             <div className="relative h-72 sm:h-96 bg-slate-100 overflow-hidden">
                                                 {selectedRoom.image ? (
                                                     <img
-                                                        src={selectedRoom.image}
+                                                        src={getImageUrl(selectedRoom.image)}
                                                         alt={selectedRoom.name}
                                                         className="w-full h-full object-cover"
                                                     />
@@ -1502,16 +1551,66 @@ const BookRoom = () => {
                                 </div>
                             </div>
 
-                            {/* Image URL */}
+                            {/* Image URL / Upload */}
                             <div className="space-y-1.5">
-                                <label className="block text-sm font-bold text-gray-700">URL de Imagen / Ruta</label>
-                                <input
-                                    type="text"
-                                    placeholder="Ej: /meeting_room_exec.png"
-                                    className="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-secondary text-sm bg-white text-gray-700"
-                                    value={roomForm.image}
-                                    onChange={(e) => setRoomForm({ ...roomForm, image: e.target.value })}
-                                />
+                                <label className="block text-sm font-bold text-gray-700">Imagen de la Sala</label>
+                                
+                                {roomForm.image && (
+                                    <div className="relative w-full h-32 rounded-xl overflow-hidden mb-2 bg-slate-100 border border-slate-200 shadow-inner">
+                                        <img
+                                            src={getImageUrl(roomForm.image)}
+                                            alt="Vista previa"
+                                            className="w-full h-full object-cover"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setRoomForm({ ...roomForm, image: '' })}
+                                            className="absolute top-2 right-2 bg-red-650 text-white p-1.5 rounded-full hover:bg-red-700 transition-colors shadow-md flex items-center justify-center"
+                                            title="Eliminar imagen"
+                                        >
+                                            <FaTimes size={12} />
+                                        </button>
+                                    </div>
+                                )}
+
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        placeholder="URL de la imagen o sube una archivo..."
+                                        className="flex-1 p-3 border rounded-xl outline-none focus:ring-2 focus:ring-secondary text-sm bg-white text-gray-700"
+                                        value={roomForm.image}
+                                        onChange={(e) => setRoomForm({ ...roomForm, image: e.target.value })}
+                                    />
+                                </div>
+
+                                <div className="mt-2">
+                                    <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors">
+                                        <div className="flex flex-col items-center justify-center pt-3 pb-3">
+                                            {uploadingImage ? (
+                                                <>
+                                                    <FaSpinner className="animate-spin text-secondary text-xl mb-1" />
+                                                    <p className="text-xs text-gray-500 font-semibold">Subiendo archivo...</p>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <span className="text-secondary text-lg mb-1">📁</span>
+                                                    <p className="text-xs text-gray-500 font-semibold"><span className="text-secondary">Haz clic aquí</span> para subir imagen</p>
+                                                    <p className="text-[10px] text-gray-400">PNG, JPG, JPEG, GIF, WEBP</p>
+                                                </>
+                                            )}
+                                        </div>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            className="hidden"
+                                            onChange={handleFileChange}
+                                            disabled={uploadingImage}
+                                        />
+                                    </label>
+                                    {uploadError && (
+                                        <p className="text-xs text-red-650 font-bold mt-1">{uploadError}</p>
+                                    )}
+                                </div>
                             </div>
 
                             {/* Description */}

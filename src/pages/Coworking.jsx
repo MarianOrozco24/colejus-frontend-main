@@ -28,6 +28,18 @@ const timeSlots = Array.from({ length: 12 }, (_, i) => {
 
 const BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || 'http://127.0.0.1:5000/api').replace('localhost', '127.0.0.1');
 
+const getImageUrl = (imagePath) => {
+    if (!imagePath) return null;
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+        return imagePath;
+    }
+    if (imagePath.startsWith('/static/')) {
+        const origin = BACKEND_URL.replace('/api', '');
+        return `${origin}${imagePath}`;
+    }
+    return imagePath;
+};
+
 const Coworking = () => {
     const [step, setStep] = useState(1);
     const [selectedRoom, setSelectedRoom] = useState(null);
@@ -281,7 +293,7 @@ const Coworking = () => {
                                 <div key={room.id} className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 hover:shadow-2xl transition-all duration-300 flex flex-col group">
                                     <div className="relative h-56 overflow-hidden">
                                         <img
-                                            src={room.image}
+                                            src={getImageUrl(room.image)}
                                             alt={room.name}
                                             className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
                                         />
