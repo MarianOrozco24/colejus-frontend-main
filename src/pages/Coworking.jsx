@@ -176,7 +176,8 @@ const Coworking = () => {
                     user_tuition: formData.tuition,
                     purpose: formData.purpose,
                     attendees: attendees,
-                    idempotency_key: currentKey
+                    idempotency_key: currentKey,
+                    bypass_validation: localStorage.getItem("disableMembershipValidation") === "true"
                 })
             });
 
@@ -284,8 +285,8 @@ const Coworking = () => {
                                             alt={room.name}
                                             className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
                                         />
-                                        <div className="absolute top-4 right-4 bg-primary text-white text-sm font-bold px-3 py-1.5 rounded-full shadow-md">
-                                            ${room.price} / hs
+                                        <div className="absolute top-4 right-4 bg-secondary text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md">
+                                            Incluido con Membresía
                                         </div>
                                     </div>
                                     <div className="p-6 flex-grow flex flex-col justify-between">
@@ -348,7 +349,7 @@ const Coworking = () => {
                             </div>
                             <div className="text-right">
                                 <span className="text-xs font-bold text-gray-400 block uppercase">Precio por hora</span>
-                                <span className="text-2xl font-extrabold text-secondary">${selectedRoom.price} ARS</span>
+                                <span className="text-2xl font-extrabold text-secondary">Sin costo adicional</span>
                             </div>
                         </div>
 
@@ -582,8 +583,8 @@ const Coworking = () => {
                                     <p className="text-xs text-gray-500">Reserva de {selectedSlots.length} horas el {selectedDate.split('-').reverse().join('/')}</p>
                                 </div>
                                 <div className="text-right">
-                                    <span className="text-2xl font-black text-secondary block">${calculateTotal()} ARS</span>
-                                    <span className="text-[10px] text-gray-400">Pago a realizarse de forma presencial o transferencia.</span>
+                                    <span className="text-2xl font-black text-secondary block">Bonificado</span>
+                                    <span className="text-[10px] text-gray-400">Uso gratuito incluido en su membresía.</span>
                                 </div>
                             </div>
 
@@ -684,7 +685,7 @@ const Coworking = () => {
                                 <div className="border-t pt-6 flex justify-between items-center bg-slate-50 -mx-8 -mb-8 p-8 rounded-b-3xl">
                                     <div>
                                         <span className="text-xs text-gray-400 block uppercase">Total a Abonar</span>
-                                        <span className="text-3xl font-black text-primary">${calculateTotal()}</span>
+                                        <span className="text-3xl font-black text-primary">Sin Costo</span>
                                     </div>
                                     <div className="text-right text-[10px] text-gray-400 leading-relaxed font-bold">
                                         * Presentarse 10 min antes.<br />

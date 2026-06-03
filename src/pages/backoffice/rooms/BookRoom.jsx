@@ -342,7 +342,8 @@ const BookRoom = () => {
                     purpose: formData.purpose,
                     attendees: attendees,
                     companions: selectedCompanions.map(c => ({ name: c.name, email: c.email })),
-                    idempotency_key: currentKey
+                    idempotency_key: currentKey,
+                    bypass_validation: localStorage.getItem("disableMembershipValidation") === "true"
                 })
             });
 
@@ -582,7 +583,7 @@ const BookRoom = () => {
                                 <span>
                                     • <span className="font-bold">{roomName}</span>: {slots.length} {slots.length === 1 ? 'hora' : 'horas'} ({slots.join(', ')})
                                 </span>
-                                
+
                                 {bookingDeleteConfirm === firstBookingId ? (
                                     <div className="flex items-center gap-1.5 self-end sm:self-auto">
                                         <span className="text-[10px] text-red-650 font-bold">¿Cancelar?</span>
@@ -826,7 +827,7 @@ const BookRoom = () => {
                                                     <div className="flex-grow min-w-0">
                                                         <h5 className="text-sm font-bold text-primary truncate">{room.name}</h5>
                                                         <p className="text-xs text-gray-500 font-semibold">Capacidad: {room.capacity} personas</p>
-                                                        <p className="text-xs font-bold text-secondary mt-0.5">${room.price} / hs</p>
+                                                        <p className="text-xs font-bold text-secondary mt-0.5">Incluido con Membresía</p>
                                                     </div>
                                                 </div>
                                             );
@@ -853,8 +854,8 @@ const BookRoom = () => {
                                                         <FaCalendarAlt className="text-6xl text-gray-300" />
                                                     </div>
                                                 )}
-                                                <div className="absolute top-4 right-4 bg-primary text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg">
-                                                    ${selectedRoom.price} / hs
+                                                <div className="absolute top-4 right-4 bg-secondary text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg">
+                                                    Incluido con Membresía
                                                 </div>
                                                 {!selectedRoom.is_active && (
                                                     <div className="absolute top-4 left-4 bg-red-600 text-white text-xs font-extrabold px-4 py-2 rounded-full shadow-lg uppercase">
@@ -1004,7 +1005,7 @@ const BookRoom = () => {
                             </div>
                             <div className="text-right">
                                 <span className="text-xs font-bold text-gray-400 block uppercase">Precio por hora</span>
-                                <span className="text-2xl font-extrabold text-secondary">${selectedRoom.price} ARS</span>
+                                <span className="text-2xl font-extrabold text-secondary">Sin costo adicional</span>
                             </div>
                         </div>
 
@@ -1228,11 +1229,10 @@ const BookRoom = () => {
                                         required
                                         type="text"
                                         placeholder="Ej: Dra. María Pérez"
-                                        className={`w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-secondary font-medium transition-all ${
-                                            hasProfessionalProfile
-                                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200'
-                                                : 'bg-white text-gray-700 border-gray-300'
-                                        }`}
+                                        className={`w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-secondary font-medium transition-all ${hasProfessionalProfile
+                                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200'
+                                            : 'bg-white text-gray-700 border-gray-300'
+                                            }`}
                                         value={formData.name}
                                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                         readOnly={hasProfessionalProfile}
@@ -1246,11 +1246,10 @@ const BookRoom = () => {
                                         required
                                         type="text"
                                         placeholder="Ej: 12590"
-                                        className={`w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-secondary font-medium transition-all ${
-                                            hasProfessionalProfile
-                                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200'
-                                                : 'bg-white text-gray-700 border-gray-300'
-                                        }`}
+                                        className={`w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-secondary font-medium transition-all ${hasProfessionalProfile
+                                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200'
+                                            : 'bg-white text-gray-700 border-gray-300'
+                                            }`}
                                         value={formData.tuition}
                                         onChange={(e) => setFormData({ ...formData, tuition: e.target.value })}
                                         readOnly={hasProfessionalProfile}
@@ -1267,11 +1266,10 @@ const BookRoom = () => {
                                         required
                                         type="email"
                                         placeholder="Ej: maria.perez@example.com"
-                                        className={`w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-secondary font-medium transition-all ${
-                                            hasProfessionalProfile
-                                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200'
-                                                : 'bg-white text-gray-700 border-gray-300'
-                                        }`}
+                                        className={`w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-secondary font-medium transition-all ${hasProfessionalProfile
+                                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200'
+                                            : 'bg-white text-gray-700 border-gray-300'
+                                            }`}
                                         value={formData.email}
                                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                         readOnly={hasProfessionalProfile}
@@ -1309,8 +1307,8 @@ const BookRoom = () => {
                                     <p className="text-xs text-gray-500">Reserva de {selectedSlots.length} horas el {selectedDate.split('-').reverse().join('/')}</p>
                                 </div>
                                 <div className="text-right">
-                                    <span className="text-2xl font-black text-secondary block">${calculateTotal()} ARS</span>
-                                    <span className="text-[10px] text-gray-400">Pago a realizarse de forma presencial o transferencia.</span>
+                                    <span className="text-2xl font-black text-secondary block">Bonificado</span>
+                                    <span className="text-[10px] text-gray-400">Uso gratuito incluido en su membresía.</span>
                                 </div>
                             </div>
 
