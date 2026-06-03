@@ -180,7 +180,7 @@ const BookRoom = () => {
     const [roomForm, setRoomForm] = useState({
         name: '',
         capacity: '',
-        price: '',
+        price: '0',
         image: '',
         description: '',
         amenities: [],
@@ -407,7 +407,7 @@ const BookRoom = () => {
         setRoomForm({
             name: '',
             capacity: '',
-            price: '',
+            price: '0',
             image: '',
             description: '',
             amenities: [],
@@ -428,7 +428,7 @@ const BookRoom = () => {
         setRoomForm({
             name: room.name || '',
             capacity: room.capacity || '',
-            price: room.price || '',
+            price: room.price !== undefined ? String(room.price) : '0',
             image: room.image || '',
             description: room.description || '',
             amenities: room.amenities || [],
@@ -464,7 +464,7 @@ const BookRoom = () => {
         const payload = {
             name: roomForm.name,
             capacity: roomForm.capacity,
-            price: parseFloat(roomForm.price),
+            price: parseFloat(roomForm.price) || 0.0,
             image: roomForm.image,
             description: roomForm.description,
             amenities: roomForm.amenities,
@@ -1412,7 +1412,7 @@ const BookRoom = () => {
                                 <div className="border-t pt-6 flex justify-between items-center bg-slate-50 -mx-8 -mb-8 p-8 rounded-b-3xl">
                                     <div>
                                         <span className="text-xs text-gray-400 block uppercase">Total a Abonar</span>
-                                        <span className="text-3xl font-black text-primary">${calculateTotal()}</span>
+                                        <span className="text-3xl font-black text-primary">Sin Costo</span>
                                     </div>
                                     <div className="text-right text-[10px] text-gray-400 leading-relaxed font-bold">
                                         * Presentarse 10 min antes.<br />
@@ -1487,7 +1487,7 @@ const BookRoom = () => {
                             </div>
 
                             {/* Capacity & Price */}
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 gap-4">
                                 <div className="space-y-1.5">
                                     <label className="block text-sm font-bold text-gray-700">Capacidad (personas) *</label>
                                     <input
@@ -1498,19 +1498,6 @@ const BookRoom = () => {
                                         className="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-secondary text-sm bg-white text-gray-700"
                                         value={roomForm.capacity}
                                         onChange={(e) => setRoomForm({ ...roomForm, capacity: parseInt(e.target.value) || '' })}
-                                    />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <label className="block text-sm font-bold text-gray-700">Precio por Hora *</label>
-                                    <input
-                                        required
-                                        type="number"
-                                        min="0"
-                                        step="0.01"
-                                        placeholder="Ej: 1500"
-                                        className="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-secondary text-sm bg-white text-gray-700"
-                                        value={roomForm.price}
-                                        onChange={(e) => setRoomForm({ ...roomForm, price: e.target.value })}
                                     />
                                 </div>
                             </div>

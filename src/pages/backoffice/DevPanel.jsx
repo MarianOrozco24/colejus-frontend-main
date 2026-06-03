@@ -13,9 +13,47 @@ const DevPanel = () => {
         localStorage.getItem("disableMembershipValidation") === "true"
     );
 
-    const handleToggleValidation = (disabled) => {
+    useEffect(() => {
+        const fetchConfig = async () => {
+            try {
+                const token = localStorage.getItem("authToken");
+                const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/config`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await response.json();
+                if (response.ok && data.disable_membership_validation !== undefined) {
+                    const disabled = data.disable_membership_validation === "true";
+                    setIsValidationDisabled(disabled);
+                    localStorage.setItem("disableMembershipValidation", disabled ? "true" : "false");
+                }
+            } catch (error) {
+                console.error("Error fetching config:", error);
+            }
+        };
+        fetchConfig();
+    }, []);
+
+    const handleToggleValidation = async (disabled) => {
         setIsValidationDisabled(disabled);
         localStorage.setItem("disableMembershipValidation", disabled ? "true" : "false");
+        try {
+            const token = localStorage.getItem("authToken");
+            await fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/config`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    key: 'disable_membership_validation',
+                    value: disabled ? 'true' : 'false'
+                })
+            });
+        } catch (error) {
+            console.error("Error updating config:", error);
+        }
     };
 
     useEffect(() => {
