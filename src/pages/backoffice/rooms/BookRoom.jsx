@@ -1201,14 +1201,16 @@ const BookRoom = () => {
                                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                     {timeSlots.map((slot) => {
                                         const isBooked = bookedSlots.includes(slot);
+                                        const hasOwnBooking = myBookingsForDate.some(b => b.time_slot === slot);
+                                        const isDisabled = isBooked || hasOwnBooking;
                                         const isSelected = selectedSlots.includes(slot);
 
                                         return (
                                             <button
                                                 key={slot}
                                                 onClick={() => handleSlotClick(slot)}
-                                                disabled={isBooked || apiLoading}
-                                                className={`py-4 rounded-xl font-bold border transition-all text-sm shadow-sm flex flex-col items-center justify-center ${isBooked
+                                                disabled={isDisabled || apiLoading}
+                                                className={`py-4 rounded-xl font-bold border transition-all text-sm shadow-sm flex flex-col items-center justify-center ${isDisabled
                                                     ? 'bg-red-50 text-red-400 border-red-100 cursor-not-allowed'
                                                     : isSelected
                                                         ? 'bg-secondary text-white border-secondary scale-102 ring-2 ring-blue-300'
@@ -1217,7 +1219,7 @@ const BookRoom = () => {
                                             >
                                                 <span>{slot}</span>
                                                 <span className="text-[10px] mt-1 font-normal opacity-85">
-                                                    {isBooked ? 'Ocupado' : isSelected ? 'Seleccionado' : 'Disponible'}
+                                                    {isBooked ? 'Ocupado' : hasOwnBooking ? 'Ya reservado' : isSelected ? 'Seleccionado' : 'Disponible'}
                                                 </span>
                                             </button>
                                         );
