@@ -176,6 +176,34 @@ const Nosotros = () => {
 
           </div>
 
+          {/* SECRETARIOS DE PRENSA */}
+          <div className="border-t border-slate-200 pt-16 mb-16">
+            <h3 className="text-xl font-serif text-primary text-center font-bold mb-10 tracking-wide uppercase">Secretarios de Prensa</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+              {[
+                { name: 'Federico Cerdá Sundermann', telefono: '2604617285' },
+                { name: 'Mira Paula Herrera Poblet', telefono: '2604607841' },
+                { name: 'Karen Georgina Vargas', telefono: '2604098418' },
+              ].map((item, index) => (
+                <div
+                  key={index}
+                  className="bg-white rounded-xl p-6 border border-slate-200 shadow-md flex flex-col justify-between transition-all hover:shadow-lg hover:-translate-y-0.5"
+                >
+                  <div>
+                    <span className="text-[9px] font-bold text-secondary uppercase tracking-widest block mb-1">Secretario/a de Prensa</span>
+                    <h4 className="text-base font-bold text-primary mb-2">{item.name}</h4>
+                    <a
+                      href={`tel:${item.telefono}`}
+                      className="text-xs text-secondary font-semibold hover:underline inline-block"
+                    >
+                      Tel. {item.telefono}
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* VOCALES / DIRECTORES GRID */}
           <div className="border-t border-slate-200 pt-16">
             <h3 className="text-xl font-serif text-primary text-center font-bold mb-10 tracking-wide uppercase">Directores Vocales</h3>
