@@ -181,9 +181,9 @@ const Nosotros = () => {
             <h3 className="text-xl font-serif text-primary text-center font-bold mb-10 tracking-wide uppercase">Secretarios de Prensa</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
               {[
-                { name: 'Federico Cerdá Sundermann', telefono: '2604617285' },
-                { name: 'Mira Paula Herrera Poblet', telefono: '2604607841' },
-                { name: 'Karen Georgina Vargas', telefono: '2604098418' },
+                { name: 'Dr. Federico Cerdá Sundermann', telefono: '2604617285' },
+                { name: 'Dra. María Paula Herrera Poblete', telefono: '2604607841' },
+                { name: 'Dra. Karen Georgina Vargas', telefono: '2604098418' },
               ].map((item, index) => (
                 <div
                   key={index}
@@ -212,7 +212,7 @@ const Nosotros = () => {
                 { name: 'Dra. Laura Cordero', cargo: 'Directora Vocal' },
                 { name: 'Dr. Diego Silvestre', cargo: 'Director Vocal' },
                 { name: 'Dra. Naim Yapur', cargo: 'Directora Vocal' },
-                { name: 'Samir Alí Sat', cargo: 'Director Vocal' },
+                { name: 'Dr. Samir Alí Sat', cargo: 'Director Vocal' },
                 { name: 'Dr. Juan Antonio Parra', cargo: 'Director Vocal' },
                 { name: 'Dra. Valentina Llorente', cargo: 'Directora Vocal' },
                 { name: 'Dr. Gonzalo E. Pagliano', cargo: 'Director Vocal' },
