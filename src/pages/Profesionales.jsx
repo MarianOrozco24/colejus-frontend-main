@@ -12,7 +12,7 @@ const Profesionales = () => {
     malargue: false,
     sanRafael: false,
   });
-  const [selectedLetter, setSelectedLetter] = useState("Todos");
+  const [selectedProfession, setSelectedProfession] = useState("Todos");
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
 
@@ -45,7 +45,7 @@ const Profesionales = () => {
           page: currentPage,
           perPage: 12,
           search: debouncedSearchTerm,
-          letter: selectedLetter !== "Todos" ? selectedLetter : "",
+          title: selectedProfession !== "Todos" ? selectedProfession : "",
           locations: Object.entries(selectedLocations)
             .filter(([, sel]) => sel)
             .map(([loc]) => loc),
@@ -66,7 +66,7 @@ const Profesionales = () => {
     };
 
     fetchProfessionals();
-  }, [currentPage, debouncedSearchTerm, selectedLetter, selectedLocations]);
+  }, [currentPage, debouncedSearchTerm, selectedProfession, selectedLocations]);
 
   const handleSearch = e => {
     e.preventDefault();
@@ -81,30 +81,41 @@ const Profesionales = () => {
 
   return (
     <div className="bg-gray-100 min-h-screen">
-      <header className="relative h-[75vh] bg-primary bg-cover bg-center flex flex-col justify-center items-center text-white text-center">
-        <div className="absolute inset-0 opacity-60 z-0" style={{ backgroundColor: "#06092E" }} />
-        <ResponsiveNav />
-        <div className="absolute inset-0 flex flex-col justify-center items-center text-white z-10 px-4 pt-40 md:pt-0">
-          <h1 className="2xl:text-7xl md:text-5xl font-normal mb-2" style={{ lineHeight: "1.5" }}>
-            Conocé nuestro
+      <header className="relative min-h-[55vh] pb-16 bg-[#06092E] flex flex-col justify-start items-center text-white text-center overflow-hidden">
+        {/* Fondo con degradado elegante a juego con Nosotros y Novedades */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#06092E] via-[#080c3e] to-[#040620] z-0"></div>
+
+        {/* Navbar */}
+        <div className="w-full z-20">
+          <ResponsiveNav />
+        </div>
+
+        {/* Contenido principal del título y buscador */}
+        <div className="flex flex-col justify-center items-center text-center z-10 px-6 flex-1 mt-28 md:mt-36 w-full max-w-4xl">
+          <h1
+            className="text-4xl md:text-6xl font-serif font-bold mb-4 tracking-tight"
+            style={{ lineHeight: "1.2" }}
+          >
+            Nuestros Profesionales
           </h1>
-          <h1 className="2xl:text-7xl md:text-5xl font-normal mb-6" style={{ lineHeight: "1.5" }}>
-            listado de profesionales
-          </h1>
-          <form onSubmit={handleSearch} className="flex items-center w-full max-w-md mt-4">
-            <div className="flex items-center bg-white rounded-full px-4 py-2 shadow-md flex-grow font-lato">
-              <FaSearch className="text-gray-500 mr-2" />
+          <p className="text-slate-300 font-light max-w-2xl text-sm md:text-base font-lato leading-relaxed mb-8">
+            Buscá abogados y procuradores matriculados vigentes dentro de la Segunda Circunscripción Judicial de Mendoza.
+          </p>
+
+          <form onSubmit={handleSearch} className="flex flex-col sm:flex-row items-center gap-4 w-full max-w-lg">
+            <div className="flex items-center bg-white rounded-full px-5 py-3 shadow-[0_10px_25px_rgba(0,0,0,0.1)] w-full font-lato transition-all duration-300 border border-slate-200 focus-within:border-secondary">
+              <FaSearch className="text-gray-400 mr-2 text-lg shrink-0" />
               <input
                 type="text"
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
-                placeholder="Buscar por nombre o matrícula"
-                className="flex-grow pl-2 py-1 rounded-full text-gray-700 focus:outline-none"
+                placeholder="Nombre, apellido o número de matrícula..."
+                className="flex-grow text-gray-700 bg-transparent focus:outline-none text-sm md:text-base"
               />
             </div>
             <button
               type="submit"
-              className="ml-4 bg-indigo-500 text-white px-6 py-2 rounded-full hover:bg-indigo-600 transition"
+              className="bg-secondary text-white font-bold px-8 py-3 rounded-full hover:bg-secondary/90 hover:scale-[1.02] shadow-[0_4px_15px_rgba(40,47,136,0.3)] transition-all duration-300 shrink-0 w-full sm:w-auto text-sm md:text-base"
             >
               Buscar
             </button>
@@ -114,10 +125,10 @@ const Profesionales = () => {
 
       <section className="bg-gray-100 px-4 md:px-0 2xl:mx-52 md:mx-16 mt-8">
         <FilterBar
-          selectedLetter={selectedLetter}
+          selectedProfession={selectedProfession}
           selectedLocations={selectedLocations}
-          setSelectedLetter={letter => {
-            setSelectedLetter(letter);
+          setSelectedProfession={profession => {
+            setSelectedProfession(profession);
             setCurrentPage(1);
           }}
           setSelectedLocations={locs => {
@@ -134,9 +145,13 @@ const Profesionales = () => {
           </div>
         )}
 
-        <h1 className="text-primary 2xl:text-3xl md:text-2xl font-bold">
-          {selectedLetter === "Todos" ? "Todos los profesionales" : selectedLetter}
-        </h1>
+        <h2 className="text-primary text-xl md:text-2xl font-serif font-semibold tracking-tight">
+          {selectedProfession === "Todos"
+            ? "Todos los profesionales"
+            : selectedProfession === "Abogado"
+            ? "Abogados matriculados"
+            : "Procuradores matriculados"}
+        </h2>
 
         {loading ? (
           <div className="flex justify-center items-center py-20">

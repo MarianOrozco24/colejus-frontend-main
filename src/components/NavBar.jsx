@@ -102,13 +102,14 @@ const NavBar = () => {
 
             <div className="flex space-x-10 text-white md:text-xs 2xl:text-sm nav-links font-bold">
                 <div className="relative text-inherit">
-                    <a  href='#'
-                        className="hover:text-gray-300 cursor-pointer flex items-center space-x-1"
+                    <button
+                        type="button"
+                        className="hover:text-gray-300 cursor-pointer flex items-center space-x-1 bg-transparent border-none p-0 text-inherit font-bold focus:outline-none"
                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                     >
                         <span className='text-inherit'>Herramientas digitales</span>
                         <FaChevronDown />
-                    </a>
+                    </button>
 
                     {isDropdownOpen && (
                         <div className="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
@@ -123,6 +124,9 @@ const NavBar = () => {
                             </Link>
                             <Link to="/links-de-interes" className="block px-4 py-2 text-primary hover:bg-gray-100 text-inherit">
                                 Links de interés
+                            </Link>
+                            <Link to="/backoffice/reservar-sala" className="block px-4 py-2 text-primary hover:bg-gray-100 text-inherit">
+                                Reserva de Salas
                             </Link>
                         </div>
                     )}

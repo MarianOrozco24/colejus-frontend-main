@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
+import { FaPlus, FaEdit } from "react-icons/fa";
 import { fetchAllRates } from "../../../api/rates/fetchAllRates";
+import { hasPermission } from "../../../utils/hasPermission";
 
 const BackOfficeRates = () => {
     const navigate = useNavigate();
+    const canManage = hasPermission("manage_rates");
     const [rates, setRates] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedRate, setSelectedRate] = useState(null);
 
     const fetchRates = async () => {
         const token = localStorage.getItem("authToken");
@@ -45,10 +45,7 @@ const BackOfficeRates = () => {
         navigate(`/backoffice/editar-tasa/${rateUuid}`);
     };
 
-    const handleDeleteClick = (rateItem) => {
-        setSelectedRate(rateItem);
-        setIsModalOpen(true);
-    };
+
 
     const formatDate = (dateString) => {
         if (!dateString) return 'Actualmente';
@@ -73,13 +70,15 @@ const BackOfficeRates = () => {
                 <h1 className="text-2xl font-bold text-primary">
                     Sección <span className="text-secondary">tasas</span>
                 </h1>
-                <button
-                    onClick={handleNewOpen}
-                    className="flex items-center space-x-2 px-4 py-2 bg-secondary text-white rounded-full shadow hover:bg-secondary-dark"
-                >
-                    <FaPlus />
-                    <span>Nueva tasa</span>
-                </button>
+                {canManage && (
+                    <button
+                        onClick={handleNewOpen}
+                        className="flex items-center space-x-2 px-4 py-2 bg-secondary text-white rounded-full shadow hover:bg-secondary-dark"
+                    >
+                        <FaPlus />
+                        <span>Nueva tasa</span>
+                    </button>
+                )}
             </div>
 
             {(!rates || rates.length === 0) ? (
@@ -94,7 +93,7 @@ const BackOfficeRates = () => {
                                 <th className="p-4 text-sm font-medium text-gray-500 w-3/12">Fecha Inicio</th>
                                 <th className="p-4 text-sm font-medium text-gray-500 w-3/12">Fecha Fin</th>
                                 <th className="p-4 text-sm font-medium text-gray-500 w-2/12">Estado</th>
-                                <th className="p-4 text-sm font-medium text-gray-500 text-center w-2/12">Acciones</th>
+                                {canManage && <th className="p-4 text-sm font-medium text-gray-500 text-center w-2/12">Acciones</th>}
                             </tr>
                         </thead>
                         <tbody>
@@ -117,17 +116,13 @@ const BackOfficeRates = () => {
                                             {!item.end_date ? 'Activa' : 'Histórica'}
                                         </span>
                                     </td>
-                                    <td className="p-4 flex items-center justify-center space-x-4">
-                                        <button className="text-gray-500 hover:text-secondary">
-                                            <FaEdit size={20} onClick={() => handleEditOpen(item.uuid)} />
-                                        </button>
-                                        <button
-                                            className="text-gray-500 hover:text-red-500"
-                                            disabled={!item.end_date}
-                                        >
-                                            <FaTrash size={20} onClick={() => handleDeleteClick(item)} />
-                                        </button>
-                                    </td>
+                                    {canManage && (
+                                        <td className="p-4 flex items-center justify-center space-x-4">
+                                            <button className="text-gray-500 hover:text-secondary">
+                                                <FaEdit size={20} onClick={() => handleEditOpen(item.uuid)} />
+                                            </button>
+                                        </td>
+                                    )}
                                 </tr>
                             ))}
                         </tbody>
@@ -153,14 +148,13 @@ const BackOfficeRates = () => {
                                         {!item.end_date ? 'Activa' : 'Histórica'}
                                     </span>
                                 </div>
-                                <div className="flex items-center justify-end gap-3 text-gray-500">
-                                    <button onClick={() => handleEditOpen(item.uuid)} className="hover:text-secondary">
-                                        <FaEdit />
-                                    </button>
-                                    <button onClick={() => handleDeleteClick(item)} disabled={!item.end_date} className="hover:text-red-500 disabled:opacity-50">
-                                        <FaTrash />
-                                    </button>
-                                </div>
+                                {canManage && (
+                                    <div className="flex items-center justify-end gap-3 text-gray-500">
+                                        <button onClick={() => handleEditOpen(item.uuid)} className="hover:text-secondary">
+                                            <FaEdit />
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>

@@ -84,7 +84,6 @@ function KPI({ title, value }) {
 // --- Utils ---
 const fmtMoney = (n) =>
   new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS" }).format(Number(n || 0));
-const fmtDate = (s) => (s ? new Date(s.replace(" ", "T")) : null);
 const groupBy = (arr, keyFn) =>
   arr.reduce((acc, x) => {
     const k = keyFn(x);
@@ -129,7 +128,7 @@ const parseDate = (s) => {
   }
   // LatAm: "DD/MM/YYYY[ HH:MM[:SS]]" o con guiones
   const m = t.match(
-    /^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?$/
+    /^(\d{1,2})[/-](\d{1,2})[/-](\d{4})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?$/
   );
   if (m) {
     const [, d, mo, y, hh = "0", mm = "0", ss = "0"] = m;
@@ -259,10 +258,7 @@ const totalIngresos = useMemo(
   [dataWindow]
 );
 
-const totalIngresos_menos_iva = useMemo(
-  () => dataWindow.reduce((acc, r) => acc + (r.total_depositado_menos_iva || 0), 0),
-  [dataWindow]
-);
+
 
 const totalIngresosQrBcm = useMemo(
   () => dataWindow.reduce((acc, r) => acc + (r.total_bcm_qr_neto || 0), 0),
@@ -283,10 +279,7 @@ const totalIngresosMpTd = useMemo(
   () => dataWindow.reduce((acc, r) => acc + (r.total_mp_td_neto || 0), 0),
   [dataWindow]
 );
-const totalIngresosDesconocidos = useMemo(
-  () => dataWindow.reduce((acc, r) => acc + (r.totoal_desconocido_neto || 0), 0),
-  [dataWindow]
-);
+
 
 const ticketPromedio = useMemo(
   () => (dataWindow.length ? totalIngresos / dataWindow.length : 0),
@@ -297,13 +290,13 @@ const ticketPromedio = useMemo(
   // Filtro tabla
   const filteredRows = useMemo(() => {
     const q = (search || "").toLowerCase();
-    if (!q) return data;
-    return data.filter((r) =>
+    if (!q) return dataWindow;
+    return dataWindow.filter((r) =>
       [r.receipt_number, r.caratula, r.juicio_n, r.payment_id, r.payment_method]
         .filter(Boolean)
         .some((f) => String(f).toLowerCase().includes(q))
     );
-  }, [dataWindow,  search]);
+  }, [dataWindow, search]);
 
   // // Series
   // const desdeVentana = useMemo(() => {

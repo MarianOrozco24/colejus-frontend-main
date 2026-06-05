@@ -1,4 +1,4 @@
-export const getPublicProfessionals = async ({ page = 1, perPage = 12, search = '', letter = '', locations = [] }) => {
+export const getPublicProfessionals = async ({ page = 1, perPage = 12, search = '', letter = '', title = '', locations = [] }) => {
     try {
         let url = `${process.env.REACT_APP_BACKEND_URL}/public/professionals?page=${page}&per_page=${perPage}`;
 
@@ -8,6 +8,10 @@ export const getPublicProfessionals = async ({ page = 1, perPage = 12, search = 
 
         if (letter) {
             url += `&letter=${encodeURIComponent(letter)}`;
+        }
+
+        if (title) {
+            url += `&title=${encodeURIComponent(title)}`;
         }
 
         if (locations.length > 0) {

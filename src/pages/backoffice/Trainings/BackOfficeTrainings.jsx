@@ -6,9 +6,11 @@ import { fetchAllTrainings } from "../../../api/trainings/fetchAllTrainings";
 import { deleteTrainingById } from "../../../api/trainings/deleteTrainingById";
 import { toggleTrainingById } from "../../../api/trainings/toggleTrainingActive";
 import DeleteTrainingModal from "./DeleteTrainingModal";
+import { hasPermission } from "../../../utils/hasPermission";
 
 const BackOfficeTrainings = () => {
     const navigate = useNavigate();
+    const canManage = hasPermission("manage_trainings");
     const [trainings, setTrainings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -111,13 +113,15 @@ const BackOfficeTrainings = () => {
                 <h1 className="text-2xl font-bold text-primary">
                     Sección <span className="text-secondary">capacitaciones</span>
                 </h1>
-                <button
-                    onClick={handleNewOpen}
-                    className="flex items-center space-x-2 px-4 py-2 bg-secondary text-white rounded-full shadow hover:bg-secondary-dark"
-                >
-                    <FaPlus />
-                    <span>Nueva capacitación</span>
-                </button>
+                {canManage && (
+                    <button
+                        onClick={handleNewOpen}
+                        className="flex items-center space-x-2 px-4 py-2 bg-secondary text-white rounded-full shadow hover:bg-secondary-dark"
+                    >
+                        <FaPlus />
+                        <span>Nueva capacitación</span>
+                    </button>
+                )}
             </div>
 
             {trainings.length === 0 ? (
@@ -130,7 +134,7 @@ const BackOfficeTrainings = () => {
                             <tr>
                                 <th className="p-4 text-sm font-medium text-gray-500 w-2/12">Fecha</th>
                                 <th className="p-4 text-sm font-medium text-gray-500 w-7/12">Título</th>
-                                <th className="p-4 text-sm font-medium text-gray-500 text-center w-3/12">Acciones</th>
+                                {canManage && <th className="p-4 text-sm font-medium text-gray-500 text-center w-3/12">Acciones</th>}
                             </tr>
                         </thead>
                         <tbody>
@@ -138,20 +142,22 @@ const BackOfficeTrainings = () => {
                                 <tr key={index} className="border-b">
                                     <td className="p-4 text-sm text-gray-500">{new Date(item.date).toLocaleDateString()}</td>
                                     <td className="p-4 text-sm text-gray-800">{item.title}</td>
-                                    <td className="p-4 flex items-center justify-center space-x-4">
-                                        <button className="text-gray-500 hover:text-secondary">
-                                            <FaEdit size={20} onClick={() => handleEditOpen(item.uuid)} />
-                                        </button>
-                                        <button className="text-gray-500 hover:text-red-500">
-                                            <FaTrash size={20} onClick={() => handleDeleteClick(item)} />
-                                        </button>
-                                        <button
-                                            className={`text-${item.is_active ? "secondary" : "gray-400"} hover:text-secondary`}
-                                            onClick={() => toggleStatus(item.uuid, index)}
-                                        >
-                                            {item.is_active ? <BsToggleOff size={26} /> : <BsToggleOn size={26} className="text-primary" />}
-                                        </button>
-                                    </td>
+                                    {canManage && (
+                                        <td className="p-4 flex items-center justify-center space-x-4">
+                                            <button className="text-gray-500 hover:text-secondary">
+                                                <FaEdit size={20} onClick={() => handleEditOpen(item.uuid)} />
+                                            </button>
+                                            <button className="text-gray-500 hover:text-red-500">
+                                                <FaTrash size={20} onClick={() => handleDeleteClick(item)} />
+                                            </button>
+                                            <button
+                                                className={`text-${item.is_active ? "secondary" : "gray-400"} hover:text-secondary`}
+                                                onClick={() => toggleStatus(item.uuid, index)}
+                                            >
+                                                {item.is_active ? <BsToggleOff size={26} /> : <BsToggleOn size={26} className="text-primary" />}
+                                            </button>
+                                        </td>
+                                    )}
                                 </tr>
                             ))}
                         </tbody>
@@ -162,17 +168,19 @@ const BackOfficeTrainings = () => {
                             <div key={index} className="p-4 space-y-2">
                                 <div className="text-xs text-gray-500">{new Date(item.date).toLocaleDateString()}</div>
                                 <div className="text-base font-medium text-gray-800">{item.title}</div>
-                                <div className="flex items-center justify-end gap-3 text-gray-500">
-                                    <button onClick={() => handleEditOpen(item.uuid)} className="hover:text-secondary">
-                                        <FaEdit />
-                                    </button>
-                                    <button onClick={() => handleDeleteClick(item)} className="hover:text-red-500">
-                                        <FaTrash />
-                                    </button>
-                                    <button onClick={() => toggleStatus(item.uuid, index)}>
-                                        {item.is_active ? <BsToggleOff size={24} /> : <BsToggleOn size={24} className="text-primary" />}
-                                    </button>
-                                </div>
+                                {canManage && (
+                                    <div className="flex items-center justify-end gap-3 text-gray-500">
+                                        <button onClick={() => handleEditOpen(item.uuid)} className="hover:text-secondary">
+                                            <FaEdit />
+                                        </button>
+                                        <button onClick={() => handleDeleteClick(item)} className="hover:text-red-500">
+                                            <FaTrash />
+                                        </button>
+                                        <button onClick={() => toggleStatus(item.uuid, index)}>
+                                            {item.is_active ? <BsToggleOff size={24} /> : <BsToggleOn size={24} className="text-primary" />}
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>

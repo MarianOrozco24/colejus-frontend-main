@@ -4,9 +4,11 @@ import { FaPlus, FaEdit, FaTrash, FaSearch } from "react-icons/fa";
 import { fetchAllEdicts } from "../../../api/edicts/fetchAllEdicts";
 import { deleteEdictById } from "../../../api/edicts/deleteEdictsById";
 import DeleteEdictModal from "./DeleteEdictModal";
+import { hasPermission } from "../../../utils/hasPermission";
 
 const BackOfficeEdicts = () => {
   const navigate = useNavigate();
+  const canManage = hasPermission("manage_edicts");
 
   // --- Estados ---
   // 1) Todos los edictos para búsqueda local
@@ -143,12 +145,14 @@ const BackOfficeEdicts = () => {
         <h1 className="text-2xl font-bold text-primary">
           Sección <span className="text-secondary">edictos</span>
         </h1>
-        <button
-          onClick={handleNew}
-          className="flex items-center space-x-2 px-4 py-2 bg-secondary text-white rounded-full shadow hover:bg-secondary-dark"
-        >
-          <FaPlus /><span>Nuevo edicto</span>
-        </button>
+        {canManage && (
+          <button
+            onClick={handleNew}
+            className="flex items-center space-x-2 px-4 py-2 bg-secondary text-white rounded-full shadow hover:bg-secondary-dark"
+          >
+            <FaPlus /><span>Nuevo edicto</span>
+          </button>
+        )}
       </div>
 
       {/* Buscador */}
@@ -180,7 +184,7 @@ const BackOfficeEdicts = () => {
                 <th className="p-4 text-sm font-medium text-gray-500 w-2/12">Fecha</th>
                 <th className="p-4 text-sm font-medium text-gray-500 w-7/12">Título</th>
                 <th className="p-4 text-sm font-medium text-gray-500 w-2/12">Estado</th>
-                <th className="p-4 text-sm font-medium text-gray-500 text-center w-3/12">Acciones</th>
+                {canManage && <th className="p-4 text-sm font-medium text-gray-500 text-center w-3/12">Acciones</th>}
               </tr>
             </thead>
             <tbody>
@@ -202,14 +206,16 @@ const BackOfficeEdicts = () => {
                         </span>
                       }
                     </td>
-                    <td className="p-4 flex items-center justify-center space-x-4">
-                      <button onClick={() => handleEdit(item.uuid)} className="text-gray-500 hover:text-secondary">
-                        <FaEdit size={20} />
-                      </button>
-                      <button onClick={() => handleDeleteClick(item)} className="text-gray-500 hover:text-red-500">
-                        <FaTrash size={20} />
-                      </button>
-                    </td>
+                    {canManage && (
+                      <td className="p-4 flex items-center justify-center space-x-4">
+                        <button onClick={() => handleEdit(item.uuid)} className="text-gray-500 hover:text-secondary">
+                          <FaEdit size={20} />
+                        </button>
+                        <button onClick={() => handleDeleteClick(item)} className="text-gray-500 hover:text-red-500">
+                          <FaTrash size={20} />
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 );
               })}
@@ -232,14 +238,16 @@ const BackOfficeEdicts = () => {
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center justify-end gap-3 text-gray-500">
-                    <button onClick={() => handleEdit(item.uuid)} className="hover:text-secondary">
-                      <FaEdit />
-                    </button>
-                    <button onClick={() => handleDeleteClick(item)} className="hover:text-red-500">
-                      <FaTrash />
-                    </button>
-                  </div>
+                  {canManage && (
+                    <div className="flex items-center justify-end gap-3 text-gray-500">
+                      <button onClick={() => handleEdit(item.uuid)} className="hover:text-secondary">
+                        <FaEdit />
+                      </button>
+                      <button onClick={() => handleDeleteClick(item)} className="hover:text-red-500">
+                        <FaTrash />
+                      </button>
+                    </div>
+                  )}
                 </div>
               );
             })}

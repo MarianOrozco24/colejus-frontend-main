@@ -40,6 +40,9 @@ import IPManager from "./pages/backoffice/IPManager";
 import LogHistory from "./pages/backoffice/LogHistory";
 import UserManager from "./pages/backoffice/UserManager";
 import ProfileManager from "./pages/backoffice/ProfileManager";
+import LawyerPayments from "./pages/backoffice/LawyerPayments";
+import BookRoom from "./pages/backoffice/rooms/BookRoom";
+import RoomStats from "./pages/backoffice/rooms/RoomStats";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -96,14 +99,17 @@ function App() {
           <Route path="tasas" element={<BackOfficeRates />} />
           <Route path="nueva-tasa" element={<NewRatePage />} />
           <Route path="historial-recibos" element={<Receipts />} />
-          <Route path="update-derecho-fijo" element={<AdminDerechoFijo />} />
+          <Route path="administrador-cobros" element={<AdminDerechoFijo />} />
           <Route path="integrantes" element={<Integrantes />} />
           <Route path="dashboard-ingresos" element={<BackofficeIngresos />} />
+          <Route path="pagos-membresias" element={<LawyerPayments />} />
           <Route path="dev-panel" element={<DevPanel />} />
           <Route path="ip-manager" element={<IPManager />} />
           <Route path="log-history" element={<LogHistory />} />
           <Route path="user-manager" element={<UserManager />} />
           <Route path="profile-manager" element={<ProfileManager />} />
+          <Route path="reservar-sala" element={<BookRoom />} />
+          <Route path="estadisticas-salas" element={<RoomStats />} />
 
 
         </Route>

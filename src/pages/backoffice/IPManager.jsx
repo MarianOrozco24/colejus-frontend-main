@@ -13,9 +13,11 @@ const IPManager = () => {
 
     const fetchBlockedRegions = async () => {
         try {
-            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/regions/blocked`);
+            const token = localStorage.getItem("authToken");
+            const headers = { 'Authorization': `Bearer ${token}` };
+            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/regions/blocked`, { headers });
             const data = await response.json();
-            setBlockedRegions(data);
+            setBlockedRegions(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error("Error fetching blocked regions:", error);
         }
@@ -23,9 +25,11 @@ const IPManager = () => {
 
     const fetchIps = async () => {
         try {
-            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/ips`);
+            const token = localStorage.getItem("authToken");
+            const headers = { 'Authorization': `Bearer ${token}` };
+            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/ips`, { headers });
             const data = await response.json();
-            setIps(data);
+            setIps(Array.isArray(data) ? data : []);
             setLoading(false);
         } catch (error) {
             console.error("Error fetching IPs:", error);
@@ -44,9 +48,13 @@ const IPManager = () => {
         e.preventDefault();
         if(!regionInput.trim()) return;
         try {
+            const token = localStorage.getItem("authToken");
             await fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/regions/block`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify({ region_type: regionType, region_name: regionInput.trim().toUpperCase() })
             });
             setRegionInput('');
@@ -58,9 +66,13 @@ const IPManager = () => {
 
     const handleUnblockRegion = async (type, name) => {
         try {
+            const token = localStorage.getItem("authToken");
             await fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/regions/unblock`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify({ region_type: type, region_name: name })
             });
             fetchBlockedRegions();
@@ -71,10 +83,14 @@ const IPManager = () => {
 
     const handleBlockAction = async (ip, isBlocked) => {
         try {
+            const token = localStorage.getItem("authToken");
             const endpoint = isBlocked ? 'unblock' : 'block';
             await fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/ips/${endpoint}`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify({ ip })
             });
             fetchIps();

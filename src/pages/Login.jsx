@@ -42,11 +42,13 @@ const Login = () => {
           JSON.stringify(response.data.profiles)
         );
         localStorage.setItem("username", response.data.name);
+        localStorage.setItem("email", response.data.email);
+        localStorage.setItem("uuid", response.data.uuid);
 
         // Navigate to home
         navigate("/backoffice");
       } else {
-        setErrorMessage(response.data?.message || "Usuario no autorizado");
+        setErrorMessage(response.data?.error || response.data?.message || "Usuario no autorizado");
         setShowErrorModal(true);
       }
     } catch (error) {

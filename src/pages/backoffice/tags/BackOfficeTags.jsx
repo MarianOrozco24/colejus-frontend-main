@@ -4,8 +4,10 @@ import { fetchAllTags } from '../../../api/tags/fetchAllTags';
 import { createTag } from '../../../api/tags/postTag';
 import { editTagById } from '../../../api/tags/editTagById';
 import { deleteTagById } from '../../../api/tags/deleteTagById';
+import { hasPermission } from '../../../utils/hasPermission';
 
 const BackOfficeTags = () => {
+    const canManage = hasPermission("manage_tags");
     const [tags, setTags] = useState([]);
     const [newTagName, setNewTagName] = useState("");
     const [color, setColor] = useState("#000000");
@@ -107,27 +109,29 @@ const BackOfficeTags = () => {
                 <h1 className="text-2xl font-bold text-primary">
                     Creación de <span className="text-secondary">categorías</span>
                 </h1>
-                <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4 w-full lg:w-auto">
-                    <input
-                        type="text"
-                        value={newTagName}
-                        onChange={(e) => setNewTagName(e.target.value)}
-                        placeholder="Nombre de categoría"
-                        className="w-full sm:w-64 px-4 py-2 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-secondary"
-                    />
-                    <input
-                        type="color"
-                        className="w-12 h-12 border rounded-lg cursor-pointer appearance-none"
-                        onChange={(e) => { setColor(e.target.value); }}
-                    />
-                    <button
-                        onClick={handleCreateTag}
-                        className="flex items-center justify-center px-4 py-2 bg-secondary text-white rounded-full shadow hover:bg-secondary-dark"
-                    >
-                        <FaPlus className="mr-2" />
-                        <span>Nueva categoría</span>
-                    </button>
-                </div>
+                {canManage && (
+                    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4 w-full lg:w-auto">
+                        <input
+                            type="text"
+                            value={newTagName}
+                            onChange={(e) => setNewTagName(e.target.value)}
+                            placeholder="Nombre de categoría"
+                            className="w-full sm:w-64 px-4 py-2 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-secondary"
+                        />
+                        <input
+                            type="color"
+                            className="w-12 h-12 border rounded-lg cursor-pointer appearance-none"
+                            onChange={(e) => { setColor(e.target.value); }}
+                        />
+                        <button
+                            onClick={handleCreateTag}
+                            className="flex items-center justify-center px-4 py-2 bg-secondary text-white rounded-full shadow hover:bg-secondary-dark"
+                        >
+                            <FaPlus className="mr-2" />
+                            <span>Nueva categoría</span>
+                        </button>
+                    </div>
+                )}
             </div>
 
             {tags.length === 0 ? (
@@ -166,20 +170,22 @@ const BackOfficeTags = () => {
                                 )}
                             </div>
 
-                            <div className="flex items-center space-x-3">
-                                <button
-                                    className="text-gray-500 hover:text-secondary"
-                                    onClick={() => setEditingTag(tag.uuid)}
-                                >
-                                    <FaEdit />
-                                </button>
-                                <button
-                                    className="text-gray-500 hover:text-red-500"
-                                    onClick={() => handleDeleteClick(tag)}
-                                >
-                                    <FaTrash />
-                                </button>
-                            </div>
+                            {canManage && (
+                                <div className="flex items-center space-x-3">
+                                    <button
+                                        className="text-gray-500 hover:text-secondary"
+                                        onClick={() => setEditingTag(tag.uuid)}
+                                    >
+                                        <FaEdit />
+                                    </button>
+                                    <button
+                                        className="text-gray-500 hover:text-red-500"
+                                        onClick={() => handleDeleteClick(tag)}
+                                    >
+                                        <FaTrash />
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     ))}
                 </div>

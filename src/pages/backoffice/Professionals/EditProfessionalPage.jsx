@@ -11,7 +11,6 @@ const EditProfessionalPage = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -44,8 +43,6 @@ const EditProfessionalPage = () => {
       } catch (err) {
         console.error("Error in fetch:", err);
         setError("Conexión no disponible.");
-      } finally {
-        setLoading(false);
       }
     };
 
