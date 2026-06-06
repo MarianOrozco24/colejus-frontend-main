@@ -182,7 +182,7 @@ const Nosotros = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
               {[
                 { name: 'Dr. Federico Cerdá Sundermann', telefono: '2604617285' },
-                { name: 'Dra. María Paula Herrera Poblete', telefono: '2604607841' },
+                { name: 'Dra. María Paula Herrera Poblet', telefono: '2604607841' },
                 { name: 'Dra. Karen Georgina Vargas', telefono: '2604098418' },
               ].map((item, index) => (
                 <div
