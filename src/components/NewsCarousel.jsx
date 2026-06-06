@@ -7,8 +7,8 @@ const NewsCarousel = () => {
   useEffect(() => {
     const loadNews = async () => {
       try {
-        // Usamos la API rss2json para parsear el feed RSS oficial y puramente jurídico de "Microjuris al Día"
-        const rssUrl = "https://aldia.microjuris.com/feed/";
+        // Feed RSS de Microjuris Argentina al Día
+        const rssUrl = "https://aldiaargentina.microjuris.com/feed/";
         const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
         const data = await response.json();
         
@@ -127,7 +127,7 @@ const NewsCarousel = () => {
 
         <div className="mt-16">
           <a
-            href="https://aldia.microjuris.com/"
+            href="https://aldiaargentina.microjuris.com/"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block bg-primary text-white hover:bg-primary/95 shadow-md px-8 py-3 rounded-full font-bold transition-all transform hover:scale-[1.02] text-sm"

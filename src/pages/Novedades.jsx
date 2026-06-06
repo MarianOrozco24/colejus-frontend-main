@@ -65,8 +65,8 @@ const Novedades = () => {
     const loadNews = async () => {
       setLoading(true);
       try {
-        // Obtenemos el feed jurídico real-time de Microjuris
-        const rssUrl = "https://aldia.microjuris.com/feed/";
+        // Feed jurídico de Microjuris Argentina (no el de Puerto Rico)
+        const rssUrl = "https://aldiaargentina.microjuris.com/feed/";
         const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
         const data = await response.json();
         

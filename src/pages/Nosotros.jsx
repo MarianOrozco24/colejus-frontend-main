@@ -2,6 +2,35 @@ import React, { useEffect } from "react";
 import ResponsiveNav from "../components/ResponsiveNav";
 import Footer from "../components/Footer";
 
+const SHOW_TRIBUNAL_ETICA = false;
+
+const COMISIONES_E_INSTITUTOS = [
+  { title: "Comisión de Jóvenes" },
+  { title: "Comisión Senior" },
+  { title: "Instituto de Derecho de Familia" },
+  { title: "Instituto de Derecho Administrativo" },
+  { title: "Comisión de Cultura" },
+  { title: "Instituto de Derecho Laboral" },
+  { title: "Instituto de Derecho Comercial" },
+  { title: "Instituto de Derecho Ambiental" },
+  { title: "Instituto de Derecho Penal, Procesal Penal y Criminología" },
+  { title: "Instituto de Derecho de Consumo" },
+  { title: "Comisión de Perspectiva de Género e Igualdad" },
+  { title: "Instituto de Derecho Constitucional" },
+  { title: "Comisión de Mediación, Conciliación y Arbitraje" },
+  { title: "Instituto de Seguridad Social" },
+  { title: "Comisión de Abogados de General Alvear" },
+  { title: "Instituto de Derecho Minero" },
+  { title: "Instituto de Derecho Civil" },
+  { title: "Comisión de Derecho Agrario" },
+  { title: "Comisión de Deportes" },
+  { title: "Comisión de Incumbencias" },
+  { title: "Comisión de Consultorio Jurídico Gratuito" },
+  { title: "Comisión de Asistencia" },
+  { title: "Comisión de Estudiantes de Abogacía (3°, 4° y 5° año)" },
+  { title: "Comisión de Procuradores" },
+];
+
 const Nosotros = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -26,7 +55,7 @@ const Nosotros = () => {
             Conocé el Colegio
           </h1>
           <p className="text-lg md:text-xl font-light max-w-3xl leading-relaxed text-slate-300">
-            Te presentamos nuestro Directorio, Tribunal de Ética, Institutos y Comisiones.
+            Te presentamos nuestro Directorio, Institutos y Comisiones.
             Compromiso, ética y formación académica al servicio del derecho.
           </p>
         </div>
@@ -182,7 +211,7 @@ const Nosotros = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
               {[
                 { name: 'Dr. Federico Cerdá Sundermann', telefono: '2604617285' },
-                { name: 'Dra. María Paula Herrera Poblete', telefono: '2604607841' },
+                { name: 'Dra. María Paula Herrera Poblet', telefono: '2604607841' },
                 { name: 'Dra. Karen Georgina Vargas', telefono: '2604098418' },
               ].map((item, index) => (
                 <div
@@ -257,7 +286,8 @@ const Nosotros = () => {
         </div>
       </section>
 
-      {/* 4. TRIBUNAL DE ETICA SECTION (CLEAN OFFICIAL CHARTER WITH CONTAINER AND HIGH CONTRAST) */}
+      {/* 4. TRIBUNAL DE ETICA SECTION — oculto hasta confirmar autoridades */}
+      {SHOW_TRIBUNAL_ETICA && (
       <section className="bg-slate-100 py-24 px-6 text-gray-900 border-b border-slate-200/50">
         <div className="container mx-auto max-w-5xl">
           
@@ -330,6 +360,7 @@ const Nosotros = () => {
 
         </div>
       </section>
+      )}
 
       {/* 5. COMISIONES E INSTITUTOS SECTION (DARK, MODERN MINIMALIST CARDS) */}
       <section className="bg-[#0A0F2C] py-24 px-6">
@@ -344,23 +375,7 @@ const Nosotros = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-            {[
-              { title: "Comisión de Jóvenes", name: "Dra. Naim Yapur" },
-              { title: "Comisión Senior", name: "Dr. Daniel Repullés" },
-              { title: "Instituto de Derecho de Familia", name: "Dra. Pía Masini" },
-              { title: "Instituto de Derecho Administrativo", name: "Dr. Daniel Vignoni" },
-              { title: "Comisión de Deporte y Cultura", name: "Dr. Mauricio Luzuriaga" },
-              { title: "Instituto de Derecho Laboral", name: "Dr. Javier Torres" },
-              { title: "Instituto de Derecho Comercial", name: "Dra. Alida Guillén" },
-              { title: "Instituto de Derecho Ambiental", name: "Dr. Adriano Indiveri" },
-              { title: "Instituto de Derecho Penal, Procesal Penal y Criminología", name: "Dra. Mariela Herrera" },
-              { title: "Instituto de Derecho de Consumo", name: "Dra. Cecilia Martínez" },
-              { title: "Comisión de Perspectiva de Género e Igualdad", name: "Dra. Celeste Marchetti" },
-              { title: "Instituto de Derecho Constitucional", name: "Dr. Enzo Orosito" },
-              { title: "Comisión de Mediación, Conciliación y Arbitraje", name: "Dra. Laura Rehder" },
-              { title: "Instituto de Seguridad Social", name: "Dra. Bibiana López Olivieri" },
-              { title: "Comisión de Abogados de General Alvear", name: "Dr. Raúl Gomeza" },
-            ].map((item, i) => (
+            {COMISIONES_E_INSTITUTOS.map((item, i) => (
               <div
                 key={i}
                 className="group bg-[#151A39]/60 hover:bg-[#1C234E] rounded-2xl p-6 text-center border-t-2 border-primary/20 hover:border-t-secondary hover:-translate-y-1 transition-all duration-300 shadow-sm flex flex-col justify-center min-h-[140px] border border-white/[0.02]"
@@ -368,7 +383,9 @@ const Nosotros = () => {
                 <h3 className="text-base font-bold text-white mb-2 group-hover:text-secondary transition-colors duration-300">
                   {item.title}
                 </h3>
-                <p className="text-xs text-slate-400 font-light font-lato">{item.name}</p>
+                {item.name && (
+                  <p className="text-xs text-slate-400 font-light font-lato">{item.name}</p>
+                )}
               </div>
             ))}
           </div>
