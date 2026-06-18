@@ -215,6 +215,7 @@ const Profesionales = () => {
           <div className="bg-white rounded-lg p-6 w-11/12 sm:w-2/3 md:w-1/2 lg:w-1/3 text-center">
             <h2 className="text-xl font-bold text-primary">{selectedProfessional.name}</h2>
             <p className="text-gray-600">{selectedProfessional.title}</p>
+            <p className="text-gray-500">Mat. {selectedProfessional.tuition || "—"}</p>
             <p className="text-gray-500">{selectedProfessional.location}</p>
             <p className="text-gray-700 mt-2">
               <strong>Dirección:</strong> {selectedProfessional.address || "No disponible"}

@@ -1,35 +1,63 @@
 import React from "react";
 import { FaMapMarkerAlt, FaIdCard } from "react-icons/fa";
 
+const parseProcuradorProfessions = (value) => {
+  if (!value) return "";
+
+  try {
+    const parsed = JSON.parse(value);
+    if (Array.isArray(parsed)) return parsed.filter(Boolean).join(", ");
+    return String(parsed);
+  } catch {
+    return String(value).replace(/^[\["']+|[\]"']+$/g, "").trim();
+  }
+};
+
+const getRoleLabel = (title, procuradorProfessions) => {
+  const specialty = parseProcuradorProfessions(procuradorProfessions);
+  const normalizedTitle = title?.trim();
+
+  if (normalizedTitle === "Abogado") return "Abogado";
+
+  if (normalizedTitle === "Procurador") {
+    return specialty ? `Procurador · ${specialty}` : "Procurador";
+  }
+
+  // Datos legacy: la especialidad quedó guardada en title (ej. Materiales, Matematicas)
+  if (specialty) return `Procurador · ${specialty}`;
+  if (normalizedTitle) return `Procurador · ${normalizedTitle}`;
+
+  return "Profesional";
+};
+
 const ContactCard = ({
   name,
-  profession,
+  title,
   email,
   location,
   tuition,
   procurador_professions,
   onClick,
 }) => {
+  const roleLabel = getRoleLabel(title, procurador_professions);
+
   return (
     <div className="group bg-white rounded-2xl border border-slate-100 shadow-[0_12px_24px_rgba(18,23,74,0.04)] hover:shadow-[0_20px_40px_rgba(18,23,74,0.1)] hover:-translate-y-1.5 transition-all duration-300 p-6 text-left flex flex-col justify-between font-lato min-h-[220px]">
       <div>
-        {/* Header containing name and tuition */}
         <div className="flex justify-between items-start gap-4 mb-2">
           <h3 className="font-serif font-bold text-lg md:text-xl text-gray-800 group-hover:text-primary transition-colors duration-300 leading-snug">
             {name}
           </h3>
-          <span className="text-[10px] md:text-xs font-semibold bg-slate-100 text-slate-500 px-2.5 py-1 rounded-full shrink-0 flex items-center gap-1">
-            <FaIdCard className="text-[10px]" />
-            Mat. {tuition || "—"}
+          <span className="text-[10px] md:text-xs font-semibold bg-slate-100 text-slate-500 px-2.5 py-1 rounded-full shrink-0 flex items-center gap-1 whitespace-nowrap">
+            <FaIdCard className="text-[10px] shrink-0" />
+            <span>Mat. {tuition || "—"}</span>
           </span>
         </div>
 
-        {/* Professional specialty/title */}
         <p className="text-secondary font-medium text-xs md:text-sm mb-4 uppercase tracking-wider">
-          {profession || "Profesional"}
+          {roleLabel}
         </p>
 
-        {/* Email */}
         {email && (
           <p className="text-gray-500 text-xs md:text-sm font-light truncate mb-2" title={email}>
             {email}
@@ -37,7 +65,6 @@ const ContactCard = ({
         )}
       </div>
 
-      {/* Footer containing location and button */}
       <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-50">
         <div className="flex items-center text-gray-500 text-xs md:text-sm truncate max-w-[60%]">
           <FaMapMarkerAlt className="text-secondary mr-1.5 shrink-0" />

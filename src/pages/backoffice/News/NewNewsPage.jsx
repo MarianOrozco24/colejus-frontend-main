@@ -15,6 +15,8 @@ const NewNewsPage = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -47,6 +49,14 @@ const NewNewsPage = () => {
     }));
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -65,12 +75,12 @@ const NewNewsPage = () => {
     setError(null);
 
     try {
-      const response = await createNews(payload, token);
+      const response = await createNews(payload, token, imageFile);
 
       if (response.status === 201) {
         setSuccess(true);
       } else {
-        setError(response.data.message || 'Error al crear la noticia.');
+        setError(response.data.error || response.data.message || 'Error al crear la noticia.');
       }
     } catch (err) {
       console.error('Error creating news:', err);
@@ -157,6 +167,25 @@ const NewNewsPage = () => {
               onChange={(value) => handleInputChange({ target: { name: 'tags', value } })}
             />
           </div>
+        </div>
+
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-500 mb-2">
+            Imagen de portada
+          </label>
+          <input
+            type="file"
+            accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
+            onChange={handleImageChange}
+            className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-white hover:file:bg-primary/90"
+          />
+          {imagePreview && (
+            <img
+              src={imagePreview}
+              alt="Vista previa"
+              className="mt-4 max-h-56 rounded-lg border border-slate-200 object-cover"
+            />
+          )}
         </div>
 
         <div className="mb-6">

@@ -1,8 +1,16 @@
 import React, { useEffect } from "react";
 import ResponsiveNav from "../components/ResponsiveNav";
 import Footer from "../components/Footer";
+import { FaFilePdf } from "react-icons/fa";
 
 const SHOW_TRIBUNAL_ETICA = false;
+
+const REGLAMENTO_INSTITUTOS_PDF = "/docs/reglamento-institutos-comisiones.pdf";
+
+const COORDINADOR_COMISIONES = {
+  role: "Coordinador de Comisiones e Institutos",
+  name: "Dr. Anuar Sat",
+};
 
 const COMISIONES_E_INSTITUTOS = [
   { title: "Comisión de Jóvenes" },
@@ -283,6 +291,32 @@ const Nosotros = () => {
             </div>
           </div>
 
+          {/* INSPECCIÓN Y RECAUDACIÓN */}
+          <div className="border-t border-slate-200 pt-16 mt-16">
+            <h3 className="text-xl font-serif text-primary text-center font-bold mb-10 tracking-wide uppercase">
+              Inspección y Recaudación
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+              {[
+                { name: "Dr. Rodrigo Hernando" },
+                { name: "Dr. Mariano Romboli" },
+                { name: "Dra. Cecilia Orozco" },
+              ].map((item, index) => (
+                <div
+                  key={index}
+                  className="bg-white rounded-xl p-6 border border-slate-200 shadow-md flex flex-col justify-between transition-all hover:shadow-lg hover:-translate-y-0.5"
+                >
+                  <div>
+                    <span className="text-[9px] font-bold text-secondary uppercase tracking-widest block mb-1">
+                      Inspección y Recaudación
+                    </span>
+                    <h4 className="text-base font-bold text-primary">{item.name}</h4>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
         </div>
       </section>
 
@@ -372,6 +406,47 @@ const Nosotros = () => {
               Comisiones e Institutos
             </h2>
             <div className="w-16 h-1 bg-secondary mx-auto"></div>
+          </div>
+
+          {/* Coordinador */}
+          <div className="bg-[#151A39]/80 border border-white/10 rounded-2xl py-8 px-6 max-w-xl mx-auto mb-10 text-center shadow-lg border-t-4 border-t-secondary">
+            <span className="text-[10px] font-bold text-secondary tracking-wider uppercase block mb-2">
+              {COORDINADOR_COMISIONES.role}
+            </span>
+            <h3 className="text-2xl font-serif font-bold text-white">
+              {COORDINADOR_COMISIONES.name}
+            </h3>
+          </div>
+
+          {/* Reglamento — PDF en public/docs, sin pegar texto */}
+          <div className="bg-[#151A39]/60 border border-white/10 rounded-2xl p-6 md:p-8 max-w-2xl mx-auto mb-14 text-center">
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-secondary/15 text-secondary mb-4">
+              <FaFilePdf className="text-xl" />
+            </div>
+            <h3 className="text-lg font-serif font-bold text-white mb-2">
+              Reglamento de Institutos y Comisiones
+            </h3>
+            <p className="text-sm text-slate-400 font-light mb-6 max-w-md mx-auto leading-relaxed">
+              Normativa de la 2.ª Circunscripción Judicial de Mendoza. Podés consultarlo en línea o descargarlo en PDF.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <a
+                href={REGLAMENTO_INSTITUTOS_PDF}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-secondary text-white font-bold text-sm px-6 py-3 rounded-full hover:bg-secondary/90 transition-all duration-300 shadow-[0_4px_15px_rgba(40,47,136,0.3)]"
+              >
+                <FaFilePdf />
+                Ver reglamento
+              </a>
+              <a
+                href={REGLAMENTO_INSTITUTOS_PDF}
+                download="Reglamento-Institutos-Comisiones-2da-Circ-MZA.pdf"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white/5 border border-white/20 text-white font-bold text-sm px-6 py-3 rounded-full hover:bg-white/10 transition-all duration-300"
+              >
+                Descargar PDF
+              </a>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">

@@ -1,12 +1,39 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
-import { BsToggleOff, BsToggleOn } from "react-icons/bs";
 import { fetchAllNews } from "../../../api/news/fetchAllNews";
 import { deleteNewsById } from "../../../api/news/deleteNewsById";
 import { toggleNewsById } from "../../../api/news/toggleNewsActive";
 import DeleteNewsModal from "./DeleteNewsModal";
 import { hasPermission } from "../../../utils/hasPermission";
+
+const PublishToggle = ({ isActive, onToggle }) => (
+    <button
+        type="button"
+        onClick={onToggle}
+        className="flex items-center gap-2"
+        title={isActive ? "Despublicar" : "Publicar"}
+    >
+        <span
+            className={`relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors ${
+                isActive ? "bg-secondary" : "bg-gray-300"
+            }`}
+        >
+            <span
+                className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform mt-0.5 ${
+                    isActive ? "translate-x-5" : "translate-x-0.5"
+                }`}
+            />
+        </span>
+        <span
+            className={`text-xs font-medium whitespace-nowrap ${
+                isActive ? "text-secondary" : "text-gray-400"
+            }`}
+        >
+            {isActive ? "Publicada" : "Borrador"}
+        </span>
+    </button>
+);
 
 const BackOfficeNews = () => {
     const navigate = useNavigate();
@@ -150,12 +177,10 @@ const BackOfficeNews = () => {
                                             <button className="text-gray-500 hover:text-red-500">
                                                 <FaTrash size={20} onClick={() => handleDeleteClick(item)} />
                                             </button>
-                                            <button
-                                                className={`text-${item.is_active ? "secondary" : "gray-400"} hover:text-secondary`}
-                                                onClick={() => toggleStatus(item.uuid, index)}
-                                            >
-                                                {item.is_active ? <BsToggleOff size={26} /> : <BsToggleOn size={26} className="text-primary" />}
-                                            </button>
+                                            <PublishToggle
+                                                isActive={item.is_active}
+                                                onToggle={() => toggleStatus(item.uuid, index)}
+                                            />
                                         </td>
                                     )}
                                 </tr>
@@ -177,9 +202,10 @@ const BackOfficeNews = () => {
                                         <button onClick={() => handleDeleteClick(item)} className="hover:text-red-500">
                                             <FaTrash />
                                         </button>
-                                        <button onClick={() => toggleStatus(item.uuid, index)}>
-                                            {item.is_active ? <BsToggleOff size={24} /> : <BsToggleOn size={24} className="text-primary" />}
-                                        </button>
+                                        <PublishToggle
+                                            isActive={item.is_active}
+                                            onToggle={() => toggleStatus(item.uuid, index)}
+                                        />
                                     </div>
                                 )}
                             </div>
