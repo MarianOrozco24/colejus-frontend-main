@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import QuillEditor from '../QuillEditor'; // Import your QuillEditor component
-import DatePicker, { registerLocale } from 'react-datepicker'; // Date picker library
-import 'react-datepicker/dist/react-datepicker.css'; // Date picker CSS
+import QuillEditor from '../QuillEditor';
+import DatePicker, { registerLocale } from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import es from 'date-fns/locale/es';
 import { fetchNewsById } from '../../../api/news/fetchNewsById';
 import { editNewsById } from '../../../api/news/editNewsById';
 import TagInput from '../../../components/TagInput';
+import { getNewsImageUrl } from '../../../utils/newsImageUrl';
 
 registerLocale('es', es);
 
@@ -17,10 +18,26 @@ const EditNewsPage = () => {
 
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [imageFile, setImageFile] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null);
+    const [currentImagePath, setCurrentImagePath] = useState(null);
+
+    const [formData, setFormData] = useState({
+        title: '',
+        subtitle: '',
+        date: new Date(),
+        readingDuration: '',
+        tags: [],
+        content: '',
+    });
 
     useEffect(() => {
         const fetchNews = async () => {
+            setLoading(true);
+            setError('');
+
             try {
                 const response = await fetchNewsById(uuid, token);
                 if (response.status === 200) {
@@ -30,11 +47,13 @@ const EditNewsPage = () => {
                         subtitle: news.subtitle,
                         date: new Date(news.date),
                         readingDuration: news.reading_duration,
-                        tags: news.tags,
+                        tags: news.tags || [],
                         content: news.content,
                     });
+                    setCurrentImagePath(news.image_path || null);
+                    setImagePreview(getNewsImageUrl(news.image_path));
                 } else {
-                    setError(response.data.message || 'Error fetching news.');
+                    setError(response.data.message || response.data.error || 'Error al cargar la noticia.');
                 }
             } catch (err) {
                 console.error('Error in fetch:', err);
@@ -46,16 +65,6 @@ const EditNewsPage = () => {
 
         fetchNews();
     }, [uuid, token]);
-
-    //FORM
-    const [formData, setFormData] = useState({
-        title: '',
-        subtitle: '',
-        date: new Date(),
-        readingDuration: '',
-        tags: '',
-        content: '',
-    });
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -79,43 +88,52 @@ const EditNewsPage = () => {
         }));
     };
 
-    //ACTIONS
+    const handleImageChange = (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setImageFile(file);
+        setImagePreview(URL.createObjectURL(file));
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        const token = localStorage.getItem('authToken');
 
         const payload = {
             title: formData.title,
             subtitle: formData.subtitle,
-            date: formData.date.toISOString().split('T')[0], // Format as YYYY-MM-DD
+            date: formData.date.toISOString().split('T')[0],
             reading_duration: parseInt(formData.readingDuration, 10),
             tags: formData.tags,
             content: formData.content,
         };
 
-        setLoading(true);
-        setError(null);
+        setIsSubmitting(true);
+        setError('');
 
         try {
-            const response = await editNewsById(payload, uuid, token);
+            const response = await editNewsById(payload, uuid, token, imageFile);
 
             if (response.status === 200) {
                 setSuccess(true);
+                if (response.data.news?.image_path) {
+                    setCurrentImagePath(response.data.news.image_path);
+                }
+                setImageFile(null);
             } else {
-                setError(response.data.message || 'Error al crear la noticia.');
+                setError(response.data.error || response.data.message || 'Error al guardar la noticia.');
             }
         } catch (err) {
-            console.error('Error creating news:', err);
+            console.error('Error updating news:', err);
             setError(err.message || 'Conexión no disponible.');
         } finally {
-            setLoading(false);
+            setIsSubmitting(false);
         }
     };
 
     const handleCloseSuccessModal = () => {
         setSuccess(false);
-        navigate('/backoffice/'); // Redirect to backoffice after closing the modal
+        navigate('/backoffice/');
     };
 
     const handleCloseErrorModal = () => {
@@ -126,15 +144,22 @@ const EditNewsPage = () => {
         navigate('/backoffice/');
     };
 
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center py-20">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            </div>
+        );
+    }
 
-    if (loading) return <p>Loading...</p>;
-    if (error) return <p className="text-red-500">{error}</p>;
+    if (error && !formData.title) {
+        return <p className="text-red-500 p-4">{error}</p>;
+    }
 
     return (
         <div className="p-1 w-full max-w-5xl mx-auto">
             <h1 className="text-2xl mb-6 font-bold text-primary">Editar noticia</h1>
             <form onSubmit={handleSubmit}>
-                {/* Title Input */}
                 <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-500">Titular</label>
                     <input
@@ -147,7 +172,6 @@ const EditNewsPage = () => {
                     />
                 </div>
 
-                {/* Subtitle Input */}
                 <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-500">Subtitulo</label>
                     <input
@@ -160,37 +184,35 @@ const EditNewsPage = () => {
                     />
                 </div>
 
-                {/* Date, Reading Duration, Tags */}
                 <div className="grid grid-cols-3 gap-4 mb-4">
-                    {/* Date Picker */}
                     <div>
                         <label className="block text-sm font-medium text-gray-500">Fecha</label>
                         <DatePicker
                             selected={formData.date}
                             onChange={handleDateChange}
                             dateFormat="dd/MM/yyyy"
+                            locale="es"
                             className="w-full px-4 py-2 mt-1 border rounded-lg text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
                         />
                     </div>
 
-                    {/* Reading Duration */}
                     <div>
                         <label className="block text-sm font-medium text-gray-500">Duración de lectura</label>
                         <input
-                            type="text"
+                            type="number"
                             name="readingDuration"
                             value={formData.readingDuration}
                             onChange={handleInputChange}
                             placeholder="Minutos"
                             className="w-full px-4 py-2 mt-1 border rounded-lg text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
+                            required
                         />
                     </div>
 
-                    {/* Tags */}
                     <div>
                         <label className="block text-sm font-medium text-gray-500">Etiquetas</label>
                         <TagInput
-                            value={formData.tags} // Pass full tag objects
+                            value={formData.tags}
                             onChange={(value) => handleInputChange({
                                 target: {
                                     name: 'tags',
@@ -201,7 +223,28 @@ const EditNewsPage = () => {
                     </div>
                 </div>
 
-                {/* Content Editor */}
+                <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-500 mb-2">
+                        Imagen de portada
+                    </label>
+                    {currentImagePath && !imageFile && (
+                        <p className="text-xs text-gray-400 mb-2">Imagen actual cargada en el servidor.</p>
+                    )}
+                    <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
+                        onChange={handleImageChange}
+                        className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-white hover:file:bg-primary/90"
+                    />
+                    {imagePreview && (
+                        <img
+                            src={imagePreview}
+                            alt="Vista previa"
+                            className="mt-4 max-h-56 rounded-lg border border-slate-200 object-cover"
+                        />
+                    )}
+                </div>
+
                 <div className="mb-6">
                     <label className="block text-sm font-medium text-gray-500">Contenido</label>
                     <QuillEditor value={formData.content} onChange={handleContentChange} />
@@ -217,13 +260,14 @@ const EditNewsPage = () => {
                     </button>
                     <button
                         type="submit"
-                        className="bg-primary text-white font-medium px-6 py-3 rounded-lg shadow hover:bg-primary-dark transition"
+                        className={`bg-primary text-white font-medium px-6 py-3 rounded-lg shadow hover:bg-primary-dark transition ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        disabled={isSubmitting}
                     >
-                        Guardar
+                        {isSubmitting ? 'Guardando...' : 'Guardar'}
                     </button>
                 </div>
             </form>
-            {/* Success Modal */}
+
             {success && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="bg-white rounded-lg p-6 w-1/3 text-center">
@@ -241,8 +285,7 @@ const EditNewsPage = () => {
                 </div>
             )}
 
-            {/* Error Modal */}
-            {error && (
+            {error && formData.title && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="bg-white rounded-lg p-6 w-1/3 text-center">
                         <h2 className="text-xl font-bold text-red-500">Error</h2>

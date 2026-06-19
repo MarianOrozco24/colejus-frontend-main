@@ -1,11 +1,15 @@
-export const fetchAllNews = async (page = 1, perPage = 10) => {
+export const fetchAllNews = async (page = 1, perPage = 10, activeOnly = false) => {
     try {
-        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/news?page=${page}&per_page=${perPage}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json', // Include token for authentication
-            },
-        });
+        const activeParam = activeOnly ? "&active_only=true" : "";
+        const response = await fetch(
+            `${process.env.REACT_APP_BACKEND_URL}/news?page=${page}&per_page=${perPage}${activeParam}`,
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        );
 
         if (!response.ok) {
             const errorData = await response.json();
@@ -18,13 +22,13 @@ export const fetchAllNews = async (page = 1, perPage = 10) => {
         const data = await response.json();
 
         return {
-            data: data, // Contains news and metadata
+            data,
             status: response.status,
         };
     } catch (error) {
-        console.error('Fetch News Error:', error);
+        console.error("Fetch News Error:", error);
         return {
-            data: { message: 'Conexión no disponible' },
+            data: { message: "Conexión no disponible" },
             status: 500,
         };
     }
