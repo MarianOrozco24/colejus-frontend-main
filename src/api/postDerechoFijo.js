@@ -161,3 +161,69 @@ export const postDerechoFijoPresencial = async (form_data) => {
   }
 };
 
+export const postDerechoFijoBNA = async (form_data) => {
+  const endpoint = "/forms/derecho_fijo_bna";
+  const url = `${process.env.REACT_APP_BACKEND_URL}${endpoint}`;
+  const ctrl = new AbortController();
+
+  const id = setTimeout(() => ctrl.abort(), 45_000);
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/pdf",
+      },
+      body: JSON.stringify(form_data),
+      signal: ctrl.signal,
+    });
+
+    if (!response.ok) {
+      let extra = "";
+      try {
+        const errJson = await response.json();
+        extra = errJson?.message || errJson?.error || JSON.stringify(errJson);
+      } catch {
+        extra = await response.text();
+      }
+      throw new Error(`Failed operation (${response.status}): ${extra}`);
+    }
+
+    const blob = await response.blob();
+    const dispo = response.headers.get("Content-Disposition") || "";
+    let filename = "boleta_bna.pdf";
+    const match = dispo.match(/filename\*?=(?:UTF-8''|")?([^";]+)/i);
+    if (match && match[1]) {
+      try {
+        filename = decodeURIComponent(match[1].replace(/"/g, "").trim());
+      } catch {
+        filename = match[1].replace(/"/g, "").trim();
+      }
+    }
+
+    const urlObj = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = urlObj;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(urlObj);
+
+    return { ok: true, filename };
+  } catch (error) {
+    if (error.name === "AbortError") {
+      throw new Error("La operación tardó demasiado y fue cancelada");
+    }
+    if (error instanceof TypeError && error.message === "Failed to fetch") {
+      console.error("Network error: Backend server is unreachable");
+      throw new Error("Network error: Backend server is unreachable");
+    }
+    console.error("Error:", error);
+    throw error;
+  } finally {
+    clearTimeout(id);
+  }
+};
+

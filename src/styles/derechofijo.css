@@ -3,3 +3,61 @@
 .react-datepicker__input-container input {
     width: 100% !important;
 }
+
+/* Side Drawer Animations */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        background-color: rgba(0, 0, 0, 0);
+    }
+    to {
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+}
+
+.drawer-open {
+    animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.overlay-fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* Grayscale Emojis */
+.grayscale-emoji {
+    filter: grayscale(100%);
+    -webkit-filter: grayscale(100%);
+}
+
+/* Spinner Animation */
+@keyframes spin-custom {
+    to {
+        transform: rotate(360deg);
+    }
+}
+.animate-spin-custom {
+    animation: spin-custom 1s linear infinite;
+}
+
+/* Custom scrollbar for side drawer */
+.drawer-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+.drawer-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+.drawer-scrollbar::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 4px;
+}
+.drawer-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #cbd5e1;
+}

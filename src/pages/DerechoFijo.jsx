@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import ResponsiveNav from "../components/ResponsiveNav";
 import Footer from "../components/Footer";
-import { postDerechoFijo, postDerechoFijoBCM, postDerechoFijoPresencial } from "../api/postDerechoFijo";
+import { postDerechoFijo, postDerechoFijoBCM, postDerechoFijoPresencial, postDerechoFijoBNA } from "../api/postDerechoFijo";
 import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import es from "date-fns/locale/es";
@@ -17,7 +17,15 @@ const DerechoFijo = () => {
   const [valorDerechoFijo, setValorDerechoFijo] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
-  const [bcmPaymentId, setBcmPaymentId] = useState(null); // NUEVO: payment_id devuelto por QR BCM
+  const [bcmPaymentId, setBcmPaymentId] = useState(null);
+
+  // Side Drawer States
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerStep, setDrawerStep] = useState("options"); // "options", "loading", "qr", "download", "success", "error"
+  const [drawerLoadingText, setDrawerLoadingText] = useState("");
+  const [drawerErrorText, setDrawerErrorText] = useState("");
+  const [qrCodeSrc, setQrCodeSrc] = useState("");
+  const [downloadFilename, setDownloadFilename] = useState("");
 
   const [formData, setFormData] = useState({
     lugar: "",
@@ -72,7 +80,7 @@ const DerechoFijo = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // ✅ Validación de campos obligatorios (agregamos email)
+    // Validacion de campos obligatorios
     const requiredFields = [
       "lugar",
       "fecha_inicio",
@@ -94,7 +102,7 @@ const DerechoFijo = () => {
       }
     }
 
-    // Validación rápida de email
+    // Validacion rapida de email
     const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email);
     if (!emailOk) {
       setModalMessage("Revisá el correo electrónico: el formato no es válido.");
@@ -102,57 +110,30 @@ const DerechoFijo = () => {
       return;
     }
 
-    // ✅ Validación de monto mínimo
+    // Validacion de monto minimo
     if (valorDerechoFijo && Number(formData.total_depositado) < valorDerechoFijo) {
       setModalMessage(`El valor mínimo para ingresar es de $${valorDerechoFijo}`);
       setModalVisible(true);
       return;
     }
 
-    // ✅ Mostrar opciones de pago (3 botones)
-    setModalMessage(
-      <div className="bg-white p-6 rounded-xl shadow-xl max-w-md mx-auto">
-        <h2 className="text-2xl font-bold text-primary mb-4 font-lato">¿Cómo querés pagar?</h2>
-        <p className="text-gray-700 mb-6 font-lato">
-          Seleccioná una de las opciones para continuar con el pago.
-        </p>
-        <div className="flex flex-col space-y-3">
-          <button
-            onClick={() => handlePago("mp_qr")}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg text-lg font-semibold transition duration-200 shadow-sm"
-          >
-            🟦 QR Mercado Pago
-          </button>
-          <button
-            onClick={() => handlePago("tarjeta")}
-            className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg text-lg font-semibold transition duration-200 shadow-sm"
-          >
-            💳 Pagar con tarjeta
-          </button>
-          <button
-            onClick={() => handlePago("bcm_qr")}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg text-lg font-semibold transition duration-200 shadow-sm"
-          >
-            🟩 QR Bolsa de Comercio
-          </button>
-          <button
-            onClick={() => handlePago("bcm_presencial")}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg text-lg font-semibold transition duration-200 shadow-sm"
-          >
-            📄 Boleta Bolsa de Comercio
-          </button>
-        </div>
-      </div>
-    );
-    setModalVisible(true);
+    // Abrir drawer con opciones de pago
+    setDrawerStep("options");
+    setDrawerOpen(true);
   };
 
   const handlePago = async (tipo) => {
     try {
-      setModalMessage("⏳ Generando pago...");
-      setModalVisible(true);
+      setDrawerLoadingText(
+        tipo === "bna_presencial"
+          ? "Generando boleta BNA..."
+          : tipo === "bcm_presencial"
+            ? "Generando boleta Bolsa de Comercio..."
+            : "Generando pago..."
+      );
+      setDrawerStep("loading");
 
-      // 🔹 Pago con tarjeta (Mercado Pago Checkout)
+      // Pago con tarjeta (Mercado Pago Checkout)
       if (tipo === "tarjeta") {
         const data = await postDerechoFijo(formData, true);
         setPreferenceId(data?.preference_id || null);
@@ -162,12 +143,13 @@ const DerechoFijo = () => {
         if (checkoutUrl) {
           window.location.href = checkoutUrl;
         } else {
-          setModalMessage("❌ No se pudo redireccionar al checkout.");
+          setDrawerErrorText("No se pudo redireccionar al checkout.");
+          setDrawerStep("error");
         }
         return;
       }
 
-      // 🔹 Pago con MP QR
+      // Pago con MP QR
       if (tipo === "mp_qr") {
         const data = await postDerechoFijo(formData, false);
         setPreferenceId(data?.preference_id || null);
@@ -175,32 +157,17 @@ const DerechoFijo = () => {
 
         const src = normalizeQrSrc(data?.qr_code_base64);
         if (!src) {
-          setModalMessage("❌ No se recibió la imagen del QR de Mercado Pago.");
+          setDrawerErrorText("No se recibió la imagen del QR de Mercado Pago.");
+          setDrawerStep("error");
           return;
         }
 
-        setModalMessage(
-          <div className="text-center font-lato">
-            <h2 className="text-2xl font-semibold text-primary mb-4">¡QR generado!</h2>
-            <p className="text-base text-gray-700 mb-3">
-              Escaneá el código para pagar con Mercado Pago.
-            </p>
-            <img
-              src={src}
-              alt="QR MP"
-              className="mx-auto mb-4 rounded shadow-md"
-              style={{ width: 240, height: 240 }}
-            />
-            <div className="mt-4 text-sm text-gray-500">
-              Estado del pago:{" "}
-              <span className="font-semibold text-black">{paymentStatus}</span>
-            </div>
-          </div>
-        );
+        setQrCodeSrc(src);
+        setDrawerStep("qr");
         return;
       }
 
-      // 🔹 Pago con QR Bolsa de Comercio
+      // Pago con QR Bolsa de Comercio
       if (tipo === "bcm_qr") {
         const data = await postDerechoFijoBCM(formData);
         setPreferenceId(data?.preference_id || null);
@@ -209,67 +176,49 @@ const DerechoFijo = () => {
 
         const src = normalizeQrSrc(data?.qr_image_base64 || data?.qr_code_base64);
         if (!src) {
-          setModalMessage("❌ No se recibió la imagen del QR de la Bolsa.");
+          setDrawerErrorText("No se recibió la imagen del QR de la Bolsa.");
+          setDrawerStep("error");
           return;
         }
 
-        setModalMessage(
-          <div className="text-center font-lato">
-            <h2 className="text-2xl font-semibold text-primary mb-4">¡QR generado!</h2>
-            <p className="text-base text-gray-700 mb-3">
-              Escaneá el código para pagar con la Bolsa de Comercio.
-            </p>
-            <img
-              src={src}
-              alt="QR Bolsa de Comercio"
-              className="mx-auto mb-4 rounded shadow-md"
-              style={{ width: 240, height: 240 }}
-            />
-            <div className="mt-4 text-sm text-gray-500">
-              Estado del pago:{" "}
-              <span className="font-semibold text-black">{paymentStatus}</span>
-            </div>
-          </div>
-        );
+        setQrCodeSrc(src);
+        setDrawerStep("qr");
         return;
       }
 
-      // 🔹 Pago PRESENCIAL Bolsa de Comercio
+      // Pago presencial Bolsa de Comercio
       if (tipo === "bcm_presencial") {
-        setModalMessage("⏳ Generando boleta para pago presencial...");
-
-        // Esta función ya dispara la descarga del PDF
         const result = await postDerechoFijoPresencial(formData);
 
         if (result?.ok) {
-          setModalMessage(
-            <div className="text-center font-lato">
-              <h2 className="text-2xl font-semibold text-primary mb-4">
-                ¡Boleta generada!
-              </h2>
-              <p className="text-base text-gray-700 mb-3">
-                Se descargó la boleta <span className="font-semibold">{result.filename}</span>.
-              </p>
-              <p className="text-base text-gray-700 mb-3">
-                Presentala en la Bolsa de Comercio para realizar el pago presencial.
-              </p>
-              <div className="mt-4 text-sm text-gray-500">
-                Recordá revisar tu carpeta de descargas.
-              </div>
-            </div>
-          );
+          setDownloadFilename(result.filename);
+          setDrawerStep("download");
         } else {
-          setModalMessage("❌ No se pudo generar la boleta para pago presencial.");
+          setDrawerErrorText("No se pudo generar la boleta para pago presencial.");
+          setDrawerStep("error");
         }
+        return;
+      }
 
+      // Pago presencial Banco Nacion
+      if (tipo === "bna_presencial") {
+        const result = await postDerechoFijoBNA(formData);
+
+        if (result?.ok) {
+          setDownloadFilename(result.filename);
+          setDrawerStep("download");
+        } else {
+          setDrawerErrorText("No se pudo generar la boleta BNA.");
+          setDrawerStep("error");
+        }
         return;
       }
 
     } catch (error) {
-      setModalMessage(`❌ Error al generar el pago: ${error.message || error}`);
+      setDrawerErrorText(error.message || String(error));
+      setDrawerStep("error");
     }
   };
-
 
   const downloadPDF = async (uuid) => {
     try {
@@ -292,20 +241,19 @@ const DerechoFijo = () => {
       alert("Error al descargar el comprobante");
     }
   };
+
   useEffect(() => {
     const fetchValorDerechoFijo = async () => {
       try {
         const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/forms/get_price_derecho_fijo`);
         const result = await response.json();
-
-        // el backend ahora devuelve { "data": 12000.0 }
         const valor = result.data;
 
         if (response.ok && valor) {
           setValorDerechoFijo(valor);
         }
       } catch (error) {
-        console.error("❌ Error trayendo derecho fijo:", error);
+        console.error("Error trayendo derecho fijo:", error);
       }
     };
 
@@ -333,18 +281,7 @@ const DerechoFijo = () => {
               body: JSON.stringify({ uuid: derechoFijoId, payment_id: preferenceId }),
             });
 
-            setModalMessage(
-              <div className="text-center font-lato">
-                <h2 className="text-xl font-semibold mb-4">Pago creado exitosamente</h2>
-                <p className="text-green-600 font-semibold mb-4">¡Pago completado!</p>
-                <button
-                  onClick={() => downloadPDF(derechoFijoId)}
-                  className="bg-secondary text-white px-4 py-2 rounded-lg"
-                >
-                  Descargar Comprobante
-                </button>
-              </div>
-            );
+            setDrawerStep("success");
           }
         } catch (error) {
           console.error("Error checking payment status:", error);
@@ -354,7 +291,7 @@ const DerechoFijo = () => {
     return () => interval && clearInterval(interval);
   }, [preferenceId, derechoFijoId]);
 
-  // 🔁 Polling para BCM por payment_id
+  // Polling para BCM por payment_id
   useEffect(() => {
     if (!bcmPaymentId) return;
     const interval = setInterval(async () => {
@@ -368,20 +305,10 @@ const DerechoFijo = () => {
         if (paid) {
           setPaymentStatus("approved");
           clearInterval(interval);
-          setModalMessage(
-            <div className="text-center font-lato">
-              <h2 className="text-xl font-semibold mb-4">Pago aprobado</h2>
-              <button
-                onClick={() => downloadPDF(derechoFijoId)}
-                className="bg-secondary text-white px-4 py-2 rounded-lg"
-              >
-                Descargar Comprobante
-              </button>
-            </div>
-          );
+          setDrawerStep("success");
         }
       } catch (e) {
-        // opcional: log
+        // opcional
       }
     }, 4000);
     return () => clearInterval(interval);
@@ -637,6 +564,284 @@ const DerechoFijo = () => {
             </button>
           </div>
         </div>
+      )}
+
+      {/* Side Drawer Component */}
+      {drawerOpen && (
+        <>
+          {/* Backdrop Overlay */}
+          <div
+            className="fixed inset-0 z-50 overlay-fade-in"
+            onClick={() => {
+              if (drawerStep !== "loading") {
+                setDrawerOpen(false);
+              }
+            }}
+          />
+
+          {/* Drawer Panel */}
+          <div className="fixed right-0 top-0 bottom-0 w-full sm:w-[480px] bg-white shadow-2xl z-50 flex flex-col drawer-open font-lato">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-100">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-800">Detalle de Pago</h2>
+              <button
+                onClick={() => {
+                  if (drawerStep !== "loading") {
+                    setDrawerOpen(false);
+                  }
+                }}
+                className="text-gray-400 hover:text-gray-600 transition-colors duration-150 p-1.5 sm:p-2 rounded-full hover:bg-gray-50 focus:outline-none"
+                aria-label="Cerrar panel"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Scrollable Content Container */}
+            <div className="flex-grow overflow-y-auto p-4 sm:p-6 drawer-scrollbar">
+              {drawerStep === "options" && (
+                <>
+                  <div className="bg-gray-50 rounded-xl p-4 mb-4 sm:mb-6 border border-gray-100">
+                    <span className="text-xs text-gray-400 uppercase tracking-wider block font-semibold">Total a pagar</span>
+                    <span className="text-xl sm:text-2xl font-black text-primary">
+                      ${Number(formData.total_depositado).toLocaleString("es-AR", { minimumFractionDigits: 2 })}
+                    </span>
+                  </div>
+
+                  <p className="text-xs sm:text-sm text-gray-500 mb-4">
+                    Seleccioná una de las opciones para realizar el pago:
+                  </p>
+
+                  <div className="flex flex-col space-y-2 sm:space-y-3">
+                    <button
+                      onClick={() => handlePago("mp_qr")}
+                      className="w-full text-left bg-white border border-gray-200 hover:border-indigo-500 rounded-xl p-3 sm:p-4 transition-all duration-200 hover:shadow-md flex items-center space-x-3 sm:space-x-4 focus:outline-none group"
+                    >
+                      <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-gray-50 rounded-xl flex items-center justify-center grayscale-emoji text-xl sm:text-2xl">
+                        🔳
+                      </div>
+                      <div className="flex-grow">
+                        <h3 className="text-sm sm:text-base font-bold text-gray-800 group-hover:text-indigo-600 transition-colors duration-150">
+                          QR Mercado Pago
+                        </h3>
+                        <p className="text-[11px] sm:text-xs text-gray-500 mt-0.5">
+                          Pagá al instante escaneando el código QR.
+                        </p>
+                      </div>
+                      <div className="text-gray-300 group-hover:text-indigo-500 group-hover:translate-x-1 transition-all duration-200">
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => handlePago("tarjeta")}
+                      className="w-full text-left bg-white border border-gray-200 hover:border-green-500 rounded-xl p-3 sm:p-4 transition-all duration-200 hover:shadow-md flex items-center space-x-3 sm:space-x-4 focus:outline-none group"
+                    >
+                      <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-gray-50 rounded-xl flex items-center justify-center grayscale-emoji text-xl sm:text-2xl">
+                        💳
+                      </div>
+                      <div className="flex-grow">
+                        <h3 className="text-sm sm:text-base font-bold text-gray-800 group-hover:text-green-600 transition-colors duration-150">
+                          Pagar con tarjeta
+                        </h3>
+                        <p className="text-[11px] sm:text-xs text-gray-500 mt-0.5">
+                          Débito o crédito a través de Mercado Pago.
+                        </p>
+                      </div>
+                      <div className="text-gray-300 group-hover:text-green-500 group-hover:translate-x-1 transition-all duration-200">
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => handlePago("bcm_qr")}
+                      className="w-full text-left bg-white border border-gray-200 hover:border-emerald-500 rounded-xl p-3 sm:p-4 transition-all duration-200 hover:shadow-md flex items-center space-x-3 sm:space-x-4 focus:outline-none group"
+                    >
+                      <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-gray-50 rounded-xl flex items-center justify-center grayscale-emoji text-xl sm:text-2xl">
+                        🔳
+                      </div>
+                      <div className="flex-grow">
+                        <h3 className="text-sm sm:text-base font-bold text-gray-800 group-hover:text-emerald-600 transition-colors duration-150">
+                          QR Bolsa de Comercio
+                        </h3>
+                        <p className="text-[11px] sm:text-xs text-gray-500 mt-0.5">
+                          Pagá escaneando con la app de la Bolsa de Comercio.
+                        </p>
+                      </div>
+                      <div className="text-gray-300 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all duration-200">
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => handlePago("bcm_presencial")}
+                      className="w-full text-left bg-white border border-gray-200 hover:border-emerald-500 rounded-xl p-3 sm:p-4 transition-all duration-200 hover:shadow-md flex items-center space-x-3 sm:space-x-4 focus:outline-none group"
+                    >
+                      <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-gray-50 rounded-xl flex items-center justify-center grayscale-emoji text-xl sm:text-2xl">
+                        📄
+                      </div>
+                      <div className="flex-grow">
+                        <h3 className="text-sm sm:text-base font-bold text-gray-800 group-hover:text-emerald-600 transition-colors duration-150">
+                          Boleta Bolsa de Comercio
+                        </h3>
+                        <p className="text-[11px] sm:text-xs text-gray-500 mt-0.5">
+                          Generá la boleta física para pago presencial.
+                        </p>
+                      </div>
+                      <div className="text-gray-300 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all duration-200">
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => handlePago("bna_presencial")}
+                      className="w-full text-left bg-white border border-gray-200 hover:border-blue-500 rounded-xl p-3 sm:p-4 transition-all duration-200 hover:shadow-md flex items-center space-x-3 sm:space-x-4 focus:outline-none group"
+                    >
+                      <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-gray-50 rounded-xl flex items-center justify-center grayscale-emoji text-xl sm:text-2xl">
+                        📄
+                      </div>
+                      <div className="flex-grow">
+                        <h3 className="text-sm sm:text-base font-bold text-gray-800 group-hover:text-blue-600 transition-colors duration-150">
+                          Boleta Banco Nación (BNA)
+                        </h3>
+                        <p className="text-[11px] sm:text-xs text-gray-500 mt-0.5">
+                          Generá la boleta BNA para realizar depósito presencial.
+                        </p>
+                      </div>
+                      <div className="text-gray-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all duration-200">
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
+                    </button>
+                  </div>
+                </>
+              )}
+
+              {drawerStep === "loading" && (
+                <div className="h-full flex flex-col items-center justify-center py-12 text-center">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin-custom mb-4 sm:mb-6"></div>
+                  <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-2">Procesando solicitud</h3>
+                  <p className="text-xs sm:text-sm text-gray-500 max-w-xs">{drawerLoadingText}</p>
+                </div>
+              )}
+
+              {drawerStep === "qr" && (
+                <div className="h-full flex flex-col items-center justify-center py-4 sm:py-6 text-center">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center text-lg sm:text-xl mb-4 grayscale-emoji">
+                    🔳
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-2">Código QR Generado</h3>
+                  <p className="text-xs sm:text-sm text-gray-500 mb-4 sm:mb-6">Escaneá el código para realizar el pago.</p>
+
+                  <div className="bg-gray-50 p-4 sm:p-6 rounded-xl sm:rounded-2xl border border-gray-100 shadow-inner flex justify-center items-center mb-4 sm:mb-6">
+                    <img src={qrCodeSrc} alt="Código QR de Pago" className="w-48 h-48 sm:w-56 sm:h-56 shadow-md rounded-xl bg-white p-2.5 sm:p-3 border border-gray-100" />
+                  </div>
+
+                  <div className="flex items-center space-x-2 bg-indigo-50 border border-indigo-100 px-4 py-2 rounded-full text-indigo-700 text-xs font-semibold mb-4 sm:mb-6">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-600"></span>
+                    </span>
+                    <span>Esperando confirmación del pago...</span>
+                  </div>
+
+                  <button
+                    onClick={() => setDrawerStep("options")}
+                    className="py-2.5 px-4 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold rounded-xl transition duration-150 text-sm w-full"
+                  >
+                    Volver
+                  </button>
+                </div>
+              )}
+
+              {drawerStep === "download" && (
+                <div className="h-full flex flex-col items-center justify-center py-4 sm:py-6 text-center">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 bg-green-50 text-green-600 rounded-full flex items-center justify-center text-2xl sm:text-3xl mb-4 grayscale-emoji">
+                    📄
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-2">¡Boleta generada con éxito!</h3>
+                  <p className="text-xs sm:text-sm text-gray-500 mb-4 sm:mb-6">El archivo se ha descargado a tu dispositivo.</p>
+
+                  <div className="bg-gray-50 p-3 sm:p-4 rounded-xl border border-gray-100 w-full mb-4 sm:mb-6 text-left">
+                    <span className="text-xs text-gray-400 block font-semibold">Nombre del archivo</span>
+                    <span className="text-xs sm:text-sm font-bold text-gray-700 break-all">{downloadFilename}</span>
+                  </div>
+
+                  <p className="text-xs text-gray-400 mb-6 sm:mb-8">
+                    Presentala impresa en la sucursal de pago correspondiente para abonar tu Derecho Fijo.
+                  </p>
+
+                  <button
+                    onClick={() => setDrawerOpen(false)}
+                    className="py-2.5 sm:py-3 bg-secondary hover:bg-opacity-95 text-white font-bold rounded-xl transition duration-150 text-sm w-full"
+                  >
+                    Entendido
+                  </button>
+                </div>
+              )}
+
+              {drawerStep === "success" && (
+                <div className="h-full flex flex-col items-center justify-center py-4 sm:py-6 text-center">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 bg-green-50 text-green-600 rounded-full flex items-center justify-center text-2xl sm:text-3xl mb-4 grayscale-emoji">
+                    ✔️
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-2">¡Pago aprobado con éxito!</h3>
+                  <p className="text-xs sm:text-sm text-gray-500 mb-4 sm:mb-6">Tu pago ha sido acreditado correctamente. Ya podés descargar el comprobante oficial.</p>
+
+                  <button
+                    onClick={() => downloadPDF(derechoFijoId)}
+                    className="w-full flex items-center justify-center space-x-2 bg-green-600 hover:bg-green-700 text-white py-3 sm:py-3.5 px-4 sm:px-6 rounded-xl font-bold shadow-md hover:shadow-lg transition duration-150 mb-4 sm:mb-6 text-sm sm:text-base"
+                  >
+                    <span className="grayscale-emoji text-xl">📄</span>
+                    <span>Descargar Comprobante</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setDrawerOpen(false);
+                      window.location.reload();
+                    }}
+                    className="py-2.5 px-4 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold rounded-xl transition duration-150 text-sm w-full"
+                  >
+                    Cerrar ventana
+                  </button>
+                </div>
+              )}
+
+              {drawerStep === "error" && (
+                <div className="h-full flex flex-col items-center justify-center py-4 sm:py-6 text-center">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 bg-red-50 text-red-600 rounded-full flex items-center justify-center text-2xl sm:text-3xl mb-4 grayscale-emoji">
+                    ❌
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-2">Ocurrió un error</h3>
+                  <p className="text-xs sm:text-sm text-red-500 mb-4 sm:mb-6 font-medium">{drawerErrorText}</p>
+
+                  <p className="text-xs text-gray-400 mb-6 sm:mb-8">
+                    Por favor, verificá la conexión e intentalo nuevamente.
+                  </p>
+
+                  <button
+                    onClick={() => setDrawerStep("options")}
+                    className="py-2.5 sm:py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition duration-150 text-sm w-full"
+                  >
+                    Volver a intentar
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </>
       )}
 
       <Footer />
