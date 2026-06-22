@@ -13,6 +13,10 @@ export const buildNewsFormData = (data, imageFile) => {
 
   formData.append("tags", JSON.stringify(tagsPayload));
 
+  if (data.is_featured !== undefined) {
+    formData.append("is_featured", data.is_featured ? "true" : "false");
+  }
+
   if (imageFile) {
     formData.append("image", imageFile);
   }

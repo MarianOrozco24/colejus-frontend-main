@@ -41,5 +41,7 @@ export const mapNewsItemForCard = (item, index = 0) => {
     tags,
     image: getNewsCoverImage(item.image_path, index),
     link: `/noticias/${item.uuid}`,
+    is_featured: Boolean(item.is_featured),
+    is_active: item.is_active !== false,
   };
 };

@@ -3,18 +3,27 @@ import { Link } from "react-router-dom";
 import { fetchAllNews } from "../api/news/fetchAllNews";
 import { mapNewsItemForCard } from "../utils/newsDisplay";
 import NewsCard from "./NewsCard";
+import FeaturedNewsStrip from "./FeaturedNewsStrip";
 
 const NewsCarousel = () => {
+  const [featuredNews, setFeaturedNews] = useState([]);
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadNews = async () => {
       try {
-        const response = await fetchAllNews(1, 8, true);
+        const [featuredResponse, newsResponse] = await Promise.all([
+          fetchAllNews(1, 8, true, { featuredOnly: true }),
+          fetchAllNews(1, 8, true),
+        ]);
 
-        if (response.status === 200) {
-          const items = response.data.news || [];
+        if (featuredResponse.status === 200) {
+          setFeaturedNews(featuredResponse.data.news || []);
+        }
+
+        if (newsResponse.status === 200) {
+          const items = newsResponse.data.news || [];
           setNews(items.map(mapNewsItemForCard));
         }
       } catch (error) {
@@ -47,6 +56,8 @@ const NewsCarousel = () => {
           </div>
         ) : (
           <>
+            <FeaturedNewsStrip items={featuredNews} variant="home" />
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left max-w-5xl mx-auto">
               {news.length === 0 ? (
                 <p className="col-span-full text-center text-gray-500">
@@ -64,6 +75,7 @@ const NewsCarousel = () => {
                     tags={item.tags}
                     image={item.image}
                     link={item.link}
+                    isFeatured={item.is_featured}
                   />
                 ))
               )}
