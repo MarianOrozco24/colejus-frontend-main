@@ -44,9 +44,16 @@ const Login = () => {
         localStorage.setItem("username", response.data.name);
         localStorage.setItem("email", response.data.email);
         localStorage.setItem("uuid", response.data.uuid);
+        localStorage.setItem(
+          "mustChangePassword",
+          response.data.must_change_password ? "true" : "false"
+        );
 
-        // Navigate to home
-        navigate("/backoffice");
+        if (response.data.must_change_password) {
+          navigate("/backoffice/cambiar-contrasena");
+        } else {
+          navigate("/backoffice");
+        }
       } else {
         setErrorMessage(response.data?.error || response.data?.message || "Usuario no autorizado");
         setShowErrorModal(true);

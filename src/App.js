@@ -43,6 +43,8 @@ import ProfileManager from "./pages/backoffice/ProfileManager";
 import LawyerPayments from "./pages/backoffice/LawyerPayments";
 import BookRoom from "./pages/backoffice/rooms/BookRoom";
 import RoomStats from "./pages/backoffice/rooms/RoomStats";
+import ChangePassword from "./pages/backoffice/ChangePassword";
+import MembershipSync from "./pages/backoffice/MembershipSync";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -110,6 +112,8 @@ function App() {
           <Route path="profile-manager" element={<ProfileManager />} />
           <Route path="reservar-sala" element={<BookRoom />} />
           <Route path="estadisticas-salas" element={<RoomStats />} />
+          <Route path="cambiar-contrasena" element={<ChangePassword />} />
+          <Route path="sync-cuotas" element={<MembershipSync />} />
 
 
         </Route>

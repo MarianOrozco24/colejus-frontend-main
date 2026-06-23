@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { hasPermission } from '../../../utils/hasPermission';
+import { validateMembership } from '../../../api/membership';
 import {
     FaUsers, FaWifi, FaTv, FaCalendarAlt, FaClock, FaArrowLeft,
     FaCheckCircle, FaUser, FaEnvelope, FaPhone, FaIdCard,
@@ -64,6 +65,34 @@ const BookRoom = () => {
         if (hasBookMeeting) return 'meeting';
         return 'coworking';
     });
+
+    const [membershipStatus, setMembershipStatus] = useState(null);
+    const [membershipLoading, setMembershipLoading] = useState(false);
+
+    useEffect(() => {
+        const checkMembership = async () => {
+            if (activeTab !== 'meeting' || isAdminOrDev || !hasBookMeeting) {
+                setMembershipStatus(null);
+                return;
+            }
+
+            setMembershipLoading(true);
+            try {
+                const { data } = await validateMembership();
+                setMembershipStatus(data);
+            } catch (err) {
+                console.error('Error validating membership:', err);
+            } finally {
+                setMembershipLoading(false);
+            }
+        };
+
+        checkMembership();
+    }, [activeTab, hasBookMeeting, isAdminOrDev]);
+
+    const canBookMeetingByMembership = isAdminOrDev
+        || !membershipStatus
+        || membershipStatus.can_book_meeting_room;
 
     const handleTabChange = (tab) => {
         setActiveTab(tab);
@@ -389,6 +418,11 @@ const BookRoom = () => {
                 const prefix = activeTab === 'coworking' ? 'CW' : 'MR';
                 setTicketNumber(`${prefix}-${dateCode}-${firstId}`);
                 setStep(4);
+            } else if (response.status === 402) {
+                setError(
+                    data.error ||
+                    'Para reservar la sala de reuniones debe estar al día con la cuota del colegio. Acérquese a secretaría.'
+                );
             } else {
                 setError(data.error || 'Ocurrió un error al procesar tu reserva.');
             }
@@ -758,6 +792,23 @@ const BookRoom = () => {
             {successMsg && (
                 <div className="bg-green-50 text-green-700 p-4 rounded-xl border border-green-100 font-bold mb-4 text-sm flex items-center gap-2">
                     <FaCheck /> {successMsg}
+                </div>
+            )}
+            {activeTab === 'meeting' && !isAdminOrDev && membershipLoading && (
+                <div className="bg-blue-50 text-blue-700 p-4 rounded-xl border border-blue-100 mb-4 text-sm flex items-center gap-2">
+                    <FaSpinner className="animate-spin" /> Verificando estado de cuota...
+                </div>
+            )}
+            {activeTab === 'meeting' && !isAdminOrDev && !membershipLoading && membershipStatus && !membershipStatus.can_book_meeting_room && (
+                <div className="bg-amber-50 text-amber-800 p-4 rounded-xl border border-amber-200 mb-4 text-sm">
+                    <div className="font-bold flex items-center gap-2 mb-1">
+                        <FaExclamationTriangle />
+                        Reserva no disponible
+                    </div>
+                    <p>
+                        {membershipStatus.message ||
+                            'Para reservar la sala de reuniones debe estar al día con la cuota del colegio. Acérquese a secretaría para regularizar su situación.'}
+                    </p>
                 </div>
             )}
 
@@ -1417,8 +1468,8 @@ const BookRoom = () => {
 
                             <button
                                 type="submit"
-                                disabled={apiLoading}
-                                className="w-full py-4 bg-primary hover:bg-secondary text-white font-bold rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer animate-fade-in"
+                                disabled={apiLoading || (activeTab === 'meeting' && !canBookMeetingByMembership)}
+                                className="w-full py-4 bg-primary hover:bg-secondary text-white font-bold rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer animate-fade-in disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Confirmar y Generar Reserva <FaCheckCircle />
                             </button>

@@ -16,6 +16,7 @@ import {
   FaTerminal,
   FaExclamationTriangle,
   FaCalendarAlt,
+  FaSyncAlt,
 } from "react-icons/fa";
 
 const Layout = () => {
@@ -90,6 +91,7 @@ const Layout = () => {
     "/backoffice/dashboard-ingresos": "view_revenue",
     
     "/backoffice/pagos-membresias": "view_lawyer_payments",
+    "/backoffice/sync-cuotas": "view_membership_sync",
     
     "/backoffice/administrador-cobros": "view_collection_admin",
     
@@ -110,6 +112,12 @@ const Layout = () => {
   useEffect(() => {
     if (!token) {
       navigate("/login");
+      return;
+    }
+
+    const mustChangePassword = localStorage.getItem("mustChangePassword") === "true";
+    if (mustChangePassword && location.pathname !== "/backoffice/cambiar-contrasena") {
+      navigate("/backoffice/cambiar-contrasena");
       return;
     }
 
@@ -175,6 +183,7 @@ const Layout = () => {
     { to: "/backoffice/historial-recibos", label: "Historial de Recibos", icon: FaReceipt, permission: "view_receipts" },
     { to: "/backoffice/dashboard-ingresos", label: "Dashboard Ingresos", icon: FaReceipt, permission: "view_revenue" },
     { to: "/backoffice/pagos-membresias", label: "Membresías Abogados", icon: FaDollarSign, permission: "view_lawyer_payments" },
+    { to: "/backoffice/sync-cuotas", label: "Sync Cuotas Excel", icon: FaSyncAlt, permission: "view_membership_sync" },
     { to: "/backoffice/administrador-cobros", label: "Administrador de Cobros", icon: FaDollarSign, permission: "view_collection_admin" },
     { to: "/backoffice/integrantes", label: "Nosotros", icon: FaUsers, permission: "view_integrantes" },
     { to: "/backoffice/reservar-sala", label: "Reservar Sala", icon: FaCalendarAlt, permission: "book_rooms" },
