@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
+import { FaPlus, FaEdit, FaTrash, FaStar, FaArrowUp, FaArrowDown } from "react-icons/fa";
 import { fetchAllNews } from "../../../api/news/fetchAllNews";
 import { deleteNewsById } from "../../../api/news/deleteNewsById";
 import { toggleNewsById } from "../../../api/news/toggleNewsActive";
+import { toggleNewsFeatured } from "../../../api/news/toggleNewsFeatured";
+import { reorderFeaturedNews } from "../../../api/news/reorderFeaturedNews";
 import DeleteNewsModal from "./DeleteNewsModal";
 import { hasPermission } from "../../../utils/hasPermission";
 
@@ -40,13 +42,12 @@ const BackOfficeNews = () => {
     const [news, setNews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [actionError, setActionError] = useState("");
 
-    // Pagination State
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const itemsPerPage = 10;
 
-    // Delete modal state
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedNews, setSelectedNews] = useState(null);
 
@@ -75,6 +76,11 @@ const BackOfficeNews = () => {
         fetchNews(currentPage);
     }, [currentPage]);
 
+    const showActionError = (message) => {
+        setActionError(message);
+        setTimeout(() => setActionError(""), 4000);
+    };
+
     const toggleStatus = async (uuid, index) => {
         const token = localStorage.getItem("authToken");
         try {
@@ -82,13 +88,47 @@ const BackOfficeNews = () => {
 
             if (response.status === 200) {
                 const updatedNews = [...news];
-                updatedNews[index].is_active = !updatedNews[index].is_active;
+                updatedNews[index].is_active = response.data.is_active;
+                if (!response.data.is_active) {
+                    updatedNews[index].is_featured = false;
+                    updatedNews[index].featured_order = null;
+                }
                 setNews(updatedNews);
             } else {
-                console.error('Failed to toggle news:', response.data.message || 'Unknown error');
+                showActionError(response.data.error || "No se pudo cambiar el estado.");
             }
         } catch (err) {
             console.error("Error toggling status:", err);
+        }
+    };
+
+    const toggleFeatured = async (uuid, index) => {
+        const token = localStorage.getItem("authToken");
+        try {
+            const response = await toggleNewsFeatured(uuid, token);
+
+            if (response.status === 200) {
+                await fetchNews(currentPage);
+            } else {
+                showActionError(response.data.error || "No se pudo cambiar el destacado.");
+            }
+        } catch (err) {
+            console.error("Error toggling featured:", err);
+        }
+    };
+
+    const moveFeatured = async (uuid, direction) => {
+        const token = localStorage.getItem("authToken");
+        try {
+            const response = await reorderFeaturedNews(uuid, direction, token);
+
+            if (response.status === 200) {
+                await fetchNews(currentPage);
+            } else {
+                showActionError(response.data.error || response.data.message || "No se pudo reordenar.");
+            }
+        } catch (err) {
+            console.error("Error reordering featured:", err);
         }
     };
 
@@ -126,6 +166,64 @@ const BackOfficeNews = () => {
         }
     };
 
+    const renderActions = (item, index) => {
+        if (!canManage) return null;
+
+        return (
+            <div className="flex items-center justify-center flex-wrap gap-3">
+                <button
+                    type="button"
+                    className="text-gray-500 hover:text-secondary"
+                    onClick={() => handleEditOpen(item.uuid)}
+                    title="Editar"
+                >
+                    <FaEdit size={20} />
+                </button>
+                <button
+                    type="button"
+                    className="text-gray-500 hover:text-red-500"
+                    onClick={() => handleDeleteClick(item)}
+                    title="Eliminar"
+                >
+                    <FaTrash size={20} />
+                </button>
+                <button
+                    type="button"
+                    onClick={() => toggleFeatured(item.uuid, index)}
+                    className={`${item.is_featured ? "text-secondary" : "text-gray-300"} hover:text-secondary`}
+                    title={item.is_featured ? "Quitar destacada" : "Marcar como destacada"}
+                    disabled={!item.is_active && !item.is_featured}
+                >
+                    <FaStar size={20} />
+                </button>
+                {item.is_featured && (
+                    <>
+                        <button
+                            type="button"
+                            onClick={() => moveFeatured(item.uuid, "up")}
+                            className="text-gray-400 hover:text-primary"
+                            title="Subir orden"
+                        >
+                            <FaArrowUp size={16} />
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => moveFeatured(item.uuid, "down")}
+                            className="text-gray-400 hover:text-primary"
+                            title="Bajar orden"
+                        >
+                            <FaArrowDown size={16} />
+                        </button>
+                    </>
+                )}
+                <PublishToggle
+                    isActive={item.is_active}
+                    onToggle={() => toggleStatus(item.uuid, index)}
+                />
+            </div>
+        );
+    };
+
     if (loading) {
         return <p className="text-center text-gray-500">Cargando noticias...</p>;
     }
@@ -151,6 +249,12 @@ const BackOfficeNews = () => {
                 )}
             </div>
 
+            {actionError && (
+                <div className="mb-4 rounded-lg bg-red-50 border border-red-200 text-red-700 px-4 py-3 text-sm">
+                    {actionError}
+                </div>
+            )}
+
             {news.length === 0 ? (
                 <p className="text-center text-gray-500">Sin noticias creadas aún</p>
             ) : (
@@ -160,27 +264,33 @@ const BackOfficeNews = () => {
                         <thead>
                             <tr>
                                 <th className="p-4 text-sm font-medium text-gray-500 w-2/12">Fecha</th>
-                                <th className="p-4 text-sm font-medium text-gray-500 w-7/12">Título</th>
+                                <th className="p-4 text-sm font-medium text-gray-500 w-5/12">Título</th>
+                                <th className="p-4 text-sm font-medium text-gray-500 w-2/12">Estado</th>
                                 {canManage && <th className="p-4 text-sm font-medium text-gray-500 text-center w-3/12">Acciones</th>}
                             </tr>
                         </thead>
                         <tbody>
                             {news.map((item, index) => (
-                                <tr key={index} className="border-b">
-                                     <td className="p-4 text-sm text-gray-500">{new Date(item.date).toLocaleDateString()}</td>
-                                    <td className="p-4 text-sm text-gray-800">{item.title}</td>
+                                <tr key={item.uuid} className="border-b">
+                                    <td className="p-4 text-sm text-gray-500">{new Date(item.date).toLocaleDateString()}</td>
+                                    <td className="p-4 text-sm text-gray-800">
+                                        <div className="flex items-center gap-2">
+                                            {item.is_featured && (
+                                                <FaStar className="text-secondary shrink-0" title="Destacada" />
+                                            )}
+                                            <span>{item.title}</span>
+                                        </div>
+                                    </td>
+                                    <td className="p-4 text-sm">
+                                        {item.is_featured ? (
+                                            <span className="text-secondary font-medium text-xs uppercase">Destacada</span>
+                                        ) : (
+                                            <span className="text-gray-400 text-xs">—</span>
+                                        )}
+                                    </td>
                                     {canManage && (
-                                        <td className="p-4 flex items-center justify-center space-x-4">
-                                            <button className="text-gray-500 hover:text-secondary">
-                                                <FaEdit size={20} onClick={() => handleEditOpen(item.uuid)} />
-                                            </button>
-                                            <button className="text-gray-500 hover:text-red-500">
-                                                <FaTrash size={20} onClick={() => handleDeleteClick(item)} />
-                                            </button>
-                                            <PublishToggle
-                                                isActive={item.is_active}
-                                                onToggle={() => toggleStatus(item.uuid, index)}
-                                            />
+                                        <td className="p-4">
+                                            {renderActions(item, index)}
                                         </td>
                                     )}
                                 </tr>
@@ -188,24 +298,17 @@ const BackOfficeNews = () => {
                         </tbody>
                     </table>
                     </div>
-                    {/* Mobile cards */}
                     <div className="md:hidden divide-y">
                         {news.map((item, index) => (
-                            <div key={index} className="p-4 space-y-2">
-                                 <div className="text-xs text-gray-500">{new Date(item.date).toLocaleDateString()}</div>
-                                <div className="text-base font-medium text-gray-800">{item.title}</div>
+                            <div key={item.uuid} className="p-4 space-y-2">
+                                <div className="text-xs text-gray-500">{new Date(item.date).toLocaleDateString()}</div>
+                                <div className="text-base font-medium text-gray-800 flex items-center gap-2">
+                                    {item.is_featured && <FaStar className="text-secondary" />}
+                                    {item.title}
+                                </div>
                                 {canManage && (
-                                    <div className="flex items-center justify-end gap-3 text-gray-500">
-                                        <button onClick={() => handleEditOpen(item.uuid)} className="hover:text-secondary">
-                                            <FaEdit />
-                                        </button>
-                                        <button onClick={() => handleDeleteClick(item)} className="hover:text-red-500">
-                                            <FaTrash />
-                                        </button>
-                                        <PublishToggle
-                                            isActive={item.is_active}
-                                            onToggle={() => toggleStatus(item.uuid, index)}
-                                        />
+                                    <div className="flex items-center justify-end">
+                                        {renderActions(item, index)}
                                     </div>
                                 )}
                             </div>
@@ -214,7 +317,6 @@ const BackOfficeNews = () => {
                 </div>
             )}
 
-            {/* Pagination */}
             {news.length > 0 && (
                 <div className="flex justify-between items-center mt-4 text-sm">
                     <span className="text-gray-500">
@@ -248,7 +350,6 @@ const BackOfficeNews = () => {
                 </div>
             )}
 
-            {/* Delete Modal */}
             <DeleteNewsModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}

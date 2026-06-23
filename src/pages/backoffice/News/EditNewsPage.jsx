@@ -31,6 +31,7 @@ const EditNewsPage = () => {
         readingDuration: '',
         tags: [],
         content: '',
+        isFeatured: false,
     });
 
     useEffect(() => {
@@ -49,6 +50,7 @@ const EditNewsPage = () => {
                         readingDuration: news.reading_duration,
                         tags: news.tags || [],
                         content: news.content,
+                        isFeatured: Boolean(news.is_featured),
                     });
                     setCurrentImagePath(news.image_path || null);
                     setImagePreview(getNewsImageUrl(news.image_path));
@@ -106,6 +108,7 @@ const EditNewsPage = () => {
             reading_duration: parseInt(formData.readingDuration, 10),
             tags: formData.tags,
             content: formData.content,
+            is_featured: formData.isFeatured,
         };
 
         setIsSubmitting(true);
@@ -236,6 +239,12 @@ const EditNewsPage = () => {
                         onChange={handleImageChange}
                         className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-white hover:file:bg-primary/90"
                     />
+                    {formData.isFeatured && !imageFile && !currentImagePath && (
+                        <p className="mt-2 text-sm text-amber-600">
+                            Recomendamos subir una imagen para que la noticia se vea bien en
+                            las destacadas.
+                        </p>
+                    )}
                     {imagePreview && (
                         <img
                             src={imagePreview}
@@ -248,6 +257,24 @@ const EditNewsPage = () => {
                 <div className="mb-6">
                     <label className="block text-sm font-medium text-gray-500">Contenido</label>
                     <QuillEditor value={formData.content} onChange={handleContentChange} />
+                </div>
+
+                <div className="mb-6 flex items-start gap-3">
+                    <input
+                        type="checkbox"
+                        id="isFeaturedEdit"
+                        checked={formData.isFeatured}
+                        onChange={(e) =>
+                            setFormData((prev) => ({ ...prev, isFeatured: e.target.checked }))
+                        }
+                        className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                    />
+                    <label htmlFor="isFeaturedEdit" className="text-sm text-gray-600">
+                        <span className="font-medium text-gray-700">Marcar como destacada</span>
+                        <span className="block text-xs text-gray-400 mt-1">
+                            Aparecerá fija arriba en Novedades y en el Home (máximo 8 destacadas).
+                        </span>
+                    </label>
                 </div>
 
                 <div className="flex justify-end">
