@@ -26,6 +26,7 @@ const NewsCard = ({
   image,
   link,
   variant = "default",
+  isFeatured = false,
 }) => {
   const styles = variantStyles[variant] || variantStyles.default;
 
@@ -43,6 +44,11 @@ const NewsCard = ({
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
           <div className="absolute top-3 left-3 max-w-[150px] truncate flex flex-wrap gap-1">
+            {isFeatured && (
+              <span className="bg-secondary text-white text-[10px] font-semibold px-2.5 py-1 rounded-full shadow-sm uppercase">
+                Destacada
+              </span>
+            )}
             {tags.map((item, index) => (
               <span
                 key={index}

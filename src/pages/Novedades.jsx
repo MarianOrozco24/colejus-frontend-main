@@ -2,10 +2,12 @@ import React, { useState, useEffect } from "react";
 import ResponsiveNav from "../components/ResponsiveNav";
 import Footer from "../components/Footer";
 import NewsCard from "../components/NewsCard";
+import FeaturedNewsStrip from "../components/FeaturedNewsStrip";
 import { fetchAllNews } from "../api/news/fetchAllNews";
 import { mapNewsItemForCard } from "../utils/newsDisplay";
 
 const Novedades = () => {
+  const [featuredNews, setFeaturedNews] = useState([]);
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -17,6 +19,22 @@ const Novedades = () => {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [currentPage]);
+
+  useEffect(() => {
+    const loadFeatured = async () => {
+      try {
+        const response = await fetchAllNews(1, 8, true, { featuredOnly: true });
+        if (response.status === 200) {
+          const items = response.data.news || [];
+          setFeaturedNews(items);
+        }
+      } catch {
+        setFeaturedNews([]);
+      }
+    };
+
+    loadFeatured();
+  }, []);
 
   useEffect(() => {
     const loadNews = async () => {
@@ -67,6 +85,8 @@ const Novedades = () => {
       </header>
 
       <section className="min-h-full bg-gray-100 px-4 md:px-0 2xl:mx-52 md:mx-16 mt-20">
+        <FeaturedNewsStrip items={featuredNews} />
+
         {loading ? (
           <div className="flex justify-center items-center py-24">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -75,6 +95,12 @@ const Novedades = () => {
           <p className="text-center text-red-600 py-12">{error}</p>
         ) : (
           <>
+            {featuredNews.length > 0 && news.length > 0 && (
+              <h3 className="text-2xl font-serif font-semibold text-primary mb-6">
+                Todas las novedades
+              </h3>
+            )}
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {news.length === 0 ? (
                 <p className="col-span-full text-center text-gray-500 py-12">
@@ -91,6 +117,7 @@ const Novedades = () => {
                     tags={item.tags}
                     image={item.image}
                     link={item.link}
+                    isFeatured={item.is_featured}
                   />
                 ))
               )}

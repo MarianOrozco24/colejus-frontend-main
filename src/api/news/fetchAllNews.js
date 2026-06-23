@@ -1,35 +1,48 @@
-export const fetchAllNews = async (page = 1, perPage = 10, activeOnly = false) => {
-    try {
-        const activeParam = activeOnly ? "&active_only=true" : "";
-        const response = await fetch(
-            `${process.env.REACT_APP_BACKEND_URL}/news?page=${page}&per_page=${perPage}${activeParam}`,
-            {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            }
-        );
+export const fetchAllNews = async (
+  page = 1,
+  perPage = 10,
+  activeOnly = false,
+  { featuredOnly = false, excludeFeatured = false } = {}
+) => {
+  try {
+    const params = new URLSearchParams({
+      page: String(page),
+      per_page: String(perPage),
+    });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            return {
-                data: errorData,
-                status: response.status,
-            };
-        }
+    if (activeOnly) params.append("active_only", "true");
+    if (featuredOnly) params.append("featured_only", "true");
+    if (excludeFeatured) params.append("exclude_featured", "true");
 
-        const data = await response.json();
+    const response = await fetch(
+      `${process.env.REACT_APP_BACKEND_URL}/news?${params.toString()}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-        return {
-            data,
-            status: response.status,
-        };
-    } catch (error) {
-        console.error("Fetch News Error:", error);
-        return {
-            data: { message: "Conexión no disponible" },
-            status: 500,
-        };
+    if (!response.ok) {
+      const errorData = await response.json();
+      return {
+        data: errorData,
+        status: response.status,
+      };
     }
+
+    const data = await response.json();
+
+    return {
+      data,
+      status: response.status,
+    };
+  } catch (error) {
+    console.error("Fetch News Error:", error);
+    return {
+      data: { message: "Conexión no disponible" },
+      status: 500,
+    };
+  }
 };
