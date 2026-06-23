@@ -5,6 +5,7 @@ import {
     FaArrowLeft, FaFilter, FaInfoCircle
 } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { hasPermission } from '../../../utils/hasPermission';
 
 const BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || 'http://127.0.0.1:5000/api').replace('localhost', '127.0.0.1');
 
@@ -27,14 +28,8 @@ const RoomStats = () => {
     const navigate = useNavigate();
     const token = localStorage.getItem('authToken');
 
-    // Access control: only admin or dev
-    const isAuthorized = (() => {
-        const p = localStorage.getItem("profiles");
-        const profilesList = p ? JSON.parse(p) : [];
-        return profilesList.some(profile =>
-            ['admin', 'administrador', 'dev'].includes((profile.name || profile.profile_name || '').toLowerCase())
-        );
-    })();
+    // Access control: view_rooms (coworking) or view_meeting_rooms (meeting rooms) or dev
+    const isAuthorized = hasPermission('view_rooms') || hasPermission('view_meeting_rooms');
 
     useEffect(() => {
         if (!isAuthorized) {

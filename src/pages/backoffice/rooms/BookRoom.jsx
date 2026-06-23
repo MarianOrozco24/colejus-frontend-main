@@ -54,6 +54,26 @@ const BookRoom = () => {
     const isAdminOrDev = profiles.some(p =>
         ['admin', 'administrador', 'dev'].includes((p.name || p.profile_name || '').toLowerCase())
     );
+
+    const hasBookCoworking = hasPermission('book_rooms');
+    const hasBookMeeting = hasPermission('book_meeting_rooms');
+    const canViewStats = hasPermission('view_rooms') || hasPermission('view_meeting_rooms');
+
+    const [activeTab, setActiveTab] = useState(() => {
+        if (hasBookCoworking) return 'coworking';
+        if (hasBookMeeting) return 'meeting';
+        return 'coworking';
+    });
+
+    const handleTabChange = (tab) => {
+        setActiveTab(tab);
+        setStep(1);
+        setSelectedRoom(null);
+        setSelectedSlots([]);
+        setError('');
+        setSuccessMsg('');
+    };
+
     const [selectedRoom, setSelectedRoom] = useState(null);
     const [selectedDate, setSelectedDate] = useState('');
     const [selectedSlots, setSelectedSlots] = useState([]);
@@ -203,15 +223,17 @@ const BookRoom = () => {
     const [uploadError, setUploadError] = useState('');
 
     // Permissions
-    const canViewAllRooms = hasPermission('view_rooms');
-    const canManageRooms = hasPermission('manage_rooms');
+    const canViewAllRooms = activeTab === 'coworking' ? hasPermission('view_rooms') : hasPermission('view_meeting_rooms');
+    const canManageRooms = activeTab === 'coworking' ? hasPermission('manage_rooms') : hasPermission('manage_meeting_rooms');
 
     // Fetch rooms from API (loads active or all based on permissions)
     const fetchRooms = useCallback(async () => {
         setRoomsLoading(true);
         setError('');
         try {
-            const url = canViewAllRooms ? `${BACKEND_URL}/rooms/all` : `${BACKEND_URL}/rooms`;
+            const url = canViewAllRooms 
+                ? `${BACKEND_URL}/rooms/all?room_type=${activeTab}` 
+                : `${BACKEND_URL}/rooms?room_type=${activeTab}`;
             const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
             const res = await fetch(url, { headers });
 
@@ -228,7 +250,7 @@ const BookRoom = () => {
         } finally {
             setRoomsLoading(false);
         }
-    }, [canViewAllRooms, token]);
+    }, [canViewAllRooms, token, activeTab]);
 
     useEffect(() => {
         fetchRooms();
@@ -237,21 +259,19 @@ const BookRoom = () => {
     // Auto-select first active room when rooms list loads, and keep selectedRoom in sync with roomsData
     useEffect(() => {
         if (roomsData.length > 0) {
-            if (!selectedRoom) {
+            if (!selectedRoom || !roomsData.some(r => r.id === selectedRoom.id)) {
                 const activeRoom = roomsData.find(r => r.is_active);
                 setSelectedRoom(activeRoom || roomsData[0]);
             } else {
                 const updatedRoom = roomsData.find(r => r.id === selectedRoom.id);
-                if (updatedRoom) {
-                    if (updatedRoom !== selectedRoom) {
-                        setSelectedRoom(updatedRoom);
-                    }
-                } else {
-                    setSelectedRoom(roomsData[0]);
+                if (updatedRoom && updatedRoom !== selectedRoom) {
+                    setSelectedRoom(updatedRoom);
                 }
             }
+        } else {
+            setSelectedRoom(null);
         }
-    }, [roomsData, selectedRoom]);
+    }, [roomsData]);
 
 
     // Initial default booking date: tomorrow
@@ -366,7 +386,8 @@ const BookRoom = () => {
             if (response.ok) {
                 const firstId = data.bookings && data.bookings[0] ? data.bookings[0].id : Math.floor(100 + Math.random() * 900);
                 const dateCode = selectedDate.replace(/-/g, '').substring(2, 6);
-                setTicketNumber(`CW-${dateCode}-${firstId}`);
+                const prefix = activeTab === 'coworking' ? 'CW' : 'MR';
+                setTicketNumber(`${prefix}-${dateCode}-${firstId}`);
                 setStep(4);
             } else {
                 setError(data.error || 'Ocurrió un error al procesar tu reserva.');
@@ -517,7 +538,8 @@ const BookRoom = () => {
             image: roomForm.image,
             description: roomForm.description,
             amenities: roomForm.amenities,
-            is_active: roomForm.is_active
+            is_active: roomForm.is_active,
+            room_type: editingRoom ? editingRoom.room_type : activeTab
         };
 
         try {
@@ -672,12 +694,12 @@ const BookRoom = () => {
             <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-serif font-bold text-primary flex items-center gap-2">
-                        <FaCalendarAlt className="text-secondary" /> Reservar Sala de Coworking
+                        <FaCalendarAlt className="text-secondary" /> Reservar {activeTab === 'coworking' ? 'Sala de Coworking' : 'Sala de Reuniones'}
                     </h1>
                     <p className="text-sm text-gray-500 mt-1">Elegí la sala, fecha y horarios para registrar tu reserva.</p>
                 </div>
                 <div className="flex gap-2 flex-wrap items-center">
-                    {isAdminOrDev && (
+                    {canViewStats && (
                         <button
                             onClick={() => navigate('/backoffice/estadisticas-salas')}
                             className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all shadow-md flex items-center gap-2 text-xs md:text-sm"
@@ -692,6 +714,36 @@ const BookRoom = () => {
                             className="px-5 py-2.5 bg-secondary hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-md flex items-center gap-2 text-sm"
                         >
                             <FaPlus /> Nueva Sala
+                        </button>
+                    )}
+                </div>
+            </div>
+
+            {/* Segmented Tab Switch */}
+            <div className="flex justify-center mb-6 no-print select-none animate-fade-in">
+                <div className="flex bg-slate-200/60 p-1 rounded-2xl border border-gray-200/50 shadow-inner">
+                    {(hasBookCoworking || isAdminOrDev) && (
+                        <button
+                            onClick={() => handleTabChange('coworking')}
+                            className={`px-6 py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center gap-2 focus:outline-none ${
+                                activeTab === 'coworking'
+                                    ? 'bg-primary text-white shadow-md'
+                                    : 'text-gray-500 hover:text-gray-800'
+                            }`}
+                        >
+                            <FaCalendarAlt /> Salas de Coworking
+                        </button>
+                    )}
+                    {(hasBookMeeting || isAdminOrDev) && (
+                        <button
+                            onClick={() => handleTabChange('meeting')}
+                            className={`px-6 py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center gap-2 focus:outline-none ${
+                                activeTab === 'meeting'
+                                    ? 'bg-primary text-white shadow-md'
+                                    : 'text-gray-500 hover:text-gray-800'
+                            }`}
+                        >
+                            <FaUsers /> Salas de Reuniones
                         </button>
                     )}
                 </div>

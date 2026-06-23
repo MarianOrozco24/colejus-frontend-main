@@ -128,7 +128,15 @@ const Layout = () => {
       const matchedPath = Object.keys(pathToPermission).find(p => currentPath.startsWith(p));
       if (matchedPath) {
         const requiredPermission = pathToPermission[matchedPath];
-        if (!hasPermission(requiredPermission)) {
+        if (matchedPath === "/backoffice/reservar-sala") {
+          if (!hasPermission("book_rooms") && !hasPermission("book_meeting_rooms")) {
+            navigate("/backoffice");
+          }
+        } else if (matchedPath === "/backoffice/estadisticas-salas") {
+          if (!hasPermission("view_rooms") && !hasPermission("view_meeting_rooms")) {
+            navigate("/backoffice");
+          }
+        } else if (!hasPermission(requiredPermission)) {
           navigate("/backoffice"); 
         }
       } else if (currentPath === "/backoffice") {
@@ -174,6 +182,9 @@ const Layout = () => {
   ];
 
   const filteredNavLinks = navLinks.filter(link => {
+    if (link.to === "/backoffice/reservar-sala") {
+      return hasPermission("book_rooms") || hasPermission("book_meeting_rooms");
+    }
     if (link.permission) {
       return hasPermission(link.permission);
     }
