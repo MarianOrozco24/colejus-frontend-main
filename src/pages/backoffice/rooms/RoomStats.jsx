@@ -28,8 +28,9 @@ const RoomStats = () => {
     const navigate = useNavigate();
     const token = localStorage.getItem('authToken');
 
-    // Access control: view_rooms (coworking) or view_meeting_rooms (meeting rooms) or dev
-    const isAuthorized = hasPermission('view_rooms') || hasPermission('view_meeting_rooms');
+    const canViewCoworking = hasPermission('view_rooms');
+    const canViewMeeting = hasPermission('view_meeting_rooms');
+    const isAuthorized = canViewCoworking || canViewMeeting;
 
     useEffect(() => {
         if (!isAuthorized) {
@@ -58,28 +59,55 @@ const RoomStats = () => {
     // Tooltip state for heatmap interaction
     const [tooltip, setTooltip] = useState({ show: false, content: '', x: 0, y: 0 });
 
-    // Fetch all rooms on load to populate selector
+    const roomTypeLabel = (type) =>
+        type === 'meeting' ? 'Reuniones' : 'Coworking';
+
+    // Fetch rooms the user can view (coworking and/or meeting)
     useEffect(() => {
         const fetchRooms = async () => {
             setRoomsLoading(true);
+            setError('');
+
+            const typesToFetch = [];
+            if (canViewCoworking) typesToFetch.push('coworking');
+            if (canViewMeeting) typesToFetch.push('meeting');
+
+            if (typesToFetch.length === 0) {
+                setRooms([]);
+                setRoomsLoading(false);
+                return;
+            }
+
             try {
-                const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-                const res = await fetch(`${BACKEND_URL}/rooms`, { headers });
+                const headers = token ? { Authorization: `Bearer ${token}` } : {};
+                const responses = await Promise.all(
+                    typesToFetch.map((roomType) =>
+                        fetch(`${BACKEND_URL}/rooms/all?room_type=${roomType}`, { headers })
+                    )
+                );
 
-                if (res.ok) {
-                    const data = await res.json();
-                    setRooms(data);
-
-                    // Default to the first room in the list
-                    if (data && data.length > 0) {
-                        setSelectedRoomId(data[0].id);
-                        setSelectedRoomName(data[0].name);
-                    } else {
-                        setError('No se encontraron salas registradas.');
+                const combined = [];
+                for (let i = 0; i < responses.length; i++) {
+                    const res = responses[i];
+                    if (!res.ok) {
+                        const errData = await res.json();
+                        setError(errData.error || errData.message || 'Error al obtener la lista de salas.');
+                        setRooms([]);
+                        setRoomsLoading(false);
+                        return;
                     }
+                    const data = await res.json();
+                    combined.push(...data);
+                }
+
+                combined.sort((a, b) => a.name.localeCompare(b.name, 'es'));
+                setRooms(combined);
+
+                if (combined.length > 0) {
+                    setSelectedRoomId(combined[0].id);
+                    setSelectedRoomName(combined[0].name);
                 } else {
-                    const errData = await res.json();
-                    setError(errData.error || 'Error al obtener la lista de salas.');
+                    setError('No se encontraron salas registradas.');
                 }
             } catch (err) {
                 setError('Error de conexión al cargar las salas.');
@@ -90,7 +118,7 @@ const RoomStats = () => {
         };
 
         fetchRooms();
-    }, [token]);
+    }, [token, canViewCoworking, canViewMeeting]);
 
     // Fetch statistics for the selected room and date range
     const fetchStats = useCallback(async () => {
@@ -408,7 +436,7 @@ const RoomStats = () => {
                         <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
                             <FaChartBar className="text-primary" /> Estadísticas de Salas
                         </h1>
-                        <p className="text-sm text-gray-500">Métricas, concurrencia y análisis temporal del coworking</p>
+                        <p className="text-sm text-gray-500">Métricas, concurrencia y análisis temporal de coworking y salas de reuniones</p>
                     </div>
                 </div>
 
@@ -429,7 +457,7 @@ const RoomStats = () => {
                             >
                                 {rooms.map(room => (
                                     <option key={room.id} value={room.id}>
-                                        {room.name}
+                                        {room.name} ({roomTypeLabel(room.room_type)})
                                     </option>
                                 ))}
                             </select>
