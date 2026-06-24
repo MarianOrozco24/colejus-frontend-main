@@ -16,7 +16,16 @@ export const editNewsById = async (newsData, newsUuid, token, imageFile) => {
     );
 
     if (!response.ok) {
-      const errorData = await response.json();
+      let errorData = { error: "Ocurrió un error en el servidor." };
+      try {
+        errorData = await response.json();
+      } catch (jsonError) {
+        if (response.status === 413) {
+          errorData = { error: "El archivo o la imagen es demasiado grande para el servidor (Límite excedido)." };
+        } else {
+          errorData = { error: `Error del servidor (${response.status}): ${response.statusText || 'Petición incorrecta'}` };
+        }
+      }
       return {
         data: errorData,
         status: response.status,
