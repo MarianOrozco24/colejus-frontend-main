@@ -16,6 +16,7 @@ import {
   FaTerminal,
   FaExclamationTriangle,
   FaCalendarAlt,
+  FaSyncAlt,
 } from "react-icons/fa";
 
 const Layout = () => {
@@ -90,6 +91,7 @@ const Layout = () => {
     "/backoffice/dashboard-ingresos": "view_revenue",
     
     "/backoffice/pagos-membresias": "view_lawyer_payments",
+    "/backoffice/sync-cuotas": "view_membership_sync",
     
     "/backoffice/administrador-cobros": "view_collection_admin",
     
@@ -113,6 +115,12 @@ const Layout = () => {
       return;
     }
 
+    const mustChangePassword = localStorage.getItem("mustChangePassword") === "true";
+    if (mustChangePassword && location.pathname !== "/backoffice/cambiar-contrasena") {
+      navigate("/backoffice/cambiar-contrasena");
+      return;
+    }
+
     const currentPath = location.pathname;
     const isDevUser = profiles.some(p => p.profile_name?.toLowerCase() === 'dev');
 
@@ -128,7 +136,15 @@ const Layout = () => {
       const matchedPath = Object.keys(pathToPermission).find(p => currentPath.startsWith(p));
       if (matchedPath) {
         const requiredPermission = pathToPermission[matchedPath];
-        if (!hasPermission(requiredPermission)) {
+        if (matchedPath === "/backoffice/reservar-sala") {
+          if (!hasPermission("book_rooms") && !hasPermission("book_meeting_rooms")) {
+            navigate("/backoffice");
+          }
+        } else if (matchedPath === "/backoffice/estadisticas-salas") {
+          if (!hasPermission("view_rooms") && !hasPermission("view_meeting_rooms")) {
+            navigate("/backoffice");
+          }
+        } else if (!hasPermission(requiredPermission)) {
           navigate("/backoffice"); 
         }
       } else if (currentPath === "/backoffice") {
@@ -167,6 +183,7 @@ const Layout = () => {
     { to: "/backoffice/historial-recibos", label: "Historial de Recibos", icon: FaReceipt, permission: "view_receipts" },
     { to: "/backoffice/dashboard-ingresos", label: "Dashboard Ingresos", icon: FaReceipt, permission: "view_revenue" },
     { to: "/backoffice/pagos-membresias", label: "Membresías Abogados", icon: FaDollarSign, permission: "view_lawyer_payments" },
+    { to: "/backoffice/sync-cuotas", label: "Sync Cuotas Excel", icon: FaSyncAlt, permission: "view_membership_sync" },
     { to: "/backoffice/administrador-cobros", label: "Administrador de Cobros", icon: FaDollarSign, permission: "view_collection_admin" },
     { to: "/backoffice/integrantes", label: "Nosotros", icon: FaUsers, permission: "view_integrantes" },
     { to: "/backoffice/reservar-sala", label: "Reservar Sala", icon: FaCalendarAlt, permission: "book_rooms" },
@@ -174,6 +191,9 @@ const Layout = () => {
   ];
 
   const filteredNavLinks = navLinks.filter(link => {
+    if (link.to === "/backoffice/reservar-sala") {
+      return hasPermission("book_rooms") || hasPermission("book_meeting_rooms");
+    }
     if (link.permission) {
       return hasPermission(link.permission);
     }
