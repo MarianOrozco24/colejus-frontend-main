@@ -54,6 +54,16 @@ const NewNewsPage = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    const MAX_SIZE_MB = 10;
+    const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
+    if (file.size > MAX_SIZE_BYTES) {
+      setError(`La imagen seleccionada supera el límite máximo permitido de ${MAX_SIZE_MB}MB.`);
+      e.target.value = null; // Resetea el input para que no quede seleccionada
+      setImageFile(null);
+      setImagePreview(null);
+      return;
+    }
+
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
   };
