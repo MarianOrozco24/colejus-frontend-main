@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaUsers, FaArrowLeft, FaUserPlus, FaUserShield, FaBan, FaCheckCircle, FaSearch, FaSyncAlt } from 'react-icons/fa';
+import { FaUsers, FaArrowLeft, FaUserPlus, FaUserShield, FaBan, FaCheckCircle, FaSearch, FaSyncAlt, FaArrowRight } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
 const UserManager = () => {
@@ -11,31 +11,59 @@ const UserManager = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [newUser, setNewUser] = useState({ uuid: '', name: '', email: '', password: '', profiles: [], tuition: '' });
     const [deleteConfirmUuid, setDeleteConfirmUuid] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalUsers, setTotalUsers] = useState(0);
+    const [perPage] = useState(10);
     const navigate = useNavigate();
 
     const fetchData = async () => {
         try {
             setLoading(true);
             const token = localStorage.getItem("authToken");
-            const headers = { 'Authorization': `Bearer ${token}` };
+            const headers = {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            };
             const [usersRes, profilesRes] = await Promise.all([
-                fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/users`, { headers }),
+                fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/users`, {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify({
+                        name: search,
+                        page: currentPage,
+                        per_page: perPage
+                    })
+                }),
                 fetch(`${process.env.REACT_APP_BACKEND_URL}/dev/profiles`, { headers })
             ]);
             const usersData = await usersRes.json();
             const profilesData = await profilesRes.json();
-            setUsers(Array.isArray(usersData) ? usersData : []);
+
+            if (usersRes.ok && usersData.data) {
+                setUsers(usersData.data || []);
+                setTotalPages(usersData.pagination?.total_pages || 1);
+                setTotalUsers(usersData.pagination?.total || 0);
+            } else {
+                setUsers([]);
+                setTotalPages(1);
+                setTotalUsers(0);
+            }
+
             setProfiles(Array.isArray(profilesData) ? profilesData : []);
             setLoading(false);
         } catch (error) {
             console.error("Error fetching data:", error);
+            setUsers([]);
+            setTotalPages(1);
+            setTotalUsers(0);
             setLoading(false);
         }
     };
 
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [currentPage, search]);
 
     const toggleBlock = async (uuid) => {
         try {
@@ -117,10 +145,13 @@ const UserManager = () => {
         setShowModal(true);
     };
 
-    const filteredUsers = users.filter(u =>
-        u.name?.toLowerCase().includes(search.toLowerCase()) ||
-        u.email?.toLowerCase().includes(search.toLowerCase())
-    );
+    const handleSearch = (value) => {
+        setSearch(value);
+        setCurrentPage(1);
+    };
+
+    const startRecord = (currentPage - 1) * perPage + 1;
+    const endRecord = Math.min(currentPage * perPage, totalUsers);
 
     return (
         <div className="p-4 md:p-6 bg-gray-50 min-h-screen">
@@ -164,7 +195,7 @@ const UserManager = () => {
                     placeholder="Buscar por nombre o email..."
                     className="w-full outline-none text-gray-700"
                     value={search}
-                    onChange={(e) => setSearch(e.target.value)}
+                    onChange={(e) => handleSearch(e.target.value)}
                 />
             </div>
 
@@ -183,9 +214,9 @@ const UserManager = () => {
                         <tbody className="divide-y divide-gray-100">
                             {loading ? (
                                 <tr><td colSpan="4" className="px-6 py-10 text-center text-gray-500">Cargando usuarios...</td></tr>
-                            ) : filteredUsers.length === 0 ? (
+                            ) : users.length === 0 ? (
                                 <tr><td colSpan="4" className="px-6 py-10 text-center text-gray-500">No se encontraron usuarios.</td></tr>
-                            ) : filteredUsers.map(user => (
+                            ) : users.map(user => (
                                 <tr key={user.uuid} className="hover:bg-gray-50 transition-colors">
                                     <td className="px-6 py-4">
                                         <div className="font-bold text-gray-800">{user.name}</div>
@@ -263,6 +294,44 @@ const UserManager = () => {
                     </table>
                 </div>
             </div>
+
+            {/* Pagination Controls */}
+            {totalUsers > 10 && (
+                <div className="mt-6 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <span className="text-sm text-gray-600">
+                        Mostrando {startRecord}-{endRecord} de {totalUsers} usuarios
+                    </span>
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                            disabled={currentPage === 1}
+                            className={`px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-all ${
+                                currentPage === 1
+                                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                    : 'bg-primary text-white hover:bg-opacity-90'
+                            }`}
+                        >
+                            <FaArrowLeft /> Anterior
+                        </button>
+
+                        <span className="text-gray-700 font-semibold whitespace-nowrap">
+                            Página {currentPage} de {totalPages}
+                        </span>
+
+                        <button
+                            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                            disabled={currentPage === totalPages}
+                            className={`px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-all ${
+                                currentPage === totalPages
+                                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                    : 'bg-primary text-white hover:bg-opacity-90'
+                            }`}
+                        >
+                            Siguiente <FaArrowRight />
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Create User Modal */}
             {showModal && (
