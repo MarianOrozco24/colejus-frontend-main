@@ -211,8 +211,16 @@ const Profesionales = () => {
       <Footer />
 
       {selectedProfessional && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-10">
-          <div className="bg-white rounded-lg p-6 w-11/12 sm:w-2/3 md:w-1/2 lg:w-1/3 text-center">
+        <div
+          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[70]"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setSelectedProfessional(null)}
+        >
+          <div
+            className="bg-white rounded-lg p-6 w-11/12 sm:w-2/3 md:w-1/2 lg:w-1/3 text-center"
+            onClick={(e) => e.stopPropagation()}
+          >
             <h2 className="text-xl font-bold text-primary">{selectedProfessional.name}</h2>
             <p className="text-gray-600">{selectedProfessional.title}</p>
             <p className="text-gray-500">Mat. {selectedProfessional.tuition || "—"}</p>

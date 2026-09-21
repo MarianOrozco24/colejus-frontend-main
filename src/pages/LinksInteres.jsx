@@ -1,97 +1,101 @@
-import React from 'react';
-import ResponsiveNav from '../components/ResponsiveNav';
-import Footer from '../components/Footer';
-import MobileFooter from '../components/MobileFooter';
+import React from "react";
+import { Link } from "react-router-dom";
+import ResponsiveNav from "../components/ResponsiveNav";
+import Footer from "../components/Footer";
+import MobileFooter from "../components/MobileFooter";
+import {
+  DIGITAL_TOOLS,
+  INTEREST_LINKS,
+  isInternalPath,
+} from "../constants/site";
+
+const LinkRow = ({ label, href }) => {
+  const className =
+    "pb-3 border-b border-slate-200 text-gray-700 hover:text-secondary font-medium transition-colors";
+
+  if (isInternalPath(href)) {
+    return (
+      <Link to={href} className={className}>
+        {label}
+      </Link>
+    );
+  }
+
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={className}
+    >
+      {label}
+    </a>
+  );
+};
 
 const LinksInteres = () => {
-    return (
-        <div className="bg-gray-100 min-h-screen">
-            {/* Desktop View */}
-            <div className="hidden md:block">
-                <header className="relative h-[80vh] 2xl:h-[70vh] bg-primary bg-cover bg-center flex flex-col justify-center items-center text-white text-center">
-                    <div className="absolute inset-0 opacity-60 z-0" style={{ backgroundColor: '#06092E' }}></div>
-                    <ResponsiveNav />
-                    <div className="absolute inset-0 flex flex-col justify-center items-center text-white z-10 px-4 pt-40 md:pt-0">
-                        <h1 className="text-5xl 2xl:text-7xl font-normal mb-6" style={{ lineHeight: '1.5' }}>
-                            Links de Interés
-                        </h1>
-                        <h5 className="text-xl 2xl:text-2xl font-normal mb-2" style={{ lineHeight: '1.5' }}>
-                            Encontrá los accesos directos a los links más usados
-                        </h5>
-                    </div>
-                </header>
-
-                <section className="mt-9 pb-24">
-                    <div className="container mx-auto text-center">
-                        <div className="grid grid-cols-2 gap-8 justify-center items-start">
-                            {/* Links sections for desktop */}
-                        </div>
-                    </div>
-                </section>
-                <Footer />
-            </div>
-
-            {/* Mobile View */}
-            <div className="block md:hidden bg-primary min-h-screen text-white">
-                <ResponsiveNav />
-
-                {/* Mobile Header */}
-                <div className="px-6 pt-24 pb-8">
-                    <h1 className="text-2xl font-normal mb-2">Links de interés</h1>
-                    <p className="text-sm text-gray-300">
-                        Encontrá los accesos directos a los links más usados
-                    </p>
-                </div>
-
-                {/* Mobile Links Sections */}
-                <div className="bg-white rounded-t-3xl px-6 pt-8 pb-4 text-gray-800">
-                    {/* Otras herramientas section */}
-                    <h2 className="text-xl font-semibold mb-4">Otras herramientas</h2>
-                    <div className="flex flex-col space-y-4">
-                        <a href="/liquidaciones" className="pb-2 border-b border-gray-200">Liquidaciones</a>
-                        <a href="/edictos" className="pb-2 border-b border-gray-200">Edictos</a>
-                        <a href="/caja-forense" className="pb-2 border-b border-gray-200">Caja forense</a>
-                    </div>
-
-                    {/* Links de interés section */}
-                    <h2 className="text-xl font-semibold mt-8 mb-4">Links de interés</h2>
-                    <div className="flex flex-col space-y-4">
-                        <a href="https://jusmendoza.gob.ar/" className="pb-2 border-b border-gray-200">Poder judicial Mza</a>
-                        <a href="/notificaciones" className="pb-2 border-b border-gray-200">Notificaciones</a>
-                        <a href="https://www2.jus.mendoza.gov.ar/listas/proveidos/listas.php" className="pb-2 border-b border-gray-200">Listas diarias</a>
-                        <a href="https://atm.mendoza.gov.ar/" className="pb-2 border-b border-gray-200">ATM</a>
-                    </div>
-                </div>
-
-                {/* Contact Form Section */}
-                <div className="bg-primary px-6 py-8">
-                    <h2 className="text-2xl font-normal mb-4">¡Hablemos!</h2>
-                    <p className="text-sm text-gray-300 mb-6">
-                        Si quieres contactarte con el Colegio de Abogados, hacelo a través de nuestro mail
-                    </p>
-                    <form className="space-y-4">
-                        <input
-                            type="text"
-                            placeholder="Nombre y apellido"
-                            className="w-full bg-transparent border-b border-gray-400 p-2 text-white placeholder-gray-400 focus:outline-none"
-                        />
-                        <textarea
-                            placeholder="Mensaje"
-                            className="w-full bg-transparent border-b border-gray-400 p-2 text-white placeholder-gray-400 focus:outline-none mt-4"
-                            rows="3"
-                        />
-                        <div className="text-right">
-                            <button className="bg-white text-primary px-6 py-2 rounded-full mt-4">
-                                Enviar mensaje →
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-                <MobileFooter />
-            </div>
+  return (
+    <div className="bg-gray-100 min-h-screen">
+      <header className="relative min-h-[50vh] pb-16 bg-[#06092E] flex flex-col justify-start items-center text-white text-center overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#06092E] via-[#080c3e] to-[#040620] z-0"></div>
+        <div className="w-full z-20">
+          <ResponsiveNav />
         </div>
-    );
+        <div className="flex flex-col justify-center items-center text-center z-10 px-6 flex-1 mt-28 md:mt-36">
+          <h1 className="text-4xl md:text-6xl font-serif font-bold mb-4 tracking-tight">
+            Links de interés
+          </h1>
+          <p className="text-slate-300 font-light max-w-2xl text-sm md:text-base font-lato leading-relaxed">
+            Accesos directos a las herramientas del Colegio y a los sitios más
+            usados por la matrícula.
+          </p>
+        </div>
+      </header>
+
+      <section className="bg-white py-16 md:py-20 px-6">
+        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
+          <div>
+            <h2 className="text-2xl font-serif font-bold text-primary mb-6">
+              Herramientas del Colegio
+            </h2>
+            <div className="flex flex-col space-y-4">
+              {DIGITAL_TOOLS.filter((tool) => isInternalPath(tool.link)).map(
+                (tool) => (
+                  <LinkRow
+                    key={tool.name}
+                    label={tool.name}
+                    href={tool.link}
+                  />
+                )
+              )}
+            </div>
+          </div>
+
+          <div>
+            <h2 className="text-2xl font-serif font-bold text-primary mb-6">
+              Organismos y consultas
+            </h2>
+            <div className="flex flex-col space-y-4">
+              {INTEREST_LINKS.map((link) => (
+                <LinkRow
+                  key={link.label}
+                  label={link.label}
+                  href={link.href}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="hidden md:block">
+        <Footer />
+      </div>
+      <div className="block md:hidden">
+        <MobileFooter />
+      </div>
+    </div>
+  );
 };
 
 export default LinksInteres;

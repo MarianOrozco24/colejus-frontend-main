@@ -1,35 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaSearch, FaChevronDown } from 'react-icons/fa';
-
-// Define your pages and their searchable content
-const pages = [
-    {
-        path: '/derecho-fijo',
-        title: 'Derecho Fijo',
-        content: 'Información sobre derecho fijo y trámites relacionados'
-    },
-    {
-        path: '/liquidaciones',
-        title: 'Liquidaciones',
-        content: 'Sistema de liquidaciones y pagos'
-    },
-    {
-        path: '/edictos',
-        title: 'Edictos',
-        content: 'Publicación y consulta de edictos'
-    },
-    {
-        path: '/novedades',
-        title: 'Novedades',
-        content: 'Últimas noticias y actualizaciones'
-    },
-    {
-        path: '/profesionales',
-        title: 'Novedades',
-        content: 'Últimas noticias y actualizaciones'
-    }
-];
+import { SEARCH_PAGES } from '../constants/site';
 
 const NavBar = () => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -37,6 +9,22 @@ const NavBar = () => {
     const [searchResults, setSearchResults] = useState([]);
     const [showResults, setShowResults] = useState(false);
     const navigate = useNavigate();
+    const dropdownRef = useRef(null);
+    const searchRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsDropdownOpen(false);
+            }
+            if (searchRef.current && !searchRef.current.contains(event.target)) {
+                setShowResults(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const handleSearch = (term) => {
         setSearchTerm(term);
@@ -46,7 +34,7 @@ const NavBar = () => {
             return;
         }
 
-        const results = pages.filter(page =>
+        const results = SEARCH_PAGES.filter(page =>
             page.title.toLowerCase().includes(term.toLowerCase()) ||
             page.content.toLowerCase().includes(term.toLowerCase())
         );
@@ -67,12 +55,12 @@ const NavBar = () => {
             style={{ borderRadius: '20px', maxWidth: 'calc(100% - 100px)', margin: '22px auto' }}
         >
             <div className="flex items-center space-x-3">
-                <a href="/">
-                    <img src="/logo-colegio.png" alt="Logo" className="h-9 w-auto object-contain" />
-                </a>
+                <Link to="/">
+                    <img src="/logo-colegio.png" alt="Logo del Colegio" className="h-9 w-auto object-contain" />
+                </Link>
             </div>
 
-            <div className="flex-grow relative mx-4 text-sm" style={{ maxWidth: '435px' }}>
+            <div className="flex-grow relative mx-4 text-sm" style={{ maxWidth: '435px' }} ref={searchRef}>
                 <input
                     type="text"
                     value={searchTerm}
@@ -101,10 +89,11 @@ const NavBar = () => {
             </div>
 
             <div className="flex space-x-10 text-white md:text-xs 2xl:text-sm nav-links font-bold">
-                <div className="relative text-inherit">
+                <div className="relative text-inherit" ref={dropdownRef}>
                     <button
                         type="button"
                         className="hover:text-gray-300 cursor-pointer flex items-center space-x-1 bg-transparent border-none p-0 text-inherit font-bold focus:outline-none"
+                        aria-expanded={isDropdownOpen}
                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                     >
                         <span className='text-inherit'>Herramientas digitales</span>
@@ -113,19 +102,19 @@ const NavBar = () => {
 
                     {isDropdownOpen && (
                         <div className="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
-                            <Link to="/derecho-fijo" className="block px-4 py-2 text-primary hover:bg-gray-100 text-inherit">
+                            <Link to="/derecho-fijo" onClick={() => setIsDropdownOpen(false)} className="block px-4 py-2 text-primary hover:bg-gray-100 text-inherit">
                                 Derecho Fijo
                             </Link>
-                            <Link to="/liquidaciones" className="block px-4 py-2 text-primary hover:bg-gray-100 text-inherit">
+                            <Link to="/liquidaciones" onClick={() => setIsDropdownOpen(false)} className="block px-4 py-2 text-primary hover:bg-gray-100 text-inherit">
                                 Liquidaciones
                             </Link>
-                            <Link to="/edictos" className="block px-4 py-2 text-primary hover:bg-gray-100 text-inherit">
+                            <Link to="/edictos" onClick={() => setIsDropdownOpen(false)} className="block px-4 py-2 text-primary hover:bg-gray-100 text-inherit">
                                 Edictos
                             </Link>
-                            <Link to="/links-de-interes" className="block px-4 py-2 text-primary hover:bg-gray-100 text-inherit">
+                            <Link to="/links-de-interes" onClick={() => setIsDropdownOpen(false)} className="block px-4 py-2 text-primary hover:bg-gray-100 text-inherit">
                                 Links de interés
                             </Link>
-                            <Link to="/backoffice/reservar-sala" className="block px-4 py-2 text-primary hover:bg-gray-100 text-inherit">
+                            <Link to="/backoffice/reservar-sala" onClick={() => setIsDropdownOpen(false)} className="block px-4 py-2 text-primary hover:bg-gray-100 text-inherit">
                                 Reserva de Salas
                             </Link>
                         </div>

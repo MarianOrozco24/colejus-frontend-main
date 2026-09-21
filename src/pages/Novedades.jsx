@@ -42,11 +42,17 @@ const Novedades = () => {
       setError(null);
 
       try {
-        const response = await fetchAllNews(currentPage, ITEMS_PER_PAGE, true);
+        const response = await fetchAllNews(currentPage, ITEMS_PER_PAGE, true, {
+          excludeFeatured: true,
+        });
 
         if (response.status === 200) {
           const { news: items = [], pages = 1 } = response.data;
-          setNews(items.map(mapNewsItemForCard));
+          setNews(
+            items
+              .filter((item) => !item.is_featured)
+              .map(mapNewsItemForCard)
+          );
           setTotalPages(Math.max(pages, 1));
         } else {
           setError("No se pudieron cargar las novedades.");
