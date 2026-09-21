@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import ResponsiveNav from "../components/ResponsiveNav";
 import Footer from "../components/Footer";
 import { FaFilePdf } from "react-icons/fa";
+import { INTEREST_LINKS } from "../constants/site";
 
 const SHOW_TRIBUNAL_ETICA = false;
 
@@ -13,30 +14,60 @@ const COORDINADOR_COMISIONES = {
 };
 
 const COMISIONES_E_INSTITUTOS = [
-  { title: "Comisión de Jóvenes" },
-  { title: "Comisión Senior" },
-  { title: "Instituto de Derecho de Familia" },
-  { title: "Instituto de Derecho Administrativo" },
-  { title: "Comisión de Cultura" },
-  { title: "Instituto de Derecho Laboral" },
-  { title: "Instituto de Derecho Comercial" },
-  { title: "Instituto de Derecho Ambiental" },
-  { title: "Instituto de Derecho Penal, Procesal Penal y Criminología" },
-  { title: "Instituto de Derecho de Consumo" },
-  { title: "Comisión de Perspectiva de Género e Igualdad" },
-  { title: "Instituto de Derecho Constitucional" },
-  { title: "Comisión de Mediación, Conciliación y Arbitraje" },
-  { title: "Instituto de Seguridad Social" },
-  { title: "Comisión de Abogados de General Alvear" },
-  { title: "Instituto de Derecho Minero" },
-  { title: "Instituto de Derecho Civil" },
-  { title: "Comisión de Derecho Agrario" },
-  { title: "Comisión de Deportes" },
-  { title: "Comisión de Incumbencias" },
-  { title: "Comisión de Consultorio Jurídico Gratuito" },
-  { title: "Comisión de Asistencia" },
-  { title: "Comisión de Estudiantes de Abogacía (3°, 4° y 5° año)" },
-  { title: "Comisión de Procuradores" },
+  {
+    title: "Instituto Derecho Penal, Procesal Penal y Criminología",
+    presidente: "Mariela Herrera",
+    secretaria: "Marina López",
+  },
+  {
+    title: "Instituto Seguridad Social",
+    presidente: "Bibiana López Olivieri",
+    secretaria: "Rosmari Ramos",
+  },
+  {
+    title: "Comisión Derecho Agrario y Rural",
+    presidente: "Gustavo Juárez",
+    secretaria: "Juan Campi Araujo",
+  },
+  {
+    title: "Instituto Derecho Minero, Hidrocarburos y Energía Renovables",
+    presidente: "Luis Jofré",
+    secretaria: "Noelia Pascucci",
+  },
+  {
+    title: "Comisión de Mediación, Conciliación y Arbitraje",
+    presidente: "Matilde Pronotto",
+  },
+  {
+    title: "Instituto Derecho Comercial",
+    presidente: "Mario Gutiérrez",
+    secretaria: "Valentín Gutiérrez Alias",
+  },
+  {
+    title: "Instituto Derecho Laboral",
+    presidente: "Rodrigo Hernando",
+  },
+  {
+    title: "Instituto de las Familias",
+    presidente: "Pía Masini",
+    secretaria: "Karen Vargas",
+  },
+  {
+    title: "Instituto Derecho de Consumo",
+    presidente: "Cecilia A. Martínez",
+  },
+  {
+    title: "Comisión de Perspectiva de Género e Igualdad",
+    presidente: "Cecilia A. Martínez",
+  },
+  {
+    title: "Comisión de Abogados Malargüe",
+    presidente: "Celeste Espina",
+  },
+  {
+    title: "Comisión Consultorio J Gratuito",
+    presidente: "Axel Kurt Ottosen",
+  },
 ];
 
 const Nosotros = () => {
@@ -453,13 +484,26 @@ const Nosotros = () => {
             {COMISIONES_E_INSTITUTOS.map((item, i) => (
               <div
                 key={i}
-                className="group bg-[#151A39]/60 hover:bg-[#1C234E] rounded-2xl p-6 text-center border-t-2 border-primary/20 hover:border-t-secondary hover:-translate-y-1 transition-all duration-300 shadow-sm flex flex-col justify-center min-h-[140px] border border-white/[0.02]"
+                className="group bg-[#151A39]/60 hover:bg-[#1C234E] rounded-2xl p-6 text-center border-t-2 border-primary/20 hover:border-t-secondary hover:-translate-y-1 transition-all duration-300 shadow-sm flex flex-col justify-center min-h-[180px] border border-white/[0.02]"
               >
-                <h3 className="text-base font-bold text-white mb-2 group-hover:text-secondary transition-colors duration-300">
+                <h3 className="text-base font-bold text-white mb-3 group-hover:text-secondary transition-colors duration-300">
                   {item.title}
                 </h3>
-                {item.name && (
-                  <p className="text-xs text-slate-400 font-light font-lato">{item.name}</p>
+                {item.presidente && (
+                  <p className="text-xs text-slate-300 font-lato leading-relaxed">
+                    <span className="text-secondary/80 font-semibold uppercase tracking-wider text-[10px] block mb-0.5">
+                      Presidente
+                    </span>
+                    {item.presidente}
+                  </p>
+                )}
+                {item.secretaria && (
+                  <p className="text-xs text-slate-400 font-lato leading-relaxed mt-2">
+                    <span className="text-secondary/80 font-semibold uppercase tracking-wider text-[10px] block mb-0.5">
+                      Secretaria/o
+                    </span>
+                    {item.secretaria}
+                  </p>
                 )}
               </div>
             ))}
@@ -476,19 +520,12 @@ const Nosotros = () => {
           </div>
 
           <div className="flex flex-wrap justify-center gap-x-10 gap-y-6 max-w-4xl mx-auto px-6">
-            {[
-              { label: "Poder judicial Mza", href: "#poder-judicial-mza" },
-              { label: "Listas diarias", href: "#listas-diarias" },
-              { label: "Notificaciones", href: "#notificaciones" },
-              { label: "ATM", href: "#atm" },
-              { label: "FACA", href: "#faca" },
-              { label: "Tasas Judiciales", href: "#tasas-judiciales" },
-              { label: "Caja Forense", href: "#caja-forense" },
-              { label: "Valor de JUS", href: "#valor-jus" },
-            ].map((link, index) => (
+            {INTEREST_LINKS.map((link) => (
               <a
-                key={index}
+                key={link.href + link.label}
                 href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-sm font-lato text-gray-500 hover:text-secondary font-medium transition-colors"
               >
                 {link.label}

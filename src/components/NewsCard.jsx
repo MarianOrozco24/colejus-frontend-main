@@ -15,6 +15,12 @@ const variantStyles = {
     subtitle: "text-gray-600",
     footerBorder: "border-slate-50",
   },
+  hero: {
+    card: "bg-white min-h-[300px] border border-white/70",
+    image: "h-32",
+    subtitle: "text-gray-600",
+    footerBorder: "border-slate-100",
+  },
 };
 
 const NewsCard = ({
@@ -49,7 +55,7 @@ const NewsCard = ({
                 Destacada
               </span>
             )}
-            {tags.map((item, index) => (
+            {(tags || []).map((item, index) => (
               <span
                 key={index}
                 className="bg-[#06092E] text-white text-[10px] font-semibold px-2.5 py-1 rounded-full shadow-sm uppercase"

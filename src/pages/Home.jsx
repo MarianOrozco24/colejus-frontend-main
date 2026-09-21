@@ -3,15 +3,24 @@ import { Link } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import MobileFooter from "../components/MobileFooter";
-import NewsCarousel from "../components/NewsCarousel";
+import ToolCard from "../components/ToolCard";
+import { DIGITAL_TOOLS } from "../constants/site";
 
 const Home = () => {
   return (
     <div className="bg-gray-100 min-h-screen">
       <Header />
 
-      {/* Novedades del Ámbito Jurídico: Visible para todos (escritorio y móvil) */}
-      <NewsCarousel />
+      {/* Herramientas digitales: debajo de Novedades */}
+      <section className="bg-slate-50 py-12 md:py-16 px-4 border-t border-slate-100">
+        <div className="max-w-6xl mx-auto">
+          <ToolCard
+            title="Herramientas digitales"
+            tools={DIGITAL_TOOLS}
+            variant="light"
+          />
+        </div>
+      </section>
 
       {/* DELEGACIONES Y SEDES */}
       <section className="bg-slate-100 py-20 px-6 border-t border-slate-200/60">
@@ -163,17 +172,17 @@ const Home = () => {
         >
           {/* Mobile logo */}
           <div className="md:hidden flex justify-between items-center p-6">
-            <h1 className="text-3xl font-serif font-bold text-white">
+            <h2 className="text-3xl font-serif font-bold text-white">
               Nosotros
-            </h1>
+            </h2>
             <img src="/isologo-white.svg" alt="Isologo" className="w-16 h-16 opacity-90" />
           </div>
 
           {/* Left content section */}
           <div className="p-8 md:w-1/2 md:p-20 relative flex flex-col justify-center items-start text-white">
-            <h1 className="text-4xl md:text-5xl font-serif font-bold mb-6 hidden md:block text-white">
+            <h2 className="text-4xl md:text-5xl font-serif font-bold mb-6 hidden md:block text-white">
               Nosotros
-            </h1>
+            </h2>
             <p
               className="text-slate-200 mb-4 text-sm md:text-base font-light leading-relaxed font-lato"
             >

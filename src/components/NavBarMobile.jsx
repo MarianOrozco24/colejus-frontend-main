@@ -1,45 +1,7 @@
 import React, { useState } from 'react';
 import { FaFacebook, FaInstagram, FaChevronDown } from "react-icons/fa";
 import { Link, useNavigate } from 'react-router-dom';
-
-// Define pages and their searchable content
-const pages = [
-  {
-    path: '/derecho-fijo',
-    title: 'Derecho Fijo',
-    content: 'Información sobre derecho fijo y trámites relacionados'
-  },
-  {
-    path: '/liquidaciones',
-    title: 'Liquidaciones',
-    content: 'Sistema de liquidaciones y pagos'
-  },
-  {
-    path: '/edictos',
-    title: 'Edictos',
-    content: 'Publicación y consulta de edictos'
-  },
-  {
-    path: '/novedades',
-    title: 'Novedades',
-    content: 'Últimas noticias y actualizaciones'
-  },
-  {
-    path: '/profesionales',
-    title: 'Profesionales',
-    content: 'Consulta de profesionales y matrícula'
-  },
-  {
-    path: '/backoffice/reservar-sala',
-    title: 'Reserva de Salas',
-    content: 'Reserva de salas y espacios de reunión'
-  },
-  {
-    path: '/contacto',
-    title: 'Contacto',
-    content: 'Información de contacto y ubicación de sedes'
-  }
-];
+import { SEARCH_PAGES } from '../constants/site';
 
 const NavBarMobile = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -67,7 +29,7 @@ const NavBarMobile = () => {
       return;
     }
 
-    const results = pages.filter(page =>
+    const results = SEARCH_PAGES.filter(page =>
       page.title.toLowerCase().includes(term.toLowerCase()) ||
       page.content.toLowerCase().includes(term.toLowerCase())
     );

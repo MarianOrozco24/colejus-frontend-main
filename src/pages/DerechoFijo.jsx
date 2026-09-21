@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import ResponsiveNav from "../components/ResponsiveNav";
 import Footer from "../components/Footer";
+import { EXTERNAL_LINKS } from "../constants/site";
 import { postDerechoFijo, postDerechoFijoBCM, postDerechoFijoPresencial } from "../api/postDerechoFijo";
 import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -610,18 +612,18 @@ const DerechoFijo = () => {
             <div className="flex flex-col items-center">
               <h3 className="text-2xl font-semibold mb-4 text-primary">Otras herramientas</h3>
               <div className="grid grid-cols-2 gap-8">
-                <a href="#liquidaciones" className="font-lato text-base text-gray-700 hover:text-primary border-b border-gray-300 hover:border-primary text-left">Liquidaciones</a>
-                <a href="#caja-forense" className="font-lato text-base text-gray-700 hover:text-primary border-b border-gray-300 hover:border-primary text-left">Caja forense</a>
-                <a href="#edictos" className="font-lato text-base text-gray-700 hover:text-primary border-b border-gray-300 hover:border-primary text-left">Edictos</a>
+                <Link to="/liquidaciones" className="font-lato text-base text-gray-700 hover:text-primary border-b border-gray-300 hover:border-primary text-left">Liquidaciones</Link>
+                <a href={EXTERNAL_LINKS.cajaForense.href} target="_blank" rel="noopener noreferrer" className="font-lato text-base text-gray-700 hover:text-primary border-b border-gray-300 hover:border-primary text-left">Caja forense</a>
+                <Link to="/edictos" className="font-lato text-base text-gray-700 hover:text-primary border-b border-gray-300 hover:border-primary text-left">Edictos</Link>
               </div>
             </div>
             <div className="flex flex-col items-center">
               <h3 className="text-2xl font-semibold mb-4 text-primary">Links de interés</h3>
               <div className="grid grid-cols-2 gap-8">
-                <a href="#poder-judicial-mza" className="font-lato text-base text-gray-700 hover:text-primary border-b border-gray-300 hover:border-primary">Poder judicial Mza</a>
-                <a href="#listas-diarias" className="font-lato text-base text-gray-700 hover:text-primary border-b border-gray-300 hover:border-primary">Listas diarias</a>
-                <a href="#notificaciones" className="font-lato text-base text-gray-700 hover:text-primary border-b border-gray-300 hover:border-primary">Notificaciones</a>
-                <a href="#atm" className="font-lato text-base text-gray-700 hover:text-primary border-b border-gray-300 hover:border-primary">ATM</a>
+                <a href={EXTERNAL_LINKS.poderJudicial.href} target="_blank" rel="noopener noreferrer" className="font-lato text-base text-gray-700 hover:text-primary border-b border-gray-300 hover:border-primary">Poder judicial Mza</a>
+                <a href={EXTERNAL_LINKS.listasDiarias.href} target="_blank" rel="noopener noreferrer" className="font-lato text-base text-gray-700 hover:text-primary border-b border-gray-300 hover:border-primary">Listas diarias</a>
+                <a href={EXTERNAL_LINKS.notificaciones.href} target="_blank" rel="noopener noreferrer" className="font-lato text-base text-gray-700 hover:text-primary border-b border-gray-300 hover:border-primary">Notificaciones</a>
+                <a href={EXTERNAL_LINKS.atm.href} target="_blank" rel="noopener noreferrer" className="font-lato text-base text-gray-700 hover:text-primary border-b border-gray-300 hover:border-primary">ATM</a>
               </div>
             </div>
           </div>

@@ -1,22 +1,8 @@
 import React from 'react';
-import ToolCard from './ToolCard';
 import ResponsiveNav from './ResponsiveNav';
+import NewsCarousel from './NewsCarousel';
 
 const Header = () => {
-    const toolsRow1 = [
-        { name: 'Derecho fijo', link: '/derecho-fijo' },
-        { name: 'Liquidaciones', link: '/liquidaciones' },
-        { name: 'Edictos', link: '/edictos' },
-        { name: 'Caja forense', link: 'https://cfm.org.ar/' },
-    ];
-
-    const toolsRow2 = [
-        { name: 'Poder Judicial Mza', link: 'https://jusmendoza.gob.ar/' },
-        { name: 'Notificaciones', link: '/novedades' },
-        { name: 'Listas diarias', link: 'https://www2.jus.mendoza.gov.ar/listas/proveidos/listas.php' },
-        { name: 'ATM', link: 'https://atm.mendoza.gov.ar/' },
-    ];
-
     return (
         <div className="relative bg-gray-100">
             {/* Hero Header Section */}
@@ -43,9 +29,9 @@ const Header = () => {
                 </div>
             </header>
 
-            {/* ToolCard Section positioned relatively below the Hero with an overlap */}
-            <div className="relative z-20 -mt-16 md:-mt-20 max-w-6xl mx-auto px-4 pb-12">
-                <ToolCard title="Herramientas digitales" tools={[...toolsRow1, ...toolsRow2]} />
+            {/* Novedades: bloque principal solapado al hero (antes: Herramientas) */}
+            <div className="relative z-20 -mt-16 md:-mt-20 max-w-6xl mx-auto px-4 pb-8 md:pb-12">
+                <NewsCarousel variant="hero" />
             </div>
         </div>
     );

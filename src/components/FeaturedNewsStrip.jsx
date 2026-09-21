@@ -3,25 +3,27 @@ import { Link } from "react-router-dom";
 import { FaRegClock, FaRegCalendarAlt } from "react-icons/fa";
 import { mapNewsItemForCard } from "../utils/newsDisplay";
 
-const FeaturedNewsStrip = ({ items = [], variant = "default" }) => {
+const FeaturedNewsStrip = ({ items = [], variant = "default", tone = "light" }) => {
   const stripItems = items.map((item, index) => mapNewsItemForCard(item, index));
 
   if (stripItems.length === 0) return null;
 
   const isCompact = variant === "home";
+  const isDark = tone === "dark";
 
   return (
     <div className={isCompact ? "mb-12" : "mb-16"}>
       <div className={isCompact ? "max-w-5xl mx-auto" : ""}>
         <h3
-          className={`font-serif font-semibold text-primary tracking-tight ${
-            isCompact ? "text-2xl mb-6 text-center" : "text-3xl mb-8"
-          }`}
+          className={`font-serif font-semibold tracking-tight ${
+            isDark ? "text-white" : "text-primary"
+          } ${isCompact ? "text-2xl mb-6 text-center" : "text-3xl mb-8"}`}
         >
           Destacadas
         </h3>
 
         <div
+          aria-label="Novedades destacadas"
           className={`flex gap-5 overflow-x-auto pb-2 snap-x snap-mandatory ${
             isCompact ? "" : "-mx-1 px-1"
           }`}
