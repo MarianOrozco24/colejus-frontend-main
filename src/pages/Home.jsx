@@ -4,6 +4,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import MobileFooter from "../components/MobileFooter";
 import ToolCard from "../components/ToolCard";
+import NewsCarousel from "../components/NewsCarousel";
 import { DIGITAL_TOOLS } from "../constants/site";
 
 const Home = () => {
@@ -11,24 +12,37 @@ const Home = () => {
     <div className="bg-gray-100 min-h-screen">
       <Header />
 
-      {/* Herramientas digitales: debajo de Novedades */}
-      <section className="bg-slate-50 py-12 md:py-16 px-4 border-t border-slate-100">
-        <div className="max-w-6xl mx-auto">
+      <NewsCarousel variant="hero" />
+
+      <section className="relative overflow-hidden py-10 md:py-12 px-4">
+        <div
+          className="absolute inset-0"
+          style={{
+            background: "linear-gradient(135deg, #1A1F66 0%, #080c3e 48%, #06092E 100%)",
+          }}
+        />
+        <div className="absolute inset-x-0 top-0 h-px bg-white/10" />
+        <div className="absolute inset-x-0 bottom-0 h-px bg-white/10" />
+        <div className="relative max-w-6xl mx-auto">
           <ToolCard
             title="Herramientas digitales"
             tools={DIGITAL_TOOLS}
-            variant="light"
+            variant="dark"
           />
         </div>
       </section>
 
       {/* DELEGACIONES Y SEDES */}
-      <section className="bg-slate-100 py-20 px-6 border-t border-slate-200/60">
+      <section className="bg-slate-100 py-14 md:py-16 px-6 border-t border-slate-200/60">
         <div className="container mx-auto max-w-6xl text-center">
-          <h2 className="text-4xl md:text-5xl font-serif font-semibold text-primary tracking-tight mb-2">
+          <span className="text-xs font-bold text-secondary uppercase tracking-[0.2em] block mb-2">
+            Presencia
+          </span>
+          <h2 className="text-4xl md:text-5xl font-serif font-semibold text-primary tracking-tight mb-3">
             Nuestras Delegaciones
           </h2>
-          <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto mb-16 font-lato">
+          <div className="w-16 h-1 bg-secondary mx-auto mb-3"></div>
+          <p className="text-sm md:text-base text-gray-600 max-w-2xl mx-auto mb-10 font-lato">
             Presencia institucional y soporte profesional en toda la Segunda Circunscripción Judicial.
           </p>
 
@@ -36,10 +50,13 @@ const Home = () => {
             {/* San Rafael */}
             <div className="group bg-white rounded-2xl shadow-[0_15px_30px_rgba(18,23,74,0.07)] hover:shadow-[0_25px_50px_rgba(18,23,74,0.15)] hover:-translate-y-2.5 hover:scale-[1.01] transition-all duration-500 ease-out overflow-hidden border border-slate-200/90 border-t-4 border-t-secondary flex flex-col">
               <div className="h-48 overflow-hidden relative">
-                <div 
-                  className="h-full w-full bg-cover bg-center group-hover:scale-105 transition-transform duration-700 ease-out" 
-                  style={{ backgroundImage: "url('/image-2.jpeg')" }}
-                ></div>
+                <img
+                  src="/image-2.jpeg"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#12174A]/10 to-transparent pointer-events-none"></div>
               </div>
               <div className="p-6 flex-grow flex flex-col justify-between">
@@ -79,10 +96,13 @@ const Home = () => {
             {/* General Alvear */}
             <div className="group bg-white rounded-2xl shadow-[0_15px_30px_rgba(18,23,74,0.07)] hover:shadow-[0_25px_50px_rgba(18,23,74,0.15)] hover:-translate-y-2.5 hover:scale-[1.01] transition-all duration-500 ease-out overflow-hidden border border-slate-200/90 border-t-4 border-t-primary flex flex-col">
               <div className="h-48 overflow-hidden relative">
-                <div 
-                  className="h-full w-full bg-cover bg-center group-hover:scale-105 transition-transform duration-700 ease-out" 
-                  style={{ backgroundImage: "url('/image-1.jpeg')" }}
-                ></div>
+                <img
+                  src="/image-1.jpeg"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#12174A]/10 to-transparent pointer-events-none"></div>
               </div>
               <div className="p-6 flex-grow flex flex-col justify-between">
@@ -122,10 +142,13 @@ const Home = () => {
             {/* Malargüe */}
             <div className="group bg-white rounded-2xl shadow-[0_15px_30px_rgba(18,23,74,0.07)] hover:shadow-[0_25px_50px_rgba(18,23,74,0.15)] hover:-translate-y-2.5 hover:scale-[1.01] transition-all duration-500 ease-out overflow-hidden border border-slate-200/90 border-t-4 border-t-primary flex flex-col">
               <div className="h-48 overflow-hidden relative">
-                <div 
-                  className="h-full w-full bg-cover bg-center group-hover:scale-105 transition-transform duration-700 ease-out" 
-                  style={{ backgroundImage: "url('/image-5.jpeg')" }}
-                ></div>
+                <img
+                  src="/image-5.jpeg"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#12174A]/10 to-transparent pointer-events-none"></div>
               </div>
               <div className="p-6 flex-grow flex flex-col justify-between">
@@ -220,7 +243,9 @@ const Home = () => {
           <div className="hidden md:block md:w-1/2 relative h-inherit">
             <img
               src="/image-2.jpeg"
-              alt="Nosotros"
+              alt="Colegio Público de Abogados y Procuradores"
+              loading="lazy"
+              decoding="async"
               className="w-full h-full object-cover rounded-r-2xl"
               style={{
                 minHeight: "100%",

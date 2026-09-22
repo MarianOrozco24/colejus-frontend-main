@@ -91,7 +91,7 @@ const Novedades = () => {
       </header>
 
       <section className="min-h-full bg-gray-100 px-4 md:px-0 2xl:mx-52 md:mx-16 mt-20">
-        <FeaturedNewsStrip items={featuredNews} />
+        <FeaturedNewsStrip items={featuredNews} variant="home" layout="grid" />
 
         {loading ? (
           <div className="flex justify-center items-center py-24">

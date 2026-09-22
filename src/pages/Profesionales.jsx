@@ -48,7 +48,7 @@ const Profesionales = () => {
           title: selectedProfession !== "Todos" ? selectedProfession : "",
           locations: Object.entries(selectedLocations)
             .filter(([, sel]) => sel)
-            .map(([loc]) => loc),
+            .map(([loc]) => loc.toLowerCase().replace(/\s+/g, "")),
         });
 
         if (resp.status === 200) {
