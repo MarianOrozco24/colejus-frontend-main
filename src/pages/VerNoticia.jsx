@@ -5,6 +5,7 @@ import { fetchNewsById } from "../api/news/fetchNewsById";
 import ResponsiveNav from "../components/ResponsiveNav";
 import Footer from "../components/Footer";
 import { formatNewsDate, getNewsCoverImage } from "../utils/newsDisplay";
+import { findPreviewNewsById } from "../utils/mockHomeNews";
 
 const VerNoticia = () => {
   const { uuid } = useParams();
@@ -13,27 +14,48 @@ const VerNoticia = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    const controller = new AbortController();
+    let cancelled = false;
+
     const loadNewsItem = async () => {
       setLoading(true);
       setError(null);
 
+      const previewItem = findPreviewNewsById(uuid);
+      if (previewItem) {
+        if (!cancelled) {
+          setNewsItem(previewItem);
+          setLoading(false);
+        }
+        return;
+      }
+
       try {
-        const response = await fetchNewsById(uuid);
+        const response = await fetchNewsById(uuid, null, {
+          signal: controller.signal,
+        });
+        if (cancelled || response.aborted) return;
         if (response.status === 200) {
           setNewsItem(response.data);
         } else {
           setError("No se pudo cargar la noticia.");
         }
-      } catch {
+      } catch (err) {
+        if (err?.name === "AbortError" || cancelled) return;
         setError("Error al cargar la noticia.");
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
     if (uuid) {
       loadNewsItem();
     }
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
   }, [uuid]);
 
   const coverImage = newsItem
@@ -51,7 +73,8 @@ const VerNoticia = () => {
         <img
           src={coverImage}
           alt={newsItem?.title || "Novedad"}
-          loading="lazy"
+          fetchPriority="high"
+          decoding="async"
           className="absolute inset-0 w-full h-full object-cover"
         />
         <div className="absolute inset-0 opacity-60 z-0 bg-[#06092E]"></div>

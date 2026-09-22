@@ -2,7 +2,11 @@ export const fetchAllNews = async (
   page = 1,
   perPage = 10,
   activeOnly = false,
-  { featuredOnly = false, excludeFeatured = false } = {}
+  {
+    featuredOnly = false,
+    excludeFeatured = false,
+    signal,
+  } = {}
 ) => {
   try {
     const params = new URLSearchParams({
@@ -18,27 +22,32 @@ export const fetchAllNews = async (
       `${process.env.REACT_APP_BACKEND_URL}/news?${params.toString()}`,
       {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        signal,
       }
     );
 
+    let payload = {};
+    try {
+      payload = await response.json();
+    } catch {
+      payload = { message: "Respuesta inválida del servidor" };
+    }
+
     if (!response.ok) {
-      const errorData = await response.json();
       return {
-        data: errorData,
+        data: payload,
         status: response.status,
       };
     }
 
-    const data = await response.json();
-
     return {
-      data,
+      data: payload,
       status: response.status,
     };
   } catch (error) {
+    if (error?.name === "AbortError") {
+      return { data: null, status: 0, aborted: true };
+    }
     console.error("Fetch News Error:", error);
     return {
       data: { message: "Conexión no disponible" },

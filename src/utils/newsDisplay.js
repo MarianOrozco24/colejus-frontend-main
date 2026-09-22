@@ -22,10 +22,26 @@ export const formatNewsDate = (dateStr) => {
   }
 };
 
-export const getNewsCoverImage = (imagePath, index = 0) =>
-  getNewsImageUrl(imagePath) || FALLBACK_IMAGES[index % FALLBACK_IMAGES.length];
+export const getNewsCoverImage = (imagePath, index = 0) => {
+  if (
+    imagePath &&
+    (imagePath.startsWith("/image") ||
+      imagePath.startsWith("/carousel") ||
+      imagePath.startsWith("/contact"))
+  ) {
+    return imagePath;
+  }
+
+  return getNewsImageUrl(imagePath) || FALLBACK_IMAGES[index % FALLBACK_IMAGES.length];
+};
 
 export const mapNewsItemForCard = (item, index = 0) => {
+  if (!item) return item;
+
+  if (item.image && item.link && item.dateLabel !== undefined) {
+    return item;
+  }
+
   const tags =
     Array.isArray(item.tags) && item.tags.length > 0
       ? item.tags
@@ -39,9 +55,10 @@ export const mapNewsItemForCard = (item, index = 0) => {
     dateLabel: formatNewsDate(item.date),
     reading_duration: item.reading_duration || 3,
     tags,
-    image: getNewsCoverImage(item.image_path, index),
-    link: `/noticias/${item.uuid}`,
+    image: getNewsCoverImage(item.image_path || item.image, index),
+    link: item.link || `/noticias/${item.uuid}`,
     is_featured: Boolean(item.is_featured),
     is_active: item.is_active !== false,
+    content: item.content || "",
   };
 };
