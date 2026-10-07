@@ -267,7 +267,7 @@ const useSeccionActiva = (ids) => {
   return activa;
 };
 
-const SECCION_IDS = SECCIONES.map((seccion) => seccion.id);
+const SECCION_IDS = [...SECCIONES.map((seccion) => seccion.id), "inspeccion-prensa"];
 
 const IndiceSecciones = () => {
   const activa = useSeccionActiva(SECCION_IDS);
@@ -476,23 +476,6 @@ const Nosotros = () => {
             ))}
           </div>
 
-          {/* SECRETARIOS DE PRENSA */}
-          <div className="border-t border-slate-200 pt-16 mb-16">
-            <h3 className="text-xl font-serif text-primary text-center font-bold mb-10 tracking-wide uppercase">Secretarios de Prensa</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
-              {SECRETARIOS_PRENSA.map((item, index) => (
-                <PersonCard key={item.name} cargo="Secretario/a de Prensa" name={item.name} delay={index * 80}>
-                  <a
-                    href={`tel:${item.telefono}`}
-                    className="mt-2 text-xs text-secondary font-semibold hover:underline inline-block"
-                  >
-                    Tel. {item.telefono}
-                  </a>
-                </PersonCard>
-              ))}
-            </div>
-          </div>
-
           {/* VOCALES / DIRECTORES GRID */}
           <div className="border-t border-slate-200 pt-16">
             <h3 className="text-xl font-serif text-primary text-center font-bold mb-10 tracking-wide uppercase">Directores Vocales</h3>
@@ -509,18 +492,6 @@ const Nosotros = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
               {DELEGADOS.map((item, index) => (
                 <PersonCard key={item.cargo} cargo={item.cargo} name={item.name} delay={index * 80} />
-              ))}
-            </div>
-          </div>
-
-          {/* INSPECCIÓN Y RECAUDACIÓN */}
-          <div className="border-t border-slate-200 pt-16 mt-16">
-            <h3 className="text-xl font-serif text-primary text-center font-bold mb-10 tracking-wide uppercase">
-              Inspección y Recaudación
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-              {INSPECCION_RECAUDACION.map((name, index) => (
-                <PersonCard key={name} cargo="Inspección y Recaudación" name={name} delay={index * 80} />
               ))}
             </div>
           </div>
@@ -588,7 +559,43 @@ const Nosotros = () => {
         </div>
       </section>
 
-      {/* 5. COMISIONES E INSTITUTOS SECTION (DARK, MODERN MINIMALIST CARDS) */}
+      {/* 5. INSPECCIÓN Y RECAUDACIÓN + SECRETARIOS DE PRENSA */}
+      <section id="inspeccion-prensa" className="bg-white py-24 px-6 md:px-8 border-b border-slate-100 scroll-mt-28 md:scroll-mt-36 2xl:scroll-mt-40">
+        <div className="max-w-6xl mx-auto">
+
+          {/* INSPECCIÓN Y RECAUDACIÓN */}
+          <div>
+            <h3 className="text-xl font-serif text-primary text-center font-bold mb-10 tracking-wide uppercase">
+              Inspección y Recaudación
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+              {INSPECCION_RECAUDACION.map((name, index) => (
+                <PersonCard key={name} cargo="Inspección y Recaudación" name={name} delay={index * 80} />
+              ))}
+            </div>
+          </div>
+
+          {/* SECRETARIOS DE PRENSA */}
+          <div className="border-t border-slate-200 pt-16 mt-16">
+            <h3 className="text-xl font-serif text-primary text-center font-bold mb-10 tracking-wide uppercase">Secretarios de Prensa</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+              {SECRETARIOS_PRENSA.map((item, index) => (
+                <PersonCard key={item.name} cargo="Secretario/a de Prensa" name={item.name} delay={index * 80}>
+                  <a
+                    href={`tel:${item.telefono}`}
+                    className="mt-2 text-xs text-secondary font-semibold hover:underline inline-block"
+                  >
+                    Tel. {item.telefono}
+                  </a>
+                </PersonCard>
+              ))}
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* 6. COMISIONES E INSTITUTOS SECTION (DARK, MODERN MINIMALIST CARDS) */}
       <section id="comisiones" className="bg-[#0A0F2C] py-24 px-6 scroll-mt-28 md:scroll-mt-36 2xl:scroll-mt-40">
         <div className="container mx-auto text-center">
           
@@ -737,7 +744,7 @@ const Nosotros = () => {
         </div>
       </section>
 
-      {/* 6. LINKS DE INTERES SECTION (MINIMALIST) */}
+      {/* 7. LINKS DE INTERES SECTION (MINIMALIST) */}
       <section className="bg-white pt-12 pb-24 border-t border-slate-100">
         <div className="container mx-auto">
           <div className="text-center mb-12">
