@@ -3,6 +3,31 @@ import { useNavigate, useParams } from "react-router-dom";
 import { fetchProfessionalById } from "../../../api/professionals/fetchProfessionalById";
 import { editProfessionalById } from "../../../api/professionals/editProfessionalById";
 
+const TITLES = ["Abogado", "Procurador"];
+
+const parseProcuradorProfessions = (value) => {
+  if (!value) return "";
+  try {
+    const parsed = JSON.parse(value);
+    if (Array.isArray(parsed)) return parsed.filter(Boolean).join(", ");
+    return String(parsed);
+  } catch {
+    return String(value);
+  }
+};
+
+// Registros legacy guardaron la especialidad del procurador en `title` (ej. "Materiales").
+const normalizeProfessional = (professional) => {
+  const specialty = parseProcuradorProfessions(professional.procurador_professions);
+  if (TITLES.includes(professional.title)) {
+    return { title: professional.title, procurador_professions: specialty };
+  }
+  return {
+    title: "Procurador",
+    procurador_professions: specialty || professional.title || "",
+  };
+};
+
 const EditProfessionalPage = () => {
   const { uuid } = useParams();
   const navigate = useNavigate();
@@ -15,6 +40,7 @@ const EditProfessionalPage = () => {
   const [formData, setFormData] = useState({
     name: "",
     title: "Abogado",
+    procurador_professions: "",
     tuition: "",
     email: "",
     address: "", // Nuevo campo: domicilio legal
@@ -30,9 +56,9 @@ const EditProfessionalPage = () => {
           const professional = response.data;
           setFormData({
             name: professional.name,
-            title: professional.title,
+            ...normalizeProfessional(professional),
             tuition: professional.tuition,
-            email: "",
+            email: professional.email || "",
             address: professional.address || "", // Nuevo
             phone: professional.phone || "", // Nuevo
             location: professional.location,
@@ -58,7 +84,12 @@ const EditProfessionalPage = () => {
   };
 
   const handleTitleChange = (event) => {
-    setFormData({ ...formData, title: event.target.value });
+    const title = event.target.value;
+    setFormData((prev) => ({
+      ...prev,
+      title,
+      procurador_professions: title === "Procurador" ? prev.procurador_professions : "",
+    }));
   };
 
   const locations = [
@@ -80,11 +111,18 @@ const EditProfessionalPage = () => {
       title: formData.title,
       name: formData.name,
       tuition: formData.tuition,
-      email: formData.email,
       address: formData.address, // Nuevo
       phone: formData.phone || "", // Nuevo
       location: formData.location,
+      procurador_professions:
+        formData.title === "Procurador" && formData.procurador_professions.trim()
+          ? [formData.procurador_professions.trim()]
+          : [],
     };
+
+    if (formData.email.trim()) {
+      payload.email = formData.email.trim();
+    }
 
     setIsSubmitting(true);
     setError(null);
@@ -148,9 +186,11 @@ const EditProfessionalPage = () => {
               onChange={handleTitleChange}
               className="w-full px-4 py-3 border rounded-lg text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
             >
-              <option value="Abogado">Abogado</option>
-              <option value="Escribano">Escribano</option>
-              <option value="Contador">Contador</option>
+              {TITLES.map((title) => (
+                <option key={title} value={title}>
+                  {title}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -165,6 +205,36 @@ const EditProfessionalPage = () => {
               onChange={handleInputChange}
               className="w-full px-4 py-2 mt-1 border rounded-lg text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
               required
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-4 mb-4">
+          {formData.title === "Procurador" && (
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-500">
+                Profesiones de Procurador
+              </label>
+              <input
+                type="text"
+                name="procurador_professions"
+                value={formData.procurador_professions}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 mt-1 border rounded-lg text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+          )}
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-500">
+              Email
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 mt-1 border rounded-lg text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
         </div>
